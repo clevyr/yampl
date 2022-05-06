@@ -10,14 +10,14 @@ var completionFlag string
 
 func init() {
 	Command.Flags().StringVar(&completionFlag, "completion", "", "Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.")
-	err := Command.RegisterFlagCompletionFunc("completion",
-		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return []string{"bash", "zsh", "fish", "powershell"}, cobra.ShellCompDirectiveNoFileComp
-		},
-	)
+	err := Command.RegisterFlagCompletionFunc("completion", completionCompletion)
 	if err != nil {
 		panic(err)
 	}
+}
+
+func completionCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return []string{"bash", "zsh", "fish", "powershell"}, cobra.ShellCompDirectiveNoFileComp
 }
 
 func completion(cmd *cobra.Command, args []string) error {
