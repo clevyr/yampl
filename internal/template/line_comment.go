@@ -15,23 +15,6 @@ func init() {
 	funcMap["tag"] = DockerTag
 }
 
-type Visitor func(conf config.Config, node *yaml.Node) error
-
-func VisitNodes(conf config.Config, visit Visitor, node *yaml.Node) error {
-	if len(node.Content) == 0 {
-		if err := visit(conf, node); err != nil {
-			return err
-		}
-	} else {
-		for _, node := range node.Content {
-			if err := VisitNodes(conf, visit, node); err != nil {
-				return err
-			}
-		}
-	}
-	return nil
-}
-
 func LineComment(conf config.Config, node *yaml.Node) error {
 	if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
 		tmpl, err := template.New("").

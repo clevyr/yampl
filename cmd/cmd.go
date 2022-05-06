@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
+	"github.com/clevyr/go-yampl/internal/node"
 	"github.com/clevyr/go-yampl/internal/template"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -135,9 +136,9 @@ func templateReader(r io.Reader) ([]byte, error) {
 	var buf bytes.Buffer
 
 	for {
-		var node yaml.Node
+		var n yaml.Node
 
-		if err := decoder.Decode(&node); err != nil {
+		if err := decoder.Decode(&n); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
@@ -148,11 +149,11 @@ func templateReader(r io.Reader) ([]byte, error) {
 			buf.Write([]byte("---\n"))
 		}
 
-		if err := template.VisitNodes(conf, template.LineComment, &node); err != nil {
+		if err := node.Visit(conf, template.LineComment, &n); err != nil {
 			return buf.Bytes(), err
 		}
 
-		b, err := yaml.Marshal(&node)
+		b, err := yaml.Marshal(&n)
 		if err != nil {
 			return buf.Bytes(), err
 		}

@@ -7,53 +7,16 @@ import (
 	"testing"
 )
 
-var defaultConf = config.Config{
-	LeftDelim:  "{{",
-	RightDelim: "}}",
-	Prefix:     "#yampl",
-	Values: map[string]string{
-		"b": "b",
-	},
-}
-
-func TestVisitNodes(t *testing.T) {
-	type args struct {
-		conf  config.Config
-		input string
-	}
-	tests := []struct {
-		name    string
-		args    args
-		want    string
-		wantErr bool
-	}{
-		{"no comment", args{defaultConf, "a: a"}, "a: a", false},
-		{"simple comment", args{defaultConf, "a: a #yampl b"}, "a: b #yampl b", false},
-		{"dynamic comment", args{defaultConf, "a: a #yampl {{ .b }}"}, "a: b #yampl {{ .b }}", false},
-		{"invalid template", args{defaultConf, "a: a #yampl {{"}, "", true},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			var node yaml.Node
-			_ = yaml.Unmarshal([]byte(tt.args.input), &node)
-
-			if err := VisitNodes(tt.args.conf, LineComment, &node); err != nil {
-				if (err != nil) != tt.wantErr {
-					t.Errorf("VisitNodes() error = %v, wantErr %v", err, tt.wantErr)
-				}
-				return
-			}
-
-			got, _ := yaml.Marshal(&node)
-			got = bytes.TrimRight(got, "\n")
-			if string(got) != tt.want {
-				t.Errorf("VisitNodes() = %v, want %v", string(got), tt.want)
-			}
-		})
-	}
-}
-
 func TestTemplateLineComment(t *testing.T) {
+	defaultConf := config.Config{
+		LeftDelim:  "{{",
+		RightDelim: "}}",
+		Prefix:     "#yampl",
+		Values: map[string]string{
+			"b": "b",
+		},
+	}
+
 	type args struct {
 		conf    config.Config
 		comment string
