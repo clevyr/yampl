@@ -118,9 +118,9 @@ func templateReader(r io.Reader) ([]byte, error) {
 	var buf bytes.Buffer
 
 	for {
-		t := template.LineComment{Config: conf}
+		var node yaml.Node
 
-		if err := decoder.Decode(&t); err != nil {
+		if err := decoder.Decode(&node); err != nil {
 			if errors.Is(err, io.EOF) {
 				break
 			}
@@ -131,7 +131,11 @@ func templateReader(r io.Reader) ([]byte, error) {
 			buf.Write([]byte("---\n"))
 		}
 
-		b, err := yaml.Marshal(t)
+		if err := template.RecurseNode(conf, &node); err != nil {
+			return buf.Bytes(), err
+		}
+
+		b, err := yaml.Marshal(&node)
 		if err != nil {
 			return buf.Bytes(), err
 		}
