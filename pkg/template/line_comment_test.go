@@ -37,9 +37,9 @@ func TestRecurseNode(t *testing.T) {
 			var node yaml.Node
 			_ = yaml.Unmarshal([]byte(tt.args.input), &node)
 
-			if err := RecurseNode(tt.args.conf, &node); err != nil {
+			if err := VisitNodes(tt.args.conf, LineComment, &node); err != nil {
 				if (err != nil) != tt.wantErr {
-					t.Errorf("RecurseNode() error = %v, wantErr %v", err, tt.wantErr)
+					t.Errorf("VisitNodes() error = %v, wantErr %v", err, tt.wantErr)
 				}
 				return
 			}
@@ -47,7 +47,7 @@ func TestRecurseNode(t *testing.T) {
 			got, _ := yaml.Marshal(&node)
 			got = bytes.TrimRight(got, "\n")
 			if string(got) != tt.want {
-				t.Errorf("RecurseNode() = %v, want %v", string(got), tt.want)
+				t.Errorf("VisitNodes() = %v, want %v", string(got), tt.want)
 			}
 		})
 	}

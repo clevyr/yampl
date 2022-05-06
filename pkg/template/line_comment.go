@@ -15,14 +15,16 @@ func init() {
 	funcMap["tag"] = DockerTag
 }
 
-func RecurseNode(conf config.Config, node *yaml.Node) error {
+type Visitor func(conf config.Config, node *yaml.Node) error
+
+func VisitNodes(conf config.Config, visit Visitor, node *yaml.Node) error {
 	if len(node.Content) == 0 {
 		if err := LineComment(conf, node); err != nil {
 			return err
 		}
 	} else {
 		for _, node := range node.Content {
-			if err := RecurseNode(conf, node); err != nil {
+			if err := VisitNodes(conf, visit, node); err != nil {
 				return err
 			}
 		}

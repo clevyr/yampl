@@ -148,7 +148,7 @@ func templateReader(r io.Reader) ([]byte, error) {
 			buf.Write([]byte("---\n"))
 		}
 
-		if err := template.RecurseNode(conf, &node); err != nil {
+		if err := template.VisitNodes(conf, template.LineComment, &node); err != nil {
 			return buf.Bytes(), err
 		}
 
