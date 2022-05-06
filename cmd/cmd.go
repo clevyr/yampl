@@ -15,7 +15,7 @@ import (
 
 var Command = &cobra.Command{
 	Use:                   "yampl [-i] [-p prefix] [-v key=value ...] [file ...]",
-	Short:                 "Inline YAML templating via line comments",
+	Short:                 "Inline YAML templating via line-comments",
 	DisableFlagsInUseLine: true,
 	DisableAutoGenTag:     true,
 	Version:               buildVersion(),
