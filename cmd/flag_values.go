@@ -16,7 +16,7 @@ import (
 )
 
 func init() {
-	Command.Flags().StringToStringVarP((*map[string]string)(&conf.Values), "value", "v", map[string]string{}, "Define a template variable")
+	Command.Flags().StringToStringVarP((*map[string]string)(&conf.Values), "value", "v", map[string]string{}, "Define a template variable. Can be used more than once.")
 	err := Command.RegisterFlagCompletionFunc("value", valueCompletion)
 	if err != nil {
 		panic(err)

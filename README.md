@@ -1,10 +1,12 @@
-# YAMPL
+# Yampl
 
-YAMPL (yaml + tmpl) is a simple templating tool that can template yaml values based on line-comments.
+[![Go](https://github.com/clevyr/go-yampl/actions/workflows/go.yml/badge.svg)](https://github.com/clevyr/go-yampl/actions/workflows/go.yml)
+
+Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comments.
 
 ## Installation
 
-YAMPL is available in brew or as a Docker container.
+Yampl is available in brew or as a Docker container.
 
 #### Brew
 
@@ -18,13 +20,7 @@ brew install clevyr/tap/yampl
 docker pull ghcr.io/clevyr/yampl
 ```
 
-## Usage
-
-[View the help docs for usage information.](docs/yampl.md)
-
 ## Templating
-
-
 
 ### Functions
 
@@ -48,12 +44,25 @@ The above produces `stable-alpine`
 
 ### Variables
 
-All variables passed in with the `-v` flag are available during templating.
-For example, a variable given as `-v tag=latest` can be used as `{{ .tag }}`.
+All variables passed in with the `-v` flag are available during templating.  
+For example, the variable `-v tag=latest` can be used as `{{ .tag }}`.
 
 The previous value is always available via `.Value` (`.Val` or `.V` if you're feeling lazy).
 
-### Example
+### Examples
+
+## Simple Examples
+
+```shell
+$ echo 'name: Clevyr #yampl {{ .name }}' | yampl -v name='Clevyr Inc.'
+name: Clevyr Inc. #yampl {{ .name }}
+$ echo 'name: Clevyr #yampl {{ upper .Value }}' | yampl
+name: CLEVYR #yampl {{ upper .Value }}
+$ echo 'image: nginx:stable-alpine #yampl {{ repo .Value }}:{{ .tag }}' | yampl -v tag=stable
+image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
+```
+
+## Full Example
 
 Here is a simple Kubernetes nginx Deployment:
 
@@ -115,3 +124,7 @@ image: nginx:1.21.6 #yampl {{ repo .Value }}:{{ .tag }}
 
 This would generate the same output, but I didn't have to type `nginx` twice.
 This becomes more useful when using custom Docker registries where repo names can get quite long.
+
+## Usage
+
+[View the generated docs for usage information.](docs/yampl.md)

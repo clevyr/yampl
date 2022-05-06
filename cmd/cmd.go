@@ -2,6 +2,7 @@ package cmd
 
 import (
 	"bytes"
+	_ "embed"
 	"errors"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
@@ -14,9 +15,13 @@ import (
 	"strings"
 )
 
+//go:embed description.md
+var description string
+
 var Command = &cobra.Command{
 	Use:                   "yampl [-i] [-p prefix] [-v key=value ...] [file ...]",
 	Short:                 "Inline YAML templating via line-comments",
+	Long:                  description,
 	DisableFlagsInUseLine: true,
 	DisableAutoGenTag:     true,
 	ValidArgsFunction:     validArgs,
@@ -28,10 +33,10 @@ var Command = &cobra.Command{
 var conf config.Config
 
 func init() {
-	Command.Flags().BoolVarP(&conf.Inline, "inline", "i", false, "Edit files in-place")
-	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", "#yampl", "Template prefix. Must begin with '#'")
-	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", "{{", "Override the default left delimiter")
-	Command.Flags().StringVar(&conf.RightDelim, "right-delim", "}}", "Override the default right delimiter")
+	Command.Flags().BoolVarP(&conf.Inline, "inline", "i", false, "Edit files in-place instead of printing to stdout")
+	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", "#yampl", "Line-comments are ignored unless this prefix is found. Prefix must begin with '#'")
+	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", "{{", "Override the left delimiter")
+	Command.Flags().StringVar(&conf.RightDelim, "right-delim", "}}", "Override the right delimiter")
 }
 
 func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

@@ -1,9 +1,3 @@
-## yampl
-
-Inline YAML templating via line-comments
-
-### Synopsis
-
 Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comments.
 
 This command can work on stdin/stdout or on files similarly to GNU sed:
@@ -28,21 +22,3 @@ Template Function Reference:
 
 Template Variable Reference:
  - https://github.com/clevyr/go-yampl#variables
-
-
-```
-yampl [-i] [-p prefix] [-v key=value ...] [file ...]
-```
-
-### Options
-
-```
-      --completion string      Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
-  -h, --help                   help for yampl
-  -i, --inline                 Edit files in-place instead of printing to stdout
-      --left-delim string      Override the left delimiter (default "{{")
-  -p, --prefix string          Line-comments are ignored unless this prefix is found. Prefix must begin with '#' (default "#yampl")
-      --right-delim string     Override the right delimiter (default "}}")
-  -v, --value stringToString   Define a template variable. Can be used more than once. (default [])
-```
-
