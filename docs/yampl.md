@@ -9,6 +9,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
 ### Options
 
 ```
+      --completion string      Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
   -C, --directory string       dir to hold the generated config (default "./docs")
   -h, --help                   help for yampl
   -i, --inline                 Edit files in-place

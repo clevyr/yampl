@@ -3,20 +3,13 @@ package main
 import (
 	"github.com/clevyr/go-yampl/cmd"
 	"github.com/spf13/cobra/doc"
-	flag "github.com/spf13/pflag"
 	"log"
 	"os"
-	"path/filepath"
 )
 
 func main() {
-	var output string
-	flag.StringVarP(&output, "directory", "C", "./docs", "dir to hold the generated config")
-	flag.Parse()
-
 	var err error
-
-	output = filepath.Join(".", filepath.Join("/", output))
+	output := "./docs"
 	log.Println(`generating docs in "` + output + `"`)
 
 	log.Println("removing existing directory")
