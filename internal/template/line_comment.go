@@ -8,17 +8,17 @@ import (
 	"text/template"
 )
 
-var funcMap = sprig.TxtFuncMap()
+var FuncMap = sprig.TxtFuncMap()
 
 func init() {
-	funcMap["repo"] = DockerRepo
-	funcMap["tag"] = DockerTag
+	FuncMap["repo"] = DockerRepo
+	FuncMap["tag"] = DockerTag
 }
 
 func LineComment(conf config.Config, node *yaml.Node) error {
 	if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
 		tmpl, err := template.New("").
-			Funcs(funcMap).
+			Funcs(FuncMap).
 			Delims(conf.LeftDelim, conf.RightDelim).
 			Option("missingkey=error").
 			Parse(strings.TrimSpace(node.LineComment[len(conf.Prefix):]))

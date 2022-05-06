@@ -28,7 +28,6 @@ var Command = &cobra.Command{
 var conf config.Config
 
 func init() {
-	Command.Flags().StringToStringVarP((*map[string]string)(&conf.Values), "value", "v", map[string]string{}, "Define a template variable")
 	Command.Flags().BoolVarP(&conf.Inline, "inline", "i", false, "Edit files in-place")
 	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", "#yampl", "Template prefix. Must begin with '#'")
 	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", "{{", "Override the default left delimiter")
