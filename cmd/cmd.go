@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"errors"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
@@ -113,18 +114,30 @@ func openAndTemplate(p string) (err error) {
 }
 
 func templateReader(r io.Reader) ([]byte, error) {
-	t := template.LineComment{
-		Config: conf,
+	decoder := yaml.NewDecoder(r)
+	var buf bytes.Buffer
+
+	for {
+		t := template.LineComment{Config: conf}
+
+		if err := decoder.Decode(&t); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
+			}
+			return buf.Bytes(), err
+		}
+
+		if buf.Len() > 0 {
+			buf.Write([]byte("---\n"))
+		}
+
+		b, err := yaml.Marshal(t)
+		if err != nil {
+			return buf.Bytes(), err
+		}
+
+		buf.Write(b)
 	}
 
-	if err := yaml.NewDecoder(r).Decode(&t); err != nil {
-		return []byte{}, err
-	}
-
-	b, err := yaml.Marshal(t)
-	if err != nil {
-		return b, err
-	}
-
-	return b, nil
+	return buf.Bytes(), nil
 }
