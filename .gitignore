@@ -1,5 +1,6 @@
 .idea/
 /go-yampl
 /yampl
+coverage.out
 dist/
 vendor/
