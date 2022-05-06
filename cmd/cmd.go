@@ -80,11 +80,14 @@ func openAndTemplate(p string) (err error) {
 		}
 
 		f, err = os.OpenFile(p, os.O_RDWR, stat.Mode())
+		if err != nil {
+			return err
+		}
 	} else {
 		f, err = os.Open(p)
-	}
-	if err != nil {
-		return err
+		if err != nil {
+			return err
+		}
 	}
 	defer func(f *os.File) {
 		_ = f.Close()
