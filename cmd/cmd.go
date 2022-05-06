@@ -18,6 +18,7 @@ var Command = &cobra.Command{
 	Short:                 "Inline YAML templating via line comments",
 	DisableFlagsInUseLine: true,
 	DisableAutoGenTag:     true,
+	Version:               buildVersion(),
 	PreRunE:               preRun,
 	RunE:                  run,
 }
