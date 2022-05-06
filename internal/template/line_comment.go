@@ -19,7 +19,7 @@ type Visitor func(conf config.Config, node *yaml.Node) error
 
 func VisitNodes(conf config.Config, visit Visitor, node *yaml.Node) error {
 	if len(node.Content) == 0 {
-		if err := LineComment(conf, node); err != nil {
+		if err := visit(conf, node); err != nil {
 			return err
 		}
 	} else {

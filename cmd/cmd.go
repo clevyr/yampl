@@ -5,7 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
-	"github.com/clevyr/go-yampl/pkg/template"
+	"github.com/clevyr/go-yampl/internal/template"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"io"

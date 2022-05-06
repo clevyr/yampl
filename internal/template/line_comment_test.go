@@ -16,7 +16,7 @@ var defaultConf = config.Config{
 	},
 }
 
-func TestRecurseNode(t *testing.T) {
+func TestVisitNodes(t *testing.T) {
 	type args struct {
 		conf  config.Config
 		input string
