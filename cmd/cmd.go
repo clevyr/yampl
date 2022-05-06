@@ -34,6 +34,10 @@ func init() {
 }
 
 func preRun(cmd *cobra.Command, args []string) error {
+	if completionFlag != "" {
+		return nil
+	}
+
 	cmd.SilenceUsage = true
 
 	conf.Paths = args
@@ -49,6 +53,10 @@ func preRun(cmd *cobra.Command, args []string) error {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	if completionFlag != "" {
+		return completion(cmd, args)
+	}
+
 	if len(args) == 0 {
 		b, err := templateReader(os.Stdin)
 		if err != nil {
