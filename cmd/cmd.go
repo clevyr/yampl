@@ -18,6 +18,7 @@ var Command = &cobra.Command{
 	Short:                 "Inline YAML templating via line-comments",
 	DisableFlagsInUseLine: true,
 	DisableAutoGenTag:     true,
+	ValidArgsFunction:     validArgs,
 	Version:               buildVersion(),
 	PreRunE:               preRun,
 	RunE:                  run,
@@ -31,6 +32,10 @@ func init() {
 	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", "#yampl", "Template prefix. Must begin with '#'")
 	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", "{{", "Override the default left delimiter")
 	Command.Flags().StringVar(&conf.RightDelim, "right-delim", "}}", "Override the default right delimiter")
+}
+
+func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 }
 
 func preRun(cmd *cobra.Command, args []string) error {
