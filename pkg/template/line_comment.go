@@ -8,6 +8,13 @@ import (
 	"text/template"
 )
 
+var funcMap = sprig.TxtFuncMap()
+
+func init() {
+	funcMap["repo"] = DockerRepo
+	funcMap["tag"] = DockerTag
+}
+
 func RecurseNode(conf config.Config, node *yaml.Node) error {
 	if len(node.Content) == 0 {
 		if err := TemplateLineComment(conf, node); err != nil {
@@ -26,7 +33,7 @@ func RecurseNode(conf config.Config, node *yaml.Node) error {
 func TemplateLineComment(conf config.Config, node *yaml.Node) error {
 	if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
 		tmpl, err := template.New("").
-			Funcs(sprig.TxtFuncMap()).
+			Funcs(funcMap).
 			Delims(conf.LeftDelim, conf.RightDelim).
 			Option("missingkey=error").
 			Parse(strings.TrimSpace(node.LineComment[len(conf.Prefix):]))
