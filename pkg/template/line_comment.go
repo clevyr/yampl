@@ -34,6 +34,8 @@ func TemplateLineComment(conf config.Config, node *yaml.Node) error {
 			return err
 		}
 
+		conf.Values["Value"] = node.Value
+
 		var buf strings.Builder
 		if err = tmpl.Execute(&buf, conf.Values); err != nil {
 			return err

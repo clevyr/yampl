@@ -2,7 +2,7 @@ package config
 
 type Config struct {
 	Paths      []string
-	Values     map[string]string
+	Values     Values
 	Inline     bool
 	Prefix     string
 	LeftDelim  string
