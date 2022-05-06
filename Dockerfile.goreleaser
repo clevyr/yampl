@@ -1,0 +1,5 @@
+FROM alpine
+WORKDIR /data
+COPY yampl /usr/local/bin
+LABEL org.opencontainers.image.source https://github.com/clevyr/go-yampl
+CMD ["yampl"]
