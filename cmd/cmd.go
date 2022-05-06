@@ -98,6 +98,10 @@ func openAndTemplate(p string) (err error) {
 			return err
 		}
 
+		if _, err := f.Seek(0, io.SeekStart); err != nil {
+			return err
+		}
+
 		if _, err := f.Write(b); err != nil {
 			return err
 		}
