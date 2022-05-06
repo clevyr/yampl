@@ -81,7 +81,7 @@ func TestTemplateLineComment(t *testing.T) {
 				LineComment: tt.args.comment,
 			}
 
-			if err := TemplateLineComment(tt.args.conf, &node); err != nil {
+			if err := LineComment(tt.args.conf, &node); err != nil {
 				if (err != nil) != tt.wantErr {
 					t.Errorf("TemplateLineComment() error = %v, wantErr %v", err, tt.wantErr)
 				}

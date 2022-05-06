@@ -17,7 +17,7 @@ func init() {
 
 func RecurseNode(conf config.Config, node *yaml.Node) error {
 	if len(node.Content) == 0 {
-		if err := TemplateLineComment(conf, node); err != nil {
+		if err := LineComment(conf, node); err != nil {
 			return err
 		}
 	} else {
@@ -30,7 +30,7 @@ func RecurseNode(conf config.Config, node *yaml.Node) error {
 	return nil
 }
 
-func TemplateLineComment(conf config.Config, node *yaml.Node) error {
+func LineComment(conf config.Config, node *yaml.Node) error {
 	if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
 		tmpl, err := template.New("").
 			Funcs(funcMap).
