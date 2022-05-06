@@ -38,6 +38,8 @@ func completion(cmd *cobra.Command, args []string) error {
 		if err := cmd.Root().GenPowerShellCompletionWithDesc(os.Stdout); err != nil {
 			return err
 		}
+	default:
+		return fmt.Errorf("%v: invalid shell", completionFlag)
 	}
-	return fmt.Errorf("%v: invalid shell", completionFlag)
+	return nil
 }
