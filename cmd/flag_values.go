@@ -1,13 +1,11 @@
 package cmd
 
 import (
-	"errors"
 	"github.com/clevyr/go-yampl/internal/config"
 	"github.com/clevyr/go-yampl/internal/node"
 	template2 "github.com/clevyr/go-yampl/internal/template"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"io"
 	"os"
 	"regexp"
 	"strings"
@@ -39,14 +37,14 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 
 			decoder := yaml.NewDecoder(f)
 
-			var n yaml.Node
-			if err := decoder.Decode(&n); err != nil {
-				if errors.Is(err, io.EOF) {
+			for {
+				var n yaml.Node
+				if err := decoder.Decode(&n); err != nil {
 					return
 				}
-			}
 
-			_ = node.Visit(conf, visitor, &n)
+				_ = node.Visit(conf, visitor, &n)
+			}
 		}()
 	}
 
