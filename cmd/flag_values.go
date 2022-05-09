@@ -73,7 +73,7 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 		}()
 	}
 
-	return values, cobra.ShellCompDirectiveNoSpace
+	return values, cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
 }
 
 func listTemplFields(t *template.Template) []string {
