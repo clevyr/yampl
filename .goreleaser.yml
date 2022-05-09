@@ -9,7 +9,6 @@ builds:
       - arm
       - arm64
     goarm:
-      - 6
       - 7
 archives:
   - replacements:
@@ -46,13 +45,6 @@ dockers:
     dockerfile: Dockerfile.goreleaser
     build_flag_templates:
       - "--platform=linux/amd64"
-  - <<: *dockers
-    image_templates:
-      - ghcr.io/clevyr/{{ .ProjectName }}:{{ .Version }}-armv6
-    goarch: arm
-    goarm: 6
-    build_flag_templates:
-      - "--platform=linux/arm/v7"
   - <<: *dockers
     image_templates:
       - ghcr.io/clevyr/{{ .ProjectName }}:{{ .Version }}-armv7
