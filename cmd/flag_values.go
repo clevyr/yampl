@@ -24,37 +24,8 @@ func init() {
 }
 
 func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	var fieldRe = regexp.MustCompile(`\.([A-Za-z_.]+)`)
-	var values []string
-
-	visitor := func(conf config.Config, node *yaml.Node) error {
-		if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
-			tmpl, err := template.New("").
-				Funcs(template2.FuncMap).
-				Delims(conf.LeftDelim, conf.RightDelim).
-				Option("missingkey=zero").
-				Parse(strings.TrimSpace(node.LineComment[len(conf.Prefix):]))
-			if err != nil {
-				return err
-			}
-
-			for _, field := range listTemplFields(tmpl) {
-				matches := fieldRe.FindStringSubmatch(field)
-				if matches != nil {
-				outer:
-					for _, match := range matches[1:] {
-						for k := range conf.Values {
-							if match == k {
-								continue outer
-							}
-						}
-						values = append(values, match+"=")
-					}
-				}
-			}
-		}
-		return nil
-	}
+	valMap := make(ValMap)
+	visitor := valMap.Visitor()
 
 	for _, path := range args {
 		func() {
@@ -70,7 +41,7 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 
 			var n yaml.Node
 			if err := decoder.Decode(&n); err != nil {
-				if !errors.Is(err, io.EOF) {
+				if errors.Is(err, io.EOF) {
 					return
 				}
 			}
@@ -79,7 +50,7 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 		}()
 	}
 
-	return values, cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
+	return valMap.Slice(), cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
 }
 
 func listTemplFields(t *template.Template) []string {
@@ -97,4 +68,47 @@ func listNodeFields(node parse.Node, res []string) []string {
 		}
 	}
 	return res
+}
+
+type ValMap map[string]struct{}
+
+func (v ValMap) Slice() []string {
+	result := make([]string, 0, len(v))
+outer:
+	for k := range v {
+		for kconf := range conf.Values {
+			if k == kconf {
+				continue outer
+			}
+		}
+		result = append(result, k+"=")
+	}
+	return result
+}
+
+func (v ValMap) Visitor() func(conf config.Config, node *yaml.Node) error {
+	var fieldRe = regexp.MustCompile(`\.([A-Za-z_.]+)`)
+
+	return func(conf config.Config, node *yaml.Node) error {
+		if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
+			tmpl, err := template.New("").
+				Funcs(template2.FuncMap).
+				Delims(conf.LeftDelim, conf.RightDelim).
+				Option("missingkey=zero").
+				Parse(strings.TrimSpace(node.LineComment[len(conf.Prefix):]))
+			if err != nil {
+				return err
+			}
+
+			for _, field := range listTemplFields(tmpl) {
+				matches := fieldRe.FindStringSubmatch(field)
+				if matches != nil {
+					for _, match := range matches[1:] {
+						v[match] = struct{}{}
+					}
+				}
+			}
+		}
+		return nil
+	}
 }
