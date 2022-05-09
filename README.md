@@ -8,17 +8,85 @@ Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comme
 
 Yampl is available in brew or as a Docker container.
 
-#### Brew
+### Homebrew (macOS, Linux)
 
-```shell
-brew install clevyr/tap/yampl
-```
+<details>
+  <summary>Click to expand</summary>
 
-#### Docker
+  ```shell
+  brew install clevyr/tap/yampl
+  ```
+</details>
 
-```shell
-docker pull ghcr.io/clevyr/yampl
-```
+### Docker
+
+<details>
+  <summary>Click to expand</summary>
+
+  yampl has a Docker image available at `ghcr.io/clevyr/yampl`
+
+  ```shell
+  docker pull ghcr.io/clevyr/yampl
+  ```
+
+  To use this image, you will need to volume bind the desired directory into the
+  Docker container. The container uses `/data` as its workdir, so if you wanted
+  to template `example.yaml` in the current directory, you could run:
+  ```shell
+  docker run --rm -it -v "$PWD:/data" ghcr.io/clevyr/yampl yampl example.yaml ...
+  ```
+</details>
+
+### APT Repository (Ubuntu, Debian)
+
+<details>
+  <summary>Click to expand</summary>
+
+  1. If you don't have it already, install the `ca-certificates` package
+     ```shell
+     apt install ca-certificates
+     ```
+
+  2. Add Clevyr's apt repository to `/etc/apt/sources.list.d/clevyr.list`
+     ```
+     deb [trusted=yes] https://apt.clevyr.com /
+     ```
+
+  3. Update apt repositories
+     ```shell
+     apt update
+     ```
+
+  4. Install yampl
+     ```shell
+     apt install yampl
+     ```
+</details>
+
+### RPM Repository (CentOS, RHEL)
+
+<details>
+  <summary>Click to expand</summary>
+
+  1. If you don't have it already, install the `ca-certificates` package
+     ```shell
+     yum install ca-certificates
+     ```
+
+  2. Add Clevyr's rpm repository to `/etc/yum.repos.d/clevyr.repo`
+     ```ini
+     [clevyr]
+     name=Clevyr
+     baseurl=https://rpm.clevyr.com
+     enabled=1
+     gpgcheck=0
+     ```
+
+  3. Install yampl
+     ```shell
+     yum install yampl
+     ```
+</details>
 
 ## Templating
 
