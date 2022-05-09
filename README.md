@@ -49,9 +49,9 @@ For example, the variable `-v tag=latest` can be used as `{{ .tag }}`.
 
 The previous value is always available via `.Value` (`.Val` or `.V` if you're feeling lazy).
 
-### Examples
+## Examples
 
-## Simple Examples
+### Simple Examples
 
 ```shell
 $ echo 'name: Clevyr #yampl {{ .name }}' | yampl -v name='Clevyr Inc.'
@@ -62,7 +62,7 @@ $ echo 'image: nginx:stable-alpine #yampl {{ repo .Value }}:{{ .tag }}' | yampl 
 image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
 ```
 
-## Full Example
+### Full Example
 
 Here is a simple Kubernetes nginx Deployment:
 
