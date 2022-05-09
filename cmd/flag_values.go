@@ -41,7 +41,13 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 			for _, field := range listTemplFields(tmpl) {
 				value := fieldRe.FindStringSubmatch(field)
 				if value != nil {
+				outer:
 					for _, v := range value[1:] {
+						for k, _ := range conf.Values {
+							if v == k {
+								continue outer
+							}
+						}
 						values = append(values, v+"=")
 					}
 				}
