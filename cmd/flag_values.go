@@ -24,7 +24,7 @@ func init() {
 }
 
 func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	var fieldRe = regexp.MustCompile(regexp.QuoteMeta(conf.LeftDelim) + `.*\.([A-Za-z_]+).*` + regexp.QuoteMeta(conf.RightDelim))
+	var fieldRe = regexp.MustCompile(`\.([A-Za-z_.]+)`)
 	var values []string
 
 	visitor := func(conf config.Config, node *yaml.Node) error {
