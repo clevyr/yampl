@@ -39,16 +39,16 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 			}
 
 			for _, field := range listTemplFields(tmpl) {
-				value := fieldRe.FindStringSubmatch(field)
-				if value != nil {
+				matches := fieldRe.FindStringSubmatch(field)
+				if matches != nil {
 				outer:
-					for _, v := range value[1:] {
+					for _, match := range matches[1:] {
 						for k, _ := range conf.Values {
-							if v == k {
+							if match == k {
 								continue outer
 							}
 						}
-						values = append(values, v+"=")
+						values = append(values, match+"=")
 					}
 				}
 			}
@@ -56,9 +56,9 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 		return nil
 	}
 
-	for _, p := range args {
+	for _, path := range args {
 		func() {
-			f, err := os.Open(p)
+			f, err := os.Open(path)
 			if err != nil {
 				return
 			}
