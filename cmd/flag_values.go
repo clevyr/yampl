@@ -43,7 +43,7 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 				if matches != nil {
 				outer:
 					for _, match := range matches[1:] {
-						for k, _ := range conf.Values {
+						for k := range conf.Values {
 							if match == k {
 								continue outer
 							}
