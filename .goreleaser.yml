@@ -26,6 +26,7 @@ changelog:
   filters:
     exclude:
       - "^:pencil:"
+      - "^:white_check_mark:"
 brews:
   - tap:
       owner: clevyr
