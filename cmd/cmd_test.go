@@ -118,18 +118,8 @@ func Test_templateReader(t *testing.T) {
 }
 
 func Test_openAndTemplate(t *testing.T) {
-	defaultConf := config.Config{
-		LeftDelim:  "{{",
-		RightDelim: "}}",
-		Prefix:     "#yampl",
-	}
-
-	inlineConf := config.Config{
-		LeftDelim:  "{{",
-		RightDelim: "}}",
-		Prefix:     "#yampl",
-		Inline:     true,
-	}
+	inlineConf := config.New()
+	inlineConf.Inline = true
 
 	tempFileWith := func(contents string) (*os.File, func(), error) {
 		f, err := os.CreateTemp("", "")
@@ -157,8 +147,8 @@ func Test_openAndTemplate(t *testing.T) {
 		wantFile string
 		wantErr  bool
 	}{
-		{"simple", args{defaultConf, "a: a"}, "a: a", false},
-		{"template", args{defaultConf, "a: a #yampl b"}, "a: a #yampl b", false},
+		{"simple", args{config.New(), "a: a"}, "a: a", false},
+		{"template", args{config.New(), "a: a #yampl b"}, "a: a #yampl b", false},
 		{"inline", args{inlineConf, "a: a #yampl b"}, "a: b #yampl b\n", false},
 	}
 	for _, tt := range tests {

@@ -1,9 +1,5 @@
 package config
 
-import (
-	"io"
-)
-
 type Config struct {
 	Paths      []string
 	Values     Values
@@ -11,5 +7,13 @@ type Config struct {
 	Prefix     string
 	LeftDelim  string
 	RightDelim string
-	Writer     io.Writer
+}
+
+func New() Config {
+	return Config{
+		Values:     make(Values),
+		Prefix:     "#yampl",
+		LeftDelim:  "{{",
+		RightDelim: "}}",
+	}
 }

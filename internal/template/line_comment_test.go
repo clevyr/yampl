@@ -8,14 +8,8 @@ import (
 )
 
 func TestTemplateLineComment(t *testing.T) {
-	defaultConf := config.Config{
-		LeftDelim:  "{{",
-		RightDelim: "}}",
-		Prefix:     "#yampl",
-		Values: config.Values{
-			"b": "b",
-		},
-	}
+	defaultConf := config.New()
+	defaultConf.Values["b"] = "b"
 
 	type args struct {
 		conf    config.Config

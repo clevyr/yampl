@@ -30,13 +30,13 @@ var Command = &cobra.Command{
 	RunE:                  run,
 }
 
-var conf config.Config
+var conf = config.New()
 
 func init() {
-	Command.Flags().BoolVarP(&conf.Inline, "inline", "i", false, "Edit files in-place instead of printing to stdout")
-	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", "#yampl", "Line-comments are ignored unless this prefix is found. Prefix must begin with '#'")
-	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", "{{", "Override the left delimiter")
-	Command.Flags().StringVar(&conf.RightDelim, "right-delim", "}}", "Override the right delimiter")
+	Command.Flags().BoolVarP(&conf.Inline, "inline", "i", conf.Inline, "Edit files in-place instead of printing to stdout")
+	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Line-comments are ignored unless this prefix is found. Prefix must begin with '#'")
+	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override the left delimiter")
+	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override the right delimiter")
 }
 
 func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -59,7 +59,6 @@ func preRun(cmd *cobra.Command, args []string) error {
 		return errors.New("no input files")
 	}
 
-	conf.Values = make(config.Values)
 	conf.Values.Fill(rawValues)
 
 	return nil

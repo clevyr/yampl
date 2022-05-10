@@ -75,14 +75,8 @@ func Test_listTemplFields(t *testing.T) {
 }
 
 func TestValMap_Visitor(t *testing.T) {
-	defaultConf := config.Config{
-		LeftDelim:  "{{",
-		RightDelim: "}}",
-		Prefix:     "#yampl",
-		Values: config.Values{
-			"b": "b",
-		},
-	}
+	defaultConf := config.New()
+	defaultConf.Values["b"] = "b"
 
 	tests := []struct {
 		name    string
