@@ -50,7 +50,6 @@ func preRun(cmd *cobra.Command, args []string) error {
 
 	cmd.SilenceUsage = true
 
-	conf.Paths = args
 	if !strings.HasPrefix(conf.Prefix, "#") {
 		return errors.New("prefix must begin with '#'")
 	}
