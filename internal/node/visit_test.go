@@ -12,7 +12,7 @@ func TestVisitNodes(t *testing.T) {
 		LeftDelim:  "{{",
 		RightDelim: "}}",
 		Prefix:     "#yampl",
-		Values: map[string]string{
+		Values: config.Values{
 			"b": "b",
 		},
 	}

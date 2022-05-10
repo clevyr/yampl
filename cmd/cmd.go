@@ -71,7 +71,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		b, err := templateReader(os.Stdin)
+		b, err := templateReader(conf, os.Stdin)
 		if err != nil {
 			return err
 		}
@@ -80,7 +80,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	for i, p := range args {
-		if err := openAndTemplate(p); err != nil {
+		if err := openAndTemplate(conf, p); err != nil {
 			return err
 		}
 
@@ -92,7 +92,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplate(p string) (err error) {
+func openAndTemplate(conf config.Config, p string) (err error) {
 	var f *os.File
 	if conf.Inline {
 		stat, err := os.Stat(p)
@@ -114,7 +114,7 @@ func openAndTemplate(p string) (err error) {
 		_ = f.Close()
 	}(f)
 
-	b, err := templateReader(f)
+	b, err := templateReader(conf, f)
 	if err != nil {
 		return err
 	}
@@ -138,7 +138,7 @@ func openAndTemplate(p string) (err error) {
 	return f.Close()
 }
 
-func templateReader(r io.Reader) ([]byte, error) {
+func templateReader(conf config.Config, r io.Reader) ([]byte, error) {
 	decoder := yaml.NewDecoder(r)
 	var buf bytes.Buffer
 

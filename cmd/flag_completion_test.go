@@ -2,11 +2,15 @@ package cmd
 
 import (
 	"github.com/spf13/cobra"
+	"io"
 	"reflect"
 	"testing"
 )
 
 func Test_completion(t *testing.T) {
+	r, w := io.Pipe()
+	_ = r.Close()
+
 	type args struct {
 		cmd   *cobra.Command
 		args  []string
@@ -14,17 +18,27 @@ func Test_completion(t *testing.T) {
 	}
 	tests := []struct {
 		name    string
+		w       io.Writer
 		args    args
 		wantErr bool
 	}{
-		{"bash", args{&cobra.Command{}, []string{}, "bash"}, false},
-		{"zsh", args{&cobra.Command{}, []string{}, "zsh"}, false},
-		{"fish", args{&cobra.Command{}, []string{}, "fish"}, false},
-		{"powershell", args{&cobra.Command{}, []string{}, "powershell"}, false},
-		{"other", args{&cobra.Command{}, []string{}, "other"}, true},
+		{"bash", io.Discard, args{&cobra.Command{}, []string{}, "bash"}, false},
+		{"bash error", w, args{&cobra.Command{}, []string{}, "bash"}, true},
+		{"zsh", io.Discard, args{&cobra.Command{}, []string{}, "zsh"}, false},
+		{"zsh error", w, args{&cobra.Command{}, []string{}, "zsh"}, true},
+		{"fish", io.Discard, args{&cobra.Command{}, []string{}, "fish"}, false},
+		{"fish error", w, args{&cobra.Command{}, []string{}, "fish"}, true},
+		{"powershell", io.Discard, args{&cobra.Command{}, []string{}, "powershell"}, false},
+		{"powershell error", w, args{&cobra.Command{}, []string{}, "powershell"}, true},
+		{"other", io.Discard, args{&cobra.Command{}, []string{}, "other"}, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			defer func(prev io.Writer) {
+				completionWriter = prev
+			}(completionWriter)
+			completionWriter = tt.w
+
 			completionFlag = tt.args.shell
 			if err := completion(tt.args.cmd, tt.args.args); (err != nil) != tt.wantErr {
 				t.Errorf("completion() error = %v, wantErr %v", err, tt.wantErr)
