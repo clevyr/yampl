@@ -84,7 +84,7 @@ outer:
 	return result
 }
 
-func (v ValMap) Visitor() func(conf config.Config, node *yaml.Node) error {
+func (v ValMap) Visitor() node.Visitor {
 	var fieldRe = regexp.MustCompile(`\.([A-Za-z_.]+)`)
 
 	return func(conf config.Config, node *yaml.Node) error {
