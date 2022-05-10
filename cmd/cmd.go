@@ -59,6 +59,9 @@ func preRun(cmd *cobra.Command, args []string) error {
 		return errors.New("no input files")
 	}
 
+	conf.Values = make(config.Values)
+	conf.Values.Fill(rawValues)
+
 	return nil
 }
 

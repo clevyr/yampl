@@ -13,8 +13,10 @@ import (
 	"text/template/parse"
 )
 
+var rawValues map[string]string
+
 func init() {
-	Command.Flags().StringToStringVarP((*map[string]string)(&conf.Values), "value", "v", map[string]string{}, "Define a template variable. Can be used more than once.")
+	Command.Flags().StringToStringVarP(&rawValues, "value", "v", map[string]string{}, "Define a template variable. Can be used more than once.")
 	err := Command.RegisterFlagCompletionFunc("value", valueCompletion)
 	if err != nil {
 		panic(err)
