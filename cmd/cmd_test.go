@@ -161,8 +161,10 @@ func Test_openAndTemplate(t *testing.T) {
 			}
 
 			var stdoutBuf strings.Builder
+			ch := make(chan struct{})
 			go func() {
 				_, _ = io.Copy(&stdoutBuf, r)
+				ch <- struct{}{}
 			}()
 			defer func(w *os.File) {
 				_ = w.Close()
@@ -195,6 +197,9 @@ func Test_openAndTemplate(t *testing.T) {
 				t.Error(err)
 				return
 			}
+
+			_ = w.Close()
+			<-ch
 
 			if (stdoutBuf.Len() != 0) != tt.wantStdout {
 				t.Errorf("openAndTemplate() got stdout len = %v, want stdout %v", stdoutBuf.Len(), tt.wantStdout)
