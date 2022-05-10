@@ -106,7 +106,7 @@ The above produces `nginx`.
 
 Splits a Docker repo and tag into the tag component:
 ```gotemplate
-repo "nginx:stable-alpine"
+tag "nginx:stable-alpine"
 ```
 The above produces `stable-alpine`
 
