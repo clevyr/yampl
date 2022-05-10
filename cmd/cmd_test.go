@@ -142,17 +142,37 @@ func Test_openAndTemplate(t *testing.T) {
 		contents string
 	}
 	tests := []struct {
-		name     string
-		args     args
-		wantFile string
-		wantErr  bool
+		name       string
+		args       args
+		want       string
+		wantStdout bool
+		wantErr    bool
 	}{
-		{"simple", args{config.New(), "a: a"}, "a: a", false},
-		{"template", args{config.New(), "a: a #yampl b"}, "a: a #yampl b", false},
-		{"inline", args{inlineConf, "a: a #yampl b"}, "a: b #yampl b\n", false},
+		{"simple", args{config.New(), "a: a"}, "a: a", true, false},
+		{"template", args{config.New(), "a: a #yampl b"}, "a: a #yampl b", true, false},
+		{"inline", args{inlineConf, "a: a #yampl b"}, "a: b #yampl b\n", false, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
+			r, w, err := os.Pipe()
+			if err != nil {
+				t.Error(err)
+				return
+			}
+
+			var stdoutBuf strings.Builder
+			go func() {
+				_, _ = io.Copy(&stdoutBuf, r)
+			}()
+			defer func(w *os.File) {
+				_ = w.Close()
+			}(w)
+
+			defer func(stdout *os.File) {
+				os.Stdout = stdout
+			}(os.Stdout)
+			os.Stdout = w
+
 			f, cleanup, err := tempFileWith(tt.args.contents)
 			if err != nil {
 				t.Error(err)
@@ -176,9 +196,20 @@ func Test_openAndTemplate(t *testing.T) {
 				return
 			}
 
-			got := buf.String()
-			if buf.String() != tt.wantFile {
-				t.Errorf("openAndTemplate() got = %v, want %v", got, tt.wantFile)
+			if (stdoutBuf.Len() != 0) != tt.wantStdout {
+				t.Errorf("openAndTemplate() got stdout len = %v, want stdout %v", stdoutBuf.Len(), tt.wantStdout)
+				return
+			}
+
+			var got string
+			if tt.wantStdout {
+				got = stdoutBuf.String()
+			} else {
+				got = buf.String()
+			}
+			if buf.String() != tt.want {
+				t.Errorf("openAndTemplate() got = %v, want %v", got, tt.want)
+				return
 			}
 		})
 	}
