@@ -3,11 +3,11 @@ package template
 import "strings"
 
 func DockerRepo(image string) string {
-	split := strings.SplitN(image, ":", 2)
-	return split[0]
+	repo, _, _ := strings.Cut(image, ":")
+	return repo
 }
 
 func DockerTag(image string) string {
-	split := strings.SplitN(image, ":", 2)
-	return split[1]
+	_, tag, _ := strings.Cut(image, ":")
+	return tag
 }
