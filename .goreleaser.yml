@@ -64,7 +64,6 @@ docker_manifests:
     name_template: ghcr.io/clevyr/{{ .ProjectName }}:latest
     image_templates:
       - ghcr.io/clevyr/{{ .ProjectName }}:{{ .Version }}-amd64
-      - ghcr.io/clevyr/{{ .ProjectName }}:{{ .Version }}-armv6
       - ghcr.io/clevyr/{{ .ProjectName }}:{{ .Version }}-armv7
       - ghcr.io/clevyr/{{ .ProjectName }}:{{ .Version }}-arm64v8
   - <<: *docker_manifests
