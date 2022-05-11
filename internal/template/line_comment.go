@@ -3,8 +3,8 @@ package template
 import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/clevyr/go-yampl/internal/config"
+	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"log"
 	"strings"
 	"text/template"
 )
@@ -34,7 +34,7 @@ func LineComment(conf config.Config, node *yaml.Node) error {
 		var buf strings.Builder
 		if err = tmpl.Execute(&buf, conf.Values); err != nil {
 			if !conf.Strict {
-				log.Printf("WARN: %v", err)
+				log.WithError(err).Warn("skipping value due to template error")
 				return nil
 			}
 			return err
