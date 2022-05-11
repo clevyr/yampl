@@ -18,11 +18,12 @@ func init() {
 
 func LineComment(conf config.Config, node *yaml.Node) error {
 	if node.LineComment != "" && strings.HasPrefix(node.LineComment, conf.Prefix) {
+		tmplSrc := strings.TrimSpace(node.LineComment[len(conf.Prefix):])
 		tmpl, err := template.New("").
 			Funcs(FuncMap).
 			Delims(conf.LeftDelim, conf.RightDelim).
 			Option("missingkey=error").
-			Parse(strings.TrimSpace(node.LineComment[len(conf.Prefix):]))
+			Parse(tmplSrc)
 		if err != nil {
 			return err
 		}
@@ -40,7 +41,14 @@ func LineComment(conf config.Config, node *yaml.Node) error {
 			return err
 		}
 
-		node.Value = buf.String()
+		if buf.String() != node.Value {
+			log.WithFields(log.Fields{
+				"tmpl": tmplSrc,
+				"from": node.Value,
+				"to":   buf.String(),
+			}).Debug("updating value")
+			node.Value = buf.String()
+		}
 	}
 	return nil
 }
