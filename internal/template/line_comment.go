@@ -47,7 +47,7 @@ func LineComment(conf config.Config, node *yaml.Node) error {
 				"from": node.Value,
 				"to":   buf.String(),
 			}).Debug("updating value")
-			node.Value = buf.String()
+			node.SetString(buf.String())
 		}
 	}
 	return nil
