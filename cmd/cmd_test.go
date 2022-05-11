@@ -36,10 +36,10 @@ func Test_preRun(t *testing.T) {
 		}
 	})
 
-	t.Run("inline no files", func(t *testing.T) {
-		conf.Inline = true
+	t.Run("inplace no files", func(t *testing.T) {
+		conf.Inplace = true
 		defer func() {
-			conf.Inline = false
+			conf.Inplace = false
 		}()
 
 		if err := preRun(&cobra.Command{}, []string{}); err == nil {
@@ -118,8 +118,8 @@ func Test_templateReader(t *testing.T) {
 }
 
 func Test_openAndTemplate(t *testing.T) {
-	inlineConf := config.New()
-	inlineConf.Inline = true
+	inplaceConf := config.New()
+	inplaceConf.Inplace = true
 
 	tempFileWith := func(contents string) (*os.File, func(), error) {
 		f, err := os.CreateTemp("", "")
@@ -150,7 +150,7 @@ func Test_openAndTemplate(t *testing.T) {
 	}{
 		{"simple", args{config.New(), "a: a"}, "a: a", true, false},
 		{"template", args{config.New(), "a: a #yampl b"}, "a: a #yampl b", true, false},
-		{"inline", args{inlineConf, "a: a #yampl b"}, "a: b #yampl b\n", false, false},
+		{"inplace", args{inplaceConf, "a: a #yampl b"}, "a: b #yampl b\n", false, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -33,7 +33,7 @@ var Command = &cobra.Command{
 var conf = config.New()
 
 func init() {
-	Command.Flags().BoolVarP(&conf.Inline, "inline", "i", conf.Inline, "Edit files in-place instead of printing to stdout")
+	Command.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Update files inplace")
 	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Line-comments are ignored unless this prefix is found. Prefix must begin with '#'")
 	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override the left delimiter")
 	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override the right delimiter")
@@ -55,7 +55,7 @@ func preRun(cmd *cobra.Command, args []string) error {
 		return errors.New("prefix must begin with '#'")
 	}
 
-	if conf.Inline && len(args) == 0 {
+	if conf.Inplace && len(args) == 0 {
 		return errors.New("no input files")
 	}
 
@@ -83,7 +83,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if !conf.Inline && i != len(args)-1 {
+		if !conf.Inplace && i != len(args)-1 {
 			fmt.Println("---")
 		}
 	}
@@ -93,7 +93,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 func openAndTemplate(conf config.Config, p string) (err error) {
 	var f *os.File
-	if conf.Inline {
+	if conf.Inplace {
 		stat, err := os.Stat(p)
 		if err != nil {
 			return err
@@ -118,7 +118,7 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 		return err
 	}
 
-	if conf.Inline {
+	if conf.Inplace {
 		if err := f.Truncate(int64(len(b))); err != nil {
 			return err
 		}

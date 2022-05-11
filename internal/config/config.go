@@ -2,7 +2,7 @@ package config
 
 type Config struct {
 	Values     Values
-	Inline     bool
+	Inplace    bool
 	Prefix     string
 	LeftDelim  string
 	RightDelim string
