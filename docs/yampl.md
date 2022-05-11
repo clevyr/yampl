@@ -7,7 +7,7 @@ Inline YAML templating via line-comments
 Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comments.
 
 This command can work on stdin/stdout or on files similarly to GNU sed:
- - If not positional args are given, it will listen for input on stdin.
+ - If no positional args are given, it will listen for input on stdin.
  - It will continue to read input until EOF is encountered.
  - By default, it will print to stdout.
  - The `-i` flag will make it update files in-place.
