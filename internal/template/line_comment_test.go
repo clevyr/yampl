@@ -11,6 +11,9 @@ func TestTemplateLineComment(t *testing.T) {
 	defaultConf := config.New()
 	defaultConf.Values["b"] = "b"
 
+	strictConf := config.New()
+	strictConf.Strict = true
+
 	type args struct {
 		conf    config.Config
 		comment string
@@ -27,7 +30,8 @@ func TestTemplateLineComment(t *testing.T) {
 		{"prefix", args{config.Config{Prefix: "#tmpl"}, "#tmpl b"}, "b #tmpl b", false},
 		{"delimiters", args{config.Config{LeftDelim: "<{", RightDelim: "}>", Prefix: "#yampl"}, `#yampl <{ "b" }>`}, `b #yampl <{ "b" }>`, false},
 		{"invalid template", args{defaultConf, "#yampl {{"}, "", true},
-		{"invalid variable", args{defaultConf, "#yampl {{ .z }}"}, "", true},
+		{"invalid variable ignore", args{defaultConf, "#yampl {{ .z }}"}, "a #yampl {{ .z }}", false},
+		{"invalid variable error", args{strictConf, "#yampl {{ .z }}"}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -48,7 +52,7 @@ func TestTemplateLineComment(t *testing.T) {
 			got, _ := yaml.Marshal(&node)
 			got = bytes.TrimRight(got, "\n")
 			if string(got) != tt.want {
-				t.Errorf("TemplateLineComment() = %v, want %v", string(got), tt.want)
+				t.Errorf("TemplateLineComment() got = %v, want %v", string(got), tt.want)
 			}
 		})
 	}

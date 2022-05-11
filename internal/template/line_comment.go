@@ -4,6 +4,7 @@ import (
 	"github.com/Masterminds/sprig/v3"
 	"github.com/clevyr/go-yampl/internal/config"
 	"gopkg.in/yaml.v3"
+	"log"
 	"strings"
 	"text/template"
 )
@@ -32,6 +33,10 @@ func LineComment(conf config.Config, node *yaml.Node) error {
 
 		var buf strings.Builder
 		if err = tmpl.Execute(&buf, conf.Values); err != nil {
+			if !conf.Strict {
+				log.Printf("WARN: %v", err)
+				return nil
+			}
 			return err
 		}
 

@@ -44,6 +44,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
       --left-delim string      Override the left delimiter (default "{{")
   -p, --prefix string          Line-comments are ignored unless this prefix is found. Prefix must begin with '#' (default "#yampl")
       --right-delim string     Override the right delimiter (default "}}")
+  -s, --strict                 Trigger an error if a template variable is missing
   -v, --value stringToString   Define a template variable. Can be used more than once. (default [])
 ```
 
