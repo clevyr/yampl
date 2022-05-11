@@ -39,6 +39,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
 ```
       --completion string      Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
   -h, --help                   help for yampl
+  -I, --indent int             Override output indentation (default 2)
   -i, --inline                 Edit files in-place instead of printing to stdout
       --left-delim string      Override the left delimiter (default "{{")
   -p, --prefix string          Line-comments are ignored unless this prefix is found. Prefix must begin with '#' (default "#yampl")

@@ -37,6 +37,7 @@ func init() {
 	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Line-comments are ignored unless this prefix is found. Prefix must begin with '#'")
 	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override the left delimiter")
 	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override the right delimiter")
+	Command.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
 }
 
 func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -158,12 +159,16 @@ func templateReader(conf config.Config, r io.Reader) ([]byte, error) {
 			return buf.Bytes(), err
 		}
 
-		b, err := yaml.Marshal(&n)
-		if err != nil {
+		encoder := yaml.NewEncoder(&buf)
+		encoder.SetIndent(conf.Indent)
+		if err := encoder.Encode(&n); err != nil {
+			_ = encoder.Close()
 			return buf.Bytes(), err
 		}
 
-		buf.Write(b)
+		if err := encoder.Close(); err != nil {
+			return buf.Bytes(), err
+		}
 	}
 
 	return buf.Bytes(), nil

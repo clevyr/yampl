@@ -17,6 +17,7 @@ func TestNew(t *testing.T) {
 				Prefix:     "#yampl",
 				LeftDelim:  "{{",
 				RightDelim: "}}",
+				Indent:     2,
 			},
 		},
 	}

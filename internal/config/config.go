@@ -6,6 +6,7 @@ type Config struct {
 	Prefix     string
 	LeftDelim  string
 	RightDelim string
+	Indent     int
 }
 
 func New() Config {
@@ -14,5 +15,6 @@ func New() Config {
 		Prefix:     "#yampl",
 		LeftDelim:  "{{",
 		RightDelim: "}}",
+		Indent:     2,
 	}
 }
