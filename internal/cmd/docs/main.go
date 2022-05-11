@@ -10,26 +10,17 @@ import (
 func main() {
 	var err error
 	output := "./docs"
-	log.Println(`generating docs in "` + output + `"`)
 
-	log.Println("removing existing directory")
-	err = os.RemoveAll(output)
-	if err != nil {
-		log.Fatal(err)
+	if err = os.RemoveAll(output); err != nil {
+		log.Fatalf("failed to remove existing dir: %v", err)
 	}
 
-	log.Println("making directory")
-	err = os.MkdirAll(output, 0755)
-	if err != nil {
-		log.Fatal(err)
+	if err = os.MkdirAll(output, 0755); err != nil {
+		log.Fatalf("failed to mkdir: %v", err)
 	}
 
-	log.Println("generating markdown")
 	rootCmd := cmd.Command
-	err = doc.GenMarkdownTree(rootCmd, output)
-	if err != nil {
-		log.Fatal(err)
+	if err = doc.GenMarkdownTree(rootCmd, output); err != nil {
+		log.Fatalf("failed to generate markdown: %v", err)
 	}
-
-	log.Println("finished")
 }
