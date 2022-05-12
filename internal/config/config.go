@@ -1,5 +1,7 @@
 package config
 
+import log "github.com/sirupsen/logrus"
+
 type Config struct {
 	Values     Values
 	Inplace    bool
@@ -8,6 +10,7 @@ type Config struct {
 	RightDelim string
 	Indent     int
 	Strict     bool
+	Log        *log.Entry
 }
 
 func New() Config {
@@ -17,5 +20,6 @@ func New() Config {
 		LeftDelim:  "{{",
 		RightDelim: "}}",
 		Indent:     2,
+		Log:        log.NewEntry(log.StandardLogger()),
 	}
 }

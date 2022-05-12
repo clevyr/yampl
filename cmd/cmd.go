@@ -8,6 +8,7 @@ import (
 	"github.com/clevyr/go-yampl/internal/config"
 	"github.com/clevyr/go-yampl/internal/node"
 	"github.com/clevyr/go-yampl/internal/template"
+	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"io"
@@ -93,6 +94,11 @@ func run(cmd *cobra.Command, args []string) error {
 }
 
 func openAndTemplate(conf config.Config, p string) (err error) {
+	defer func(logger *log.Entry) {
+		conf.Log = logger
+	}(conf.Log)
+	conf.Log = log.WithField("file", p)
+
 	var f *os.File
 	if conf.Inplace {
 		stat, err := os.Stat(p)

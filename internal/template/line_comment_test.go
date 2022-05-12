@@ -14,6 +14,14 @@ func TestTemplateLineComment(t *testing.T) {
 	strictConf := config.New()
 	strictConf.Strict = true
 
+	prefixConf := config.New()
+	prefixConf.Prefix = "#tmpl"
+
+	delimConf := config.New()
+	delimConf.LeftDelim = "<{"
+	delimConf.RightDelim = "}>"
+	delimConf.Prefix = "#yampl"
+
 	type args struct {
 		conf    config.Config
 		comment string
@@ -27,8 +35,8 @@ func TestTemplateLineComment(t *testing.T) {
 		{"no comment", args{defaultConf, ""}, "a", false},
 		{"simple comment", args{defaultConf, "#yampl b"}, "b #yampl b", false},
 		{"dynamic comment", args{defaultConf, "#yampl {{ .b }}"}, "b #yampl {{ .b }}", false},
-		{"prefix", args{config.Config{Prefix: "#tmpl"}, "#tmpl b"}, "b #tmpl b", false},
-		{"delimiters", args{config.Config{LeftDelim: "<{", RightDelim: "}>", Prefix: "#yampl"}, `#yampl <{ "b" }>`}, `b #yampl <{ "b" }>`, false},
+		{"prefix", args{prefixConf, "#tmpl b"}, "b #tmpl b", false},
+		{"delimiters", args{delimConf, `#yampl <{ "b" }>`}, `b #yampl <{ "b" }>`, false},
 		{"invalid template", args{defaultConf, "#yampl {{"}, "", true},
 		{"invalid variable ignore", args{defaultConf, "#yampl {{ .z }}"}, "a #yampl {{ .z }}", false},
 		{"invalid variable error", args{strictConf, "#yampl {{ .z }}"}, "", true},

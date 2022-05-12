@@ -35,14 +35,14 @@ func LineComment(conf config.Config, node *yaml.Node) error {
 		var buf strings.Builder
 		if err = tmpl.Execute(&buf, conf.Values); err != nil {
 			if !conf.Strict {
-				log.WithError(err).Warn("skipping value due to template error")
+				conf.Log.WithError(err).Warn("skipping value due to template error")
 				return nil
 			}
 			return err
 		}
 
 		if buf.String() != node.Value {
-			log.WithFields(log.Fields{
+			conf.Log.WithFields(log.Fields{
 				"tmpl": tmplSrc,
 				"from": node.Value,
 				"to":   buf.String(),

@@ -1,6 +1,7 @@
 package config
 
 import (
+	log "github.com/sirupsen/logrus"
 	"reflect"
 	"testing"
 )
@@ -18,6 +19,7 @@ func TestNew(t *testing.T) {
 				LeftDelim:  "{{",
 				RightDelim: "}}",
 				Indent:     2,
+				Log:        log.NewEntry(log.StandardLogger()),
 			},
 		},
 	}
