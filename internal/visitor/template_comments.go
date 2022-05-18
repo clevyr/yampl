@@ -37,10 +37,12 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 			v.conf.Values["Value"] = n.String()
 		}
 
+		l := v.conf.Log.WithField("yamlpath", n.(*ast.StringNode).BaseNode.Path)
+
 		var buf strings.Builder
 		if err = tmpl.Execute(&buf, v.conf.Values); err != nil {
 			if !v.conf.Strict {
-				v.conf.Log.WithError(err).Warn("skipping value due to template error")
+				l.WithError(err).Warn("skipping value due to template error")
 				return nil
 			}
 			v.err = err
@@ -48,7 +50,7 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 		}
 
 		if buf.String() != n.String() {
-			v.conf.Log.WithFields(log.Fields{
+			l.WithFields(log.Fields{
 				"tmpl": comment,
 				"from": n.String(),
 				"to":   buf.String(),
