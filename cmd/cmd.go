@@ -1,16 +1,15 @@
 package cmd
 
 import (
-	"bytes"
 	_ "embed"
 	"errors"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
-	"github.com/clevyr/go-yampl/internal/node"
-	"github.com/clevyr/go-yampl/internal/template"
+	"github.com/clevyr/go-yampl/internal/parser"
+	"github.com/clevyr/go-yampl/internal/visitor"
+	"github.com/goccy/go-yaml/ast"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"strings"
@@ -72,12 +71,12 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		b, err := templateReader(conf, os.Stdin)
+		s, err := templateReader(conf, os.Stdin)
 		if err != nil {
 			return err
 		}
 
-		fmt.Print(string(b))
+		fmt.Print(s)
 	}
 
 	for i, p := range args {
@@ -120,13 +119,13 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 		_ = f.Close()
 	}(f)
 
-	b, err := templateReader(conf, f)
+	s, err := templateReader(conf, f)
 	if err != nil {
 		return err
 	}
 
 	if conf.Inplace {
-		if err := f.Truncate(int64(len(b))); err != nil {
+		if err := f.Truncate(int64(len(s))); err != nil {
 			return err
 		}
 
@@ -134,49 +133,32 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 			return err
 		}
 
-		if _, err := f.Write(b); err != nil {
+		if _, err := f.WriteString(s); err != nil {
 			return err
 		}
 	} else {
-		fmt.Print(string(b))
+		fmt.Print(s)
 	}
 
 	return f.Close()
 }
 
-func templateReader(conf config.Config, r io.Reader) ([]byte, error) {
-	decoder := yaml.NewDecoder(r)
-	var buf bytes.Buffer
+func templateReader(conf config.Config, r io.Reader) (string, error) {
+	file, err := parser.ParseReader(r)
+	if err != nil {
+		return "", err
+	}
 
-	for {
-		var n yaml.Node
-
-		if err := decoder.Decode(&n); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
-			}
-			return buf.Bytes(), err
-		}
-
-		if buf.Len() > 0 {
-			buf.Write([]byte("---\n"))
-		}
-
-		if err := node.Visit(conf, template.LineComment, &n); err != nil {
-			return buf.Bytes(), err
-		}
-
-		encoder := yaml.NewEncoder(&buf)
-		encoder.SetIndent(conf.Indent)
-		if err := encoder.Encode(&n); err != nil {
-			_ = encoder.Close()
-			return buf.Bytes(), err
-		}
-
-		if err := encoder.Close(); err != nil {
-			return buf.Bytes(), err
+	v := visitor.NewTemplateComments(conf)
+	for _, doc := range file.Docs {
+		if ast.Walk(&v, doc.Body); v.Error() != nil {
+			return "", v.Error()
 		}
 	}
 
-	return buf.Bytes(), nil
+	s := file.String()
+	if s != "" {
+		s += "\n"
+	}
+	return s, nil
 }

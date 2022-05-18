@@ -96,17 +96,17 @@ func Test_templateReader(t *testing.T) {
 	tests := []struct {
 		name    string
 		args    args
-		want    []byte
+		want    string
 		wantErr bool
 	}{
-		{"empty", args{conf, strings.NewReader("")}, nil, false},
-		{"static", args{conf, strings.NewReader("a: a")}, []byte("a: a\n"), false},
-		{"simple", args{conf, strings.NewReader("a: a #yampl b")}, []byte("a: b #yampl b\n"), false},
-		{"dynamic", args{conf, strings.NewReader("a: a #yampl {{ .Value }}")}, []byte("a: a #yampl {{ .Value }}\n"), false},
-		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, []byte("a: a\n---\nb: b\n"), false},
-		{"invalid yaml", args{conf, strings.NewReader("a:\n - b\n c: c")}, nil, true},
-		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, []byte("a: a #yampl {{ .b }}\n"), false},
-		{"unset value error", args{strictConf, strings.NewReader("a: a #yampl {{ .z }}")}, nil, true},
+		{"empty", args{conf, strings.NewReader("")}, "", false},
+		{"static", args{conf, strings.NewReader("a: a")}, "a: a\n", false},
+		{"simple", args{conf, strings.NewReader("a: a #yampl b")}, "a: b #yampl b\n", false},
+		{"dynamic", args{conf, strings.NewReader("a: a #yampl {{ .Value }}")}, "a: a #yampl {{ .Value }}\n", false},
+		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", false},
+		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", true},
+		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", false},
+		{"unset value error", args{strictConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

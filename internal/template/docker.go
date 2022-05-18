@@ -1,6 +1,8 @@
 package template
 
-import "strings"
+import (
+	"strings"
+)
 
 func DockerRepo(image string) string {
 	repo, _, _ := strings.Cut(image, ":")
