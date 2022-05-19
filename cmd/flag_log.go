@@ -24,11 +24,11 @@ func init() {
 		panic(err)
 	}
 
-	Command.Flags().StringVar(&logFormat, "log-format", "color", "Log format (color, plain, json)")
+	Command.Flags().StringVar(&logFormat, "log-format", "color", "Log format (auto, color, plain, json)")
 	err = Command.RegisterFlagCompletionFunc(
 		"log-format",
 		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-			return []string{"text", "json"}, cobra.ShellCompDirectiveNoFileComp
+			return []string{"auto", "color", "plain", "json"}, cobra.ShellCompDirectiveNoFileComp
 		},
 	)
 	if err != nil {
@@ -53,14 +53,16 @@ func initLogLevel(level string) log.Level {
 func initLogFormat(format string) log.Formatter {
 	var formatter log.Formatter = &log.TextFormatter{}
 	switch format {
-	case "color", "c":
+	case "auto", "a":
 		break
+	case "color", "c":
+		formatter.(*log.TextFormatter).ForceColors = true
 	case "plain", "p":
 		formatter.(*log.TextFormatter).DisableColors = true
 	case "json", "j":
 		formatter = &log.JSONFormatter{}
 	default:
-		log.WithField("format", logFormat).Warn("invalid log formatter. defaulting to color.")
+		log.WithField("format", logFormat).Warn("invalid log formatter. defaulting to auto.")
 	}
 	log.SetFormatter(formatter)
 	return formatter

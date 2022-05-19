@@ -28,7 +28,8 @@ func Test_initLogFormat(t *testing.T) {
 		args args
 		want log.Formatter
 	}{
-		{"default", args{"color"}, &log.TextFormatter{}},
+		{"default", args{"auto"}, &log.TextFormatter{}},
+		{"color", args{"color"}, &log.TextFormatter{ForceColors: true}},
 		{"plain", args{"plain"}, &log.TextFormatter{DisableColors: true}},
 		{"json", args{"json"}, &log.JSONFormatter{}},
 		{"unknown", args{""}, &log.TextFormatter{}},
