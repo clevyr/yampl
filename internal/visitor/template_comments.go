@@ -89,10 +89,11 @@ func templateComment(conf config.Config, comment string, n ast.Node) (ast.Node, 
 		return nil, err
 	}
 
-	if buf.String() != n.String() {
+	oldVal := n.GetToken().Value
+	if buf.String() != oldVal {
 		logEntry.WithFields(log.Fields{
 			"tmpl": comment,
-			"from": n.String(),
+			"from": oldVal,
 			"to":   buf.String(),
 		}).Debug("updating value")
 
