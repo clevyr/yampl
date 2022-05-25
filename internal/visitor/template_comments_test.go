@@ -80,18 +80,25 @@ func TestTemplateComments_Visit(t *testing.T) {
 		want    string
 		wantErr bool
 	}{
-		{"no comment", args{defaultConf, ""}, "a", false},
-		{"simple comment", args{defaultConf, "#yampl b"}, "b #yampl b", false},
-		{"dynamic comment", args{defaultConf, "#yampl {{ .b }}"}, "b #yampl {{ .b }}", false},
-		{"prefix", args{prefixConf, "#tmpl b"}, "b #tmpl b", false},
-		{"delimiters", args{delimConf, `#yampl <{ "b" }>`}, `b #yampl <{ "b" }>`, false},
-		{"invalid template", args{defaultConf, "#yampl {{"}, "", true},
-		{"invalid variable ignore", args{defaultConf, "#yampl {{ .z }}"}, "a #yampl {{ .z }}", false},
-		{"invalid variable error", args{strictConf, "#yampl {{ .z }}"}, "", true},
+		{"no comment", args{defaultConf, "test: a"}, "test: a", false},
+		{"simple comment", args{defaultConf, "test: a #yampl b"}, "test: b #yampl b", false},
+		{"dynamic comment", args{defaultConf, "test: a #yampl {{ .b }}"}, "test: b #yampl {{ .b }}", false},
+		{"prefix", args{prefixConf, "test: a #tmpl b"}, "test: b #tmpl b", false},
+		{"to string", args{prefixConf, "test: 1 #tmpl a"}, "test: a #tmpl a", false},
+		{"to int", args{prefixConf, "test: a #tmpl 1"}, "test: 1 #tmpl 1", false},
+		{"to float", args{prefixConf, "test: a #tmpl 0.1"}, "test: 0.1 #tmpl 0.1", false},
+		{"same value", args{prefixConf, "test: a #tmpl a"}, "test: a #tmpl a", false},
+		{"delimiters", args{delimConf, `test: a #yampl <{ "b" }>`}, `test: b #yampl <{ "b" }>`, false},
+		{"sequence", args{delimConf, `- a #yampl b`}, `- b #yampl b`, false},
+		{"invalid template", args{defaultConf, "test: a #yampl {{"}, "", true},
+		{"mapping invalid variable ignore", args{defaultConf, "test: a #yampl {{ .z }}"}, "test: a #yampl {{ .z }}", false},
+		{"sequence invalid variable ignore", args{defaultConf, "- a #yampl {{ .z }}"}, "- a #yampl {{ .z }}", false},
+		{"mapping invalid variable error", args{strictConf, "test: a #yampl {{ .z }}"}, "", true},
+		{"sequence invalid variable error", args{strictConf, "- a #yampl {{ .z }}"}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			file, _ := parser.ParseBytes([]byte("a " + tt.args.comment))
+			file, _ := parser.ParseBytes([]byte(tt.args.comment))
 			v := TemplateComments{conf: tt.args.conf}
 
 			if v.Visit(file.Docs[0].Body); v.err != nil {
