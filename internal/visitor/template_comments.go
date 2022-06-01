@@ -28,13 +28,17 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 		if comment := node.GetCommentTmpl(v.conf.Prefix, n.Value); comment != "" {
 			newNode, err := templateComment(v.conf, comment, n.Value)
 			if err != nil {
-				v.err = err
+				if v.err == nil {
+					v.err = err
+				}
 				return nil
 			}
 
 			if newNode != nil {
 				if err := n.Replace(newNode); err != nil {
-					v.err = err
+					if v.err == nil {
+						v.err = err
+					}
 					return nil
 				}
 			}
@@ -44,13 +48,17 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 			if comment := node.GetCommentTmpl(v.conf.Prefix, value); comment != "" {
 				newNode, err := templateComment(v.conf, comment, value)
 				if err != nil {
-					v.err = err
+					if v.err == nil {
+						v.err = err
+					}
 					return nil
 				}
 
 				if newNode != nil {
 					if err := n.Replace(i, newNode); err != nil {
-						v.err = err
+						if v.err == nil {
+							v.err = err
+						}
 						return nil
 					}
 				}
