@@ -29,7 +29,7 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 			newNode, err := templateComment(v.conf, comment, n.Value)
 			if err != nil {
 				if v.err == nil {
-					v.err = err
+					v.err = node.NewPrintableError(err, n)
 				}
 				return nil
 			}
@@ -37,7 +37,7 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 			if newNode != nil {
 				if err := n.Replace(newNode); err != nil {
 					if v.err == nil {
-						v.err = err
+						v.err = node.NewPrintableError(err, n)
 					}
 					return nil
 				}
@@ -49,7 +49,7 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 				newNode, err := templateComment(v.conf, comment, value)
 				if err != nil {
 					if v.err == nil {
-						v.err = err
+						v.err = node.NewPrintableError(err, value)
 					}
 					return nil
 				}
@@ -57,7 +57,7 @@ func (v *TemplateComments) Visit(n ast.Node) ast.Visitor {
 				if newNode != nil {
 					if err := n.Replace(i, newNode); err != nil {
 						if v.err == nil {
-							v.err = err
+							v.err = node.NewPrintableError(err, value)
 						}
 						return nil
 					}

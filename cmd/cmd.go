@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
+	"github.com/clevyr/go-yampl/internal/node"
 	"github.com/clevyr/go-yampl/internal/parser"
 	"github.com/clevyr/go-yampl/internal/visitor"
 	"github.com/goccy/go-yaml/ast"
@@ -152,8 +153,13 @@ func templateReader(conf config.Config, r io.Reader) (string, error) {
 
 	v := visitor.NewTemplateComments(conf)
 	for _, doc := range file.Docs {
-		if ast.Walk(&v, doc.Body); v.Error() != nil {
-			return "", v.Error()
+		ast.Walk(&v, doc.Body)
+		if err := v.Error(); err != nil {
+			switch err := err.(type) {
+			case node.PrintableError:
+				return "", fmt.Errorf("%w\n%v", err, err.AnnotateSource(file.String(), colored))
+			}
+			return "", err
 		}
 	}
 
