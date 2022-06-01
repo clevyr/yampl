@@ -59,8 +59,8 @@ func TestTemplateComments_Visit(t *testing.T) {
 	defaultConf := config.New()
 	defaultConf.Values["b"] = "b"
 
-	strictConf := config.New()
-	strictConf.Strict = true
+	failConf := config.New()
+	failConf.Fail = true
 
 	prefixConf := config.New()
 	prefixConf.Prefix = "#tmpl"
@@ -93,8 +93,8 @@ func TestTemplateComments_Visit(t *testing.T) {
 		{"invalid template", args{defaultConf, "test: a #yampl {{"}, "", true},
 		{"mapping invalid variable ignore", args{defaultConf, "test: a #yampl {{ .z }}"}, "test: a #yampl {{ .z }}", false},
 		{"sequence invalid variable ignore", args{defaultConf, "- a #yampl {{ .z }}"}, "- a #yampl {{ .z }}", false},
-		{"mapping invalid variable error", args{strictConf, "test: a #yampl {{ .z }}"}, "", true},
-		{"sequence invalid variable error", args{strictConf, "- a #yampl {{ .z }}"}, "", true},
+		{"mapping invalid variable error", args{failConf, "test: a #yampl {{ .z }}"}, "", true},
+		{"sequence invalid variable error", args{failConf, "- a #yampl {{ .z }}"}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

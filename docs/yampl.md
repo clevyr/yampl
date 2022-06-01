@@ -38,15 +38,15 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
 
 ```
       --completion string      Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
+  -f, --fail                   Trigger an error if a template variable is missing
   -h, --help                   help for yampl
   -I, --indent int             Override output indentation (default 2)
   -i, --inplace                Update files inplace
       --left-delim string      Override the left delimiter (default "{{")
-      --log-format string      Log format (color, plain, json) (default "color")
+      --log-format string      Log format (auto, color, plain, json) (default "color")
   -l, --log-level string       Log level (trace, debug, info, warning, error, fatal, panic) (default "info")
   -p, --prefix string          Line-comments are ignored unless this prefix is found. Prefix must begin with '#' (default "#yampl")
       --right-delim string     Override the right delimiter (default "}}")
-  -s, --strict                 Trigger an error if a template variable is missing
   -v, --value stringToString   Define a template variable. Can be used more than once. (default [])
 ```
 

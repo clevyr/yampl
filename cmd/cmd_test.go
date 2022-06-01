@@ -86,8 +86,8 @@ func Test_validArgs(t *testing.T) {
 }
 
 func Test_templateReader(t *testing.T) {
-	strictConf := config.New()
-	strictConf.Strict = true
+	failConf := config.New()
+	failConf.Fail = true
 
 	type args struct {
 		conf config.Config
@@ -106,7 +106,7 @@ func Test_templateReader(t *testing.T) {
 		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", false},
 		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", true},
 		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", false},
-		{"unset value error", args{strictConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", true},
+		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

@@ -82,7 +82,7 @@ func templateComment(conf config.Config, comment string, n ast.Node) (ast.Node, 
 
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, conf.Values); err != nil {
-		if !conf.Strict {
+		if !conf.Fail {
 			logEntry.WithError(err).Warn("skipping value due to template error")
 			return nil, nil
 		}

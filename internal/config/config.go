@@ -9,7 +9,7 @@ type Config struct {
 	LeftDelim  string
 	RightDelim string
 	Indent     int
-	Strict     bool
+	Fail       bool
 	Log        *log.Entry
 }
 
