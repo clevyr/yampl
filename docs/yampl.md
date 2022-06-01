@@ -47,6 +47,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
   -l, --log-level string       Log level (trace, debug, info, warning, error, fatal, panic) (default "info")
   -p, --prefix string          Line-comments are ignored unless this prefix is found. Prefix must begin with '#' (default "#yampl")
       --right-delim string     Override the right delimiter (default "}}")
+  -s, --strip                  Strip comments in generated template
   -v, --value stringToString   Define a template variable. Can be used more than once. (default [])
 ```
 

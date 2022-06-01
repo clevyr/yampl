@@ -70,6 +70,9 @@ func TestTemplateComments_Visit(t *testing.T) {
 	delimConf.RightDelim = "}>"
 	delimConf.Prefix = "#yampl"
 
+	stripConf := config.New()
+	stripConf.Strip = true
+
 	type args struct {
 		conf    config.Config
 		comment string
@@ -95,6 +98,7 @@ func TestTemplateComments_Visit(t *testing.T) {
 		{"sequence invalid variable ignore", args{defaultConf, "- a #yampl {{ .z }}"}, "- a #yampl {{ .z }}", false},
 		{"mapping invalid variable error", args{failConf, "test: a #yampl {{ .z }}"}, "", true},
 		{"sequence invalid variable error", args{failConf, "- a #yampl {{ .z }}"}, "", true},
+		{"strip", args{stripConf, "test: a #yampl b"}, "test: b", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

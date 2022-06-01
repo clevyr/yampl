@@ -80,6 +80,12 @@ func templateComment(conf config.Config, comment string, n ast.Node) (ast.Node, 
 
 	logEntry := conf.Log.WithField("yamlpath", n.GetPath())
 
+	if conf.Strip {
+		if err := n.SetComment(nil); err != nil {
+			return nil, err
+		}
+	}
+
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, conf.Values); err != nil {
 		if !conf.Fail {

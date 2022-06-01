@@ -11,6 +11,7 @@ type Config struct {
 	Indent     int
 	Fail       bool
 	Log        *log.Entry
+	Strip      bool
 }
 
 func New() Config {

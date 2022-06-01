@@ -39,6 +39,7 @@ func init() {
 	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override the right delimiter")
 	Command.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
 	Command.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Trigger an error if a template variable is missing`)
+	Command.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip comments in generated template")
 }
 
 func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
