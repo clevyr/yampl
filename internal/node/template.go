@@ -13,7 +13,23 @@ import (
 func Template(conf config.Config, n ast.Node) error {
 	switch n := n.(type) {
 	case *ast.MappingValueNode:
-		if comment := GetCommentTmpl(conf.Prefix, n.Value); comment != "" {
+		// Comment after value
+		comment := GetCommentTmpl(conf.Prefix, n.Value)
+
+		// Edge case where comment is set on key
+		if comment == "" {
+			if comment = GetCommentTmpl(conf.Prefix, n.Key); comment != "" {
+				// Move comment from key to value
+				if err := n.Value.SetComment(n.Key.GetComment()); err != nil {
+					return err
+				}
+				if err := n.Key.SetComment(nil); err != nil {
+					return err
+				}
+			}
+		}
+
+		if comment != "" {
 			newNode, err := templateComment(conf, comment, n.Value)
 			if err != nil {
 				return err

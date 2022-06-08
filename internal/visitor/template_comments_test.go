@@ -99,6 +99,7 @@ func TestTemplateComments_Visit(t *testing.T) {
 		{"mapping invalid variable error", args{failConf, "test: a #yampl {{ .z }}"}, "", true},
 		{"sequence invalid variable error", args{failConf, "- a #yampl {{ .z }}"}, "", true},
 		{"strip", args{stripConf, "test: a #yampl b"}, "test: b", false},
+		{"no value", args{defaultConf, "test: #yampl a"}, "test: a #yampl a", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
