@@ -51,6 +51,7 @@ func TestFindArgs_Values(t *testing.T) {
 		{"simple", fields{valMap: map[string]struct{}{"a": {}}}, []string{"a="}},
 		{"nested", fields{valMap: map[string]struct{}{"a.b": {}}}, []string{"a.b="}},
 		{"duplicate", fields{conf: config.Config{Values: map[string]any{"b": "b"}}, valMap: map[string]struct{}{"b": {}}}, []string{}},
+		{"reserved", fields{valMap: map[string]struct{}{"Value": {}}}, []string{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

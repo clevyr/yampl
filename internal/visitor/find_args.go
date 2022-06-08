@@ -75,6 +75,11 @@ outer:
 				continue outer
 			}
 		}
+		for _, reserved := range config.ReservedKeys {
+			if k == reserved {
+				continue outer
+			}
+		}
 		result = append(result, k+"=")
 	}
 	return result
