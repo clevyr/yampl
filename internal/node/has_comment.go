@@ -6,6 +6,7 @@ import (
 )
 
 func GetCommentTmpl(prefix string, node ast.Node) string {
+	prefix = prefix + " "
 	comments := node.GetComment()
 	if comments != nil {
 		for _, comment := range comments.Comments {
