@@ -74,6 +74,9 @@ func templateComment(conf config.Config, comment string, n ast.Node) (ast.Node, 
 		n, ok := n.(ast.ScalarNode)
 		if ok {
 			conf.Values["Value"] = n.GetValue()
+			defer func() {
+				delete(conf.Values, "Value")
+			}()
 		}
 	}
 
