@@ -71,7 +71,10 @@ func templateComment(conf config.Config, comment string, n ast.Node) (ast.Node, 
 	}
 
 	if conf.Values != nil {
-		conf.Values["Value"] = n.(ast.ScalarNode).GetValue()
+		n, ok := n.(ast.ScalarNode)
+		if ok {
+			conf.Values["Value"] = n.GetValue()
+		}
 	}
 
 	logEntry := conf.Log.WithField("yamlpath", n.GetPath())
