@@ -18,6 +18,14 @@ Yampl is available in brew or as a Docker container.
   ```
 </details>
 
+### GitHub Actions
+
+<details>
+  <summary>Click to expand</summary>
+
+  There is an Action provided for use during CI/CD. See [clevyr/yampl-action](https://github.com/clevyr/yampl-action) for more details.
+</details>
+
 ### Docker
 
 <details>
