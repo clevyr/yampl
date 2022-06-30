@@ -5,7 +5,7 @@ import (
 	"os"
 )
 
-//go:generate go run internal/cmd/docs/main.go --directory=docs
+//go:generate git config core.hooksPath .githooks
 
 func main() {
 	if err := cmd.Command.Execute(); err != nil {
