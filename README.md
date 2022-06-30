@@ -52,22 +52,22 @@ Yampl is available in brew or as a Docker container.
 
   1. If you don't have it already, install the `ca-certificates` package
      ```shell
-     apt install ca-certificates
+     sudo apt install ca-certificates
      ```
 
-  2. Add Clevyr's apt repository to `/etc/apt/sources.list.d/clevyr.list`
+  2. Add Clevyr's apt repository
      ```
-     deb [trusted=yes] https://apt.clevyr.com /
+     echo 'deb [trusted=yes] https://apt.clevyr.com /' | sudo tee /etc/apt/sources.list.d/clevyr.list
      ```
 
   3. Update apt repositories
      ```shell
-     apt update
+     sudo apt update
      ```
 
   4. Install yampl
      ```shell
-     apt install yampl
+     sudo apt install yampl
      ```
 </details>
 
@@ -78,7 +78,7 @@ Yampl is available in brew or as a Docker container.
 
   1. If you don't have it already, install the `ca-certificates` package
      ```shell
-     yum install ca-certificates
+     sudo yum install ca-certificates
      ```
 
   2. Add Clevyr's rpm repository to `/etc/yum.repos.d/clevyr.repo`
@@ -92,7 +92,7 @@ Yampl is available in brew or as a Docker container.
 
   3. Install yampl
      ```shell
-     yum install yampl
+     sudo yum install yampl
      ```
 </details>
 
