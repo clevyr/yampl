@@ -34,13 +34,13 @@ var Command = &cobra.Command{
 var conf = config.New()
 
 func init() {
-	Command.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Update files inplace")
+	Command.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
 	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Template comments must begin with this prefix. The beginning '#' is implied.")
-	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override the left delimiter")
-	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override the right delimiter")
+	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override template left delimiter")
+	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override template right delimiter")
 	Command.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
-	Command.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Trigger an error if a template variable is missing`)
-	Command.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip comments in generated template")
+	Command.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Exit with an error if a template variable is not set`)
+	Command.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip template comments from output")
 }
 
 func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
