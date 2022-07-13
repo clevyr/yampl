@@ -1,4 +1,0 @@
-#!/bin/sh
-
-go generate docs.go
-git add docs
