@@ -45,7 +45,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
       --left-delim string      Override the left delimiter (default "{{")
       --log-format string      Log format (auto, color, plain, json) (default "color")
   -l, --log-level string       Log level (trace, debug, info, warning, error, fatal, panic) (default "info")
-  -p, --prefix string          Line-comments are ignored unless this prefix is found. Prefix must begin with '#' (default "#yampl")
+  -p, --prefix string          Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
       --right-delim string     Override the right delimiter (default "}}")
   -s, --strip                  Strip comments in generated template
   -v, --value stringToString   Define a template variable. Can be used more than once. (default [])

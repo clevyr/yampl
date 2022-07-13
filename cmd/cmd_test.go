@@ -26,13 +26,18 @@ func Test_preRun(t *testing.T) {
 	})
 
 	t.Run("invalid prefix", func(t *testing.T) {
-		conf.Prefix = "a"
+		conf.Prefix = "tmpl"
 		defer func() {
 			conf.Prefix = "#yampl"
 		}()
 
-		if err := preRun(&cobra.Command{}, []string{}); err == nil {
-			t.Errorf("preRun() error = %v, wantErr %v", err, true)
+		if err := preRun(&cobra.Command{}, []string{}); err != nil {
+			t.Errorf("preRun() error = %v, wantErr %v", err, false)
+		}
+
+		want := "#tmpl"
+		if conf.Prefix != want {
+			t.Errorf("preRun() prefix = %s, want %s", conf.Prefix, want)
 		}
 	})
 
