@@ -14,7 +14,7 @@ import (
 	"text/template/parse"
 )
 
-var fieldRe = regexp.MustCompile(`\.([A-Za-z_.]+)`)
+var fieldRe = regexp.MustCompile(`\.([A-Za-z\d_.]+)`)
 
 func NewFindArgs(conf config.Config) FindArgs {
 	return FindArgs{
