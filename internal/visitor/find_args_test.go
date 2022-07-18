@@ -11,9 +11,9 @@ import (
 
 func TestFindArgs_Error(t *testing.T) {
 	type fields struct {
-		conf   config.Config
-		valMap map[string]struct{}
-		err    error
+		conf     config.Config
+		matchMap map[string]MatchSlice
+		err      error
 	}
 	tests := []struct {
 		name    string
@@ -26,9 +26,9 @@ func TestFindArgs_Error(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := FindArgs{
-				conf:   tt.fields.conf,
-				valMap: tt.fields.valMap,
-				err:    tt.fields.err,
+				conf:     tt.fields.conf,
+				matchMap: tt.fields.matchMap,
+				err:      tt.fields.err,
 			}
 			if err := v.Error(); (err != nil) != tt.wantErr {
 				t.Errorf("Error() error = %v, wantErr %v", err, tt.wantErr)
@@ -39,26 +39,26 @@ func TestFindArgs_Error(t *testing.T) {
 
 func TestFindArgs_Values(t *testing.T) {
 	type fields struct {
-		conf   config.Config
-		valMap map[string]struct{}
-		err    error
+		conf     config.Config
+		matchMap map[string]MatchSlice
+		err      error
 	}
 	tests := []struct {
 		name   string
 		fields fields
 		want   []string
 	}{
-		{"simple", fields{valMap: map[string]struct{}{"a": {}}}, []string{"a="}},
-		{"nested", fields{valMap: map[string]struct{}{"a.b": {}}}, []string{"a.b="}},
-		{"duplicate", fields{conf: config.Config{Values: map[string]any{"b": "b"}}, valMap: map[string]struct{}{"b": {}}}, []string{}},
-		{"reserved", fields{valMap: map[string]struct{}{"Value": {}}}, []string{}},
+		{name: "simple", fields: fields{matchMap: map[string]MatchSlice{"a": []Match{}}}, want: []string{"a=\t"}},
+		{"nested", fields{matchMap: map[string]MatchSlice{"a.b": []Match{}}}, []string{"a.b=\t"}},
+		{"duplicate", fields{conf: config.Config{Values: map[string]any{"b": "b"}}, matchMap: map[string]MatchSlice{"b": []Match{{}}}}, []string{}},
+		{"reserved", fields{matchMap: map[string]MatchSlice{"Value": []Match{}}}, []string{}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			v := FindArgs{
-				conf:   tt.fields.conf,
-				valMap: tt.fields.valMap,
-				err:    tt.fields.err,
+				conf:     tt.fields.conf,
+				matchMap: tt.fields.matchMap,
+				err:      tt.fields.err,
 			}
 			if got := v.Values(); !reflect.DeepEqual(got, tt.want) {
 				t.Errorf("Values() = %v, want %v", got, tt.want)
@@ -75,11 +75,11 @@ func TestFindArgs_Visit(t *testing.T) {
 		name    string
 		v       map[string]struct{}
 		source  string
-		want    map[string]struct{}
+		wantLen int
 		wantErr bool
 	}{
-		{"simple", make(map[string]struct{}), "a #yampl {{ .a }}", map[string]struct{}{"a": {}}, false},
-		{"invalid template", make(map[string]struct{}), "a #yampl {{", map[string]struct{}{}, true},
+		{"simple", make(map[string]struct{}), "a #yampl {{ .a }}", 1, false},
+		{"invalid template", make(map[string]struct{}), "a #yampl {{", 0, true},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -91,9 +91,9 @@ func TestFindArgs_Visit(t *testing.T) {
 				return
 			}
 
-			got := v.valMap
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("Visitor() = %v, want %v", got, tt.want)
+			got := v.matchMap
+			if len(got) != tt.wantLen {
+				t.Errorf("Visitor() len = %v, want len %v", len(got), tt.wantLen)
 			}
 		})
 	}
@@ -108,7 +108,7 @@ func TestNewFindArgs(t *testing.T) {
 		args args
 		want FindArgs
 	}{
-		{"default", args{conf: config.Config{}}, FindArgs{conf: config.Config{}, valMap: make(map[string]struct{})}},
+		{"default", args{conf: config.Config{}}, FindArgs{conf: config.Config{}, matchMap: make(map[string]MatchSlice)}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
