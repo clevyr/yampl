@@ -24,7 +24,11 @@ RUN set -x \
 
 
 FROM alpine
-WORKDIR /data
-COPY --from=builder /app/yampl /usr/local/bin/
 LABEL org.opencontainers.image.source https://github.com/clevyr/go-yampl
+WORKDIR /data
+
+RUN apk add --no-cache yq git
+
+COPY --from=builder /app/yampl /usr/local/bin/
+
 ENTRYPOINT ["yampl"]

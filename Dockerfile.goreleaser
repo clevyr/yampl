@@ -1,5 +1,9 @@
 FROM alpine
-WORKDIR /data
-COPY yampl /usr/local/bin
 LABEL org.opencontainers.image.source https://github.com/clevyr/go-yampl
+WORKDIR /data
+
+RUN apk add --no-cache git yq
+
+COPY yampl /usr/local/bin
+
 CMD ["yampl"]
