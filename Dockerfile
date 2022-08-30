@@ -27,7 +27,7 @@ FROM alpine
 LABEL org.opencontainers.image.source https://github.com/clevyr/go-yampl
 WORKDIR /data
 
-RUN apk add --no-cache yq git
+RUN apk add --no-cache git jq yq
 
 COPY --from=builder /app/yampl /usr/local/bin/
 
