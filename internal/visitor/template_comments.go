@@ -1,6 +1,7 @@
 package visitor
 
 import (
+	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
 	"github.com/clevyr/go-yampl/internal/node"
 	template2 "github.com/clevyr/go-yampl/internal/template"
@@ -46,9 +47,10 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 
 		if buf.String() != n.Value {
 			t.conf.Log.WithFields(log.Fields{
-				"tmpl": tmplSrc,
-				"from": n.Value,
-				"to":   buf.String(),
+				"tmpl":    tmplSrc,
+				"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
+				"from":    n.Value,
+				"to":      buf.String(),
 			}).Debug("updating value")
 			n.Value = buf.String()
 		}
