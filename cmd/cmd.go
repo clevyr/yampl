@@ -6,11 +6,10 @@ import (
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
 	"github.com/clevyr/go-yampl/internal/node"
-	"github.com/clevyr/go-yampl/internal/parser"
 	"github.com/clevyr/go-yampl/internal/visitor"
-	"github.com/goccy/go-yaml/ast"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"strings"
@@ -57,6 +56,7 @@ func preRun(cmd *cobra.Command, args []string) error {
 	if !strings.HasPrefix(conf.Prefix, "#") {
 		conf.Prefix = "#" + conf.Prefix
 	}
+	conf.Prefix += " "
 
 	if conf.Inplace && len(args) == 0 {
 		return errors.New("no input files")
@@ -146,26 +146,40 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 }
 
 func templateReader(conf config.Config, r io.Reader) (string, error) {
-	file, err := parser.ParseReader(r)
-	if err != nil {
-		return "", err
-	}
-
 	v := visitor.NewTemplateComments(conf)
-	for _, doc := range file.Docs {
-		ast.Walk(&v, doc.Body)
-		if err := v.Error(); err != nil {
-			switch err := err.(type) {
-			case node.PrintableError:
-				return "", fmt.Errorf("%w\n%v", err, err.AnnotateSource(file.String(), colored))
+
+	decoder := yaml.NewDecoder(r)
+	var buf strings.Builder
+
+	for {
+		var n yaml.Node
+
+		if err := decoder.Decode(&n); err != nil {
+			if errors.Is(err, io.EOF) {
+				break
 			}
-			return "", err
+			return buf.String(), err
+		}
+
+		if buf.Len() > 0 {
+			buf.Write([]byte("---\n"))
+		}
+
+		if err := node.Visit(v.Visit, &n); err != nil {
+			return buf.String(), err
+		}
+
+		encoder := yaml.NewEncoder(&buf)
+		encoder.SetIndent(conf.Indent)
+		if err := encoder.Encode(&n); err != nil {
+			_ = encoder.Close()
+			return buf.String(), err
+		}
+
+		if err := encoder.Close(); err != nil {
+			return buf.String(), err
 		}
 	}
 
-	s := file.String()
-	if s != "" {
-		s += "\n"
-	}
-	return s, nil
+	return buf.String(), nil
 }

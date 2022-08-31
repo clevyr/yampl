@@ -1,11 +1,12 @@
 package cmd
 
 import (
+	"github.com/clevyr/go-yampl/internal/node"
 	"github.com/clevyr/go-yampl/internal/visitor"
-	"github.com/goccy/go-yaml/ast"
-	"github.com/goccy/go-yaml/parser"
 	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 	"os"
+	"strings"
 )
 
 var rawValues map[string]string
@@ -19,26 +20,32 @@ func init() {
 }
 
 func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	if !strings.HasPrefix(conf.Prefix, "#") {
+		conf.Prefix = "#" + conf.Prefix
+	}
+	conf.Prefix += " "
+
 	v := visitor.NewFindArgs(conf)
 
 	for _, path := range args {
-		func() {
-			b, err := os.ReadFile(path)
-			if err != nil {
-				return
+		f, err := os.Open(path)
+		if err != nil {
+			break
+		}
+
+		decoder := yaml.NewDecoder(f)
+
+		for {
+			var n yaml.Node
+
+			if err := decoder.Decode(&n); err != nil {
+				break
 			}
 
-			file, err := parser.ParseBytes(b, parser.ParseComments)
-			if err != nil {
-				return
+			if err := node.Visit(v.Visit, &n); err != nil {
+				break
 			}
-
-			for _, doc := range file.Docs {
-				if ast.Walk(&v, doc.Body); v.Error() != nil {
-					return
-				}
-			}
-		}()
+		}
 	}
 
 	return v.Values(), cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp

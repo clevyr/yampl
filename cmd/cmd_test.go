@@ -35,7 +35,7 @@ func Test_preRun(t *testing.T) {
 			t.Errorf("preRun() error = %v, wantErr %v", err, false)
 		}
 
-		want := "#tmpl"
+		want := "#tmpl "
 		if conf.Prefix != want {
 			t.Errorf("preRun() prefix = %s, want %s", conf.Prefix, want)
 		}

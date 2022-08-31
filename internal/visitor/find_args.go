@@ -5,8 +5,7 @@ import (
 	"github.com/clevyr/go-yampl/internal/config"
 	"github.com/clevyr/go-yampl/internal/node"
 	template2 "github.com/clevyr/go-yampl/internal/template"
-	"github.com/goccy/go-yaml/ast"
-	"github.com/goccy/go-yaml/token"
+	"gopkg.in/yaml.v3"
 	"regexp"
 	"strconv"
 	"strings"
@@ -26,7 +25,8 @@ func NewFindArgs(conf config.Config) FindArgs {
 type Match struct {
 	Value    any
 	Template string
-	Position *token.Position
+	Line     int
+	Column   int
 }
 
 func (m Match) String() string {
@@ -36,8 +36,8 @@ func (m Match) String() string {
 		val = val[:maxLen-3] + "..."
 	}
 	var result string
-	if m.Position != nil {
-		result += "line " + strconv.Itoa(m.Position.Line) + ": "
+	if m.Line != 0 {
+		result += "line " + strconv.Itoa(m.Line) + ": "
 	}
 	result += fmt.Sprintf("%s %#v", val, m.Template)
 	result = strings.ReplaceAll(result, "\n", " ")
@@ -60,13 +60,13 @@ type FindArgs struct {
 	err      error
 }
 
-func (visitor *FindArgs) Visit(n ast.Node) ast.Visitor {
-	if comment := node.GetCommentTmpl(visitor.conf.Prefix, n); comment != "" {
+func (visitor *FindArgs) Visit(n *yaml.Node) error {
+	if tmplSrc := node.GetCommentTmpl(visitor.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
 			Delims(visitor.conf.LeftDelim, visitor.conf.RightDelim).
 			Option("missingkey=zero").
-			Parse(comment)
+			Parse(tmplSrc)
 		if err != nil {
 			visitor.err = err
 			return nil
@@ -76,23 +76,17 @@ func (visitor *FindArgs) Visit(n ast.Node) ast.Visitor {
 			if tokens := fieldRe.FindStringSubmatch(field); tokens != nil {
 				for _, tok := range tokens[1:] {
 					match := Match{
-						Template: comment,
-						Position: n.GetToken().Position,
+						Template: tmplSrc,
+						Line:     n.Line,
+						Column:   n.Column,
 					}
-					switch n := n.(type) {
-					case *ast.LiteralNode:
-						match.Value = n.Value.String()
-					default:
-						if scalar, ok := n.(ast.ScalarNode); ok {
-							match.Value = scalar.GetValue()
-						}
-					}
+					match.Value = n.Value
 					visitor.matchMap[tok] = append(visitor.matchMap[tok], match)
 				}
 			}
 		}
 	}
-	return visitor
+	return nil
 }
 
 func listTemplFields(t *template.Template) []string {

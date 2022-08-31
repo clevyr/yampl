@@ -1,21 +1,14 @@
 package node
 
 import (
-	"github.com/goccy/go-yaml/ast"
+	"gopkg.in/yaml.v3"
 	"strings"
 )
 
-func GetCommentTmpl(prefix string, node ast.Node) string {
-	prefix = prefix + " "
-	comments := node.GetComment()
-	if comments != nil {
-		for _, comment := range comments.Comments {
-			s := comment.String()
-			if strings.HasPrefix(s, prefix) {
-				s = strings.TrimPrefix(s, prefix)
-				s = strings.TrimSpace(s)
-				return s
-			}
+func GetCommentTmpl(prefix string, n *yaml.Node) string {
+	for _, comment := range []string{n.LineComment, n.HeadComment, n.FootComment} {
+		if strings.HasPrefix(comment, prefix) {
+			return strings.TrimSpace(comment[len(prefix):])
 		}
 	}
 	return ""
