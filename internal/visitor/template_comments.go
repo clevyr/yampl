@@ -39,7 +39,7 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 				t.conf.Log.WithError(err).Warn("skipping value due to template error")
 				return nil
 			}
-			return err
+			return NodeErr{Err: err, Node: n}
 		}
 
 		if t.conf.Values != nil {
@@ -52,7 +52,7 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 				t.conf.Log.WithError(err).Warn("skipping value due to template error")
 				return nil
 			}
-			return err
+			return NodeErr{Err: err, Node: n}
 		}
 
 		if buf.String() != n.Value {

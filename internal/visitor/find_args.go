@@ -67,7 +67,7 @@ func (visitor *FindArgs) Visit(n *yaml.Node) error {
 			Option("missingkey=zero").
 			Parse(tmplSrc)
 		if err != nil {
-			return err
+			return NodeErr{Err: err, Node: n}
 		}
 
 		for _, field := range listTemplFields(tmpl) {

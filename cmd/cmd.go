@@ -104,17 +104,17 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 	if conf.Inplace {
 		stat, err := os.Stat(p)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 
 		f, err = os.OpenFile(p, os.O_RDWR, stat.Mode())
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 	} else {
 		f, err = os.Open(p)
 		if err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 	}
 	defer func(f *os.File) {
@@ -123,20 +123,20 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 
 	s, err := templateReader(conf, f)
 	if err != nil {
-		return err
+		return fmt.Errorf("%s: %w", p, err)
 	}
 
 	if conf.Inplace {
 		if err := f.Truncate(int64(len(s))); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 
 		if _, err := f.Seek(0, io.SeekStart); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 
 		if _, err := f.WriteString(s); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 	} else {
 		fmt.Print(s)
