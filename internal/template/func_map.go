@@ -9,5 +9,6 @@ func FuncMap() template.FuncMap {
 	fmap := sprig.TxtFuncMap()
 	fmap["repo"] = DockerRepo
 	fmap["tag"] = DockerTag
+	fmap["toYaml"] = toYaml
 	return fmap
 }

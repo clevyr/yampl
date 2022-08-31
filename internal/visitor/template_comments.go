@@ -1,13 +1,13 @@
 package visitor
 
 import (
+	"bytes"
 	"fmt"
 	"github.com/clevyr/go-yampl/internal/config"
 	"github.com/clevyr/go-yampl/internal/node"
 	template2 "github.com/clevyr/go-yampl/internal/template"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"strings"
 	"text/template"
 )
 
@@ -46,7 +46,7 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 			t.conf.Values["Value"] = n.Value
 		}
 
-		var buf strings.Builder
+		var buf bytes.Buffer
 		if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
 			if !t.conf.Fail {
 				t.conf.Log.WithError(err).Warn("skipping value due to template error")
@@ -58,13 +58,28 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 		if buf.String() != n.Value {
 			t.conf.Log.WithField("to", buf.String()).Debug("updating value")
 			n.Style = 0
-			n.SetString(buf.String())
+
 			switch tmplTag {
-			case node.DynamicTag:
-				n.Tag = ""
+			case node.SeqTag, node.MapTag:
+				var tmpNode yaml.Node
+
+				if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {
+					if !t.conf.Fail {
+						t.conf.Log.WithError(err).Warn("skipping value due to unmarshal error")
+						return nil
+					}
+					return NodeErr{Err: err, Node: n}
+				}
+
+				content := tmpNode.Content[0]
+				n.Content = content.Content
+				n.Kind = content.Kind
+				n.Value = content.Value
 			default:
-				n.Tag = "!!" + string(tmplTag)
+				n.SetString(buf.String())
 			}
+
+			n.Tag = tmplTag.ToYaml()
 		}
 	}
 	return nil

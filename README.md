@@ -213,6 +213,8 @@ Supported tags:
 - `#yampl:str`
 - `#yampl:int`
 - `#yampl:float`
+- `#yampl:seq`
+- `#yampl:map`
 
 For example, the following could be interpreted as either a string or an int:
 

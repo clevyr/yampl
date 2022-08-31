@@ -7,12 +7,21 @@ import (
 
 type TmplTag string
 
+func (t TmplTag) ToYaml() string {
+	if t == DynamicTag {
+		return ""
+	}
+	return "!!" + string(t)
+}
+
 var (
 	DynamicTag TmplTag = ""
 	BoolTag    TmplTag = "bool"
 	StrTag     TmplTag = "str"
 	IntTag     TmplTag = "int"
 	FloatTag   TmplTag = "float"
+	SeqTag     TmplTag = "seq"
+	MapTag     TmplTag = "map"
 )
 
 var tags = []TmplTag{
@@ -20,6 +29,8 @@ var tags = []TmplTag{
 	StrTag,
 	IntTag,
 	FloatTag,
+	SeqTag,
+	MapTag,
 }
 
 func GetCommentTmpl(prefix string, n *yaml.Node) (string, TmplTag) {
