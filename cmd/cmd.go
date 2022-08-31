@@ -5,7 +5,6 @@ import (
 	"errors"
 	"fmt"
 	"github.com/clevyr/yampl/internal/config"
-	"github.com/clevyr/yampl/internal/node"
 	"github.com/clevyr/yampl/internal/visitor"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -164,7 +163,7 @@ func templateReader(conf config.Config, r io.Reader) (string, error) {
 			buf.Write([]byte("---\n"))
 		}
 
-		if err := node.Visit(v.Visit, &n); err != nil {
+		if err := v.Run(&n); err != nil {
 			return buf.String(), err
 		}
 

@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"errors"
-	"github.com/clevyr/yampl/internal/node"
 	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -46,7 +45,7 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 				continue
 			}
 
-			if err := node.Visit(v.Visit, &n); err != nil {
+			if err := v.Run(&n); err != nil {
 				continue
 			}
 		}

@@ -21,66 +21,103 @@ type TemplateComments struct {
 	conf config.Config
 }
 
-func (t TemplateComments) Visit(n *yaml.Node) error {
-	if tmplSrc, tmplTag := node.GetCommentTmpl(t.conf.Prefix, n); tmplSrc != "" {
-		t.conf.Log = t.conf.Log.WithFields(log.Fields{
-			"tmpl":    tmplSrc,
-			"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
-			"from":    n.Value,
-		})
-
-		tmpl, err := template.New("").
-			Funcs(template2.FuncMap()).
-			Delims(t.conf.LeftDelim, t.conf.RightDelim).
-			Option("missingkey=error").
-			Parse(tmplSrc)
-		if err != nil {
-			if !t.conf.Fail {
-				t.conf.Log.WithError(err).Warn("skipping value due to template error")
-				return nil
-			}
-			return NodeErr{Err: err, Node: n}
-		}
-
-		if t.conf.Values != nil {
-			t.conf.Values["Value"] = n.Value
-		}
-
-		var buf bytes.Buffer
-		if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
-			if !t.conf.Fail {
-				t.conf.Log.WithError(err).Warn("skipping value due to template error")
-				return nil
-			}
-			return NodeErr{Err: err, Node: n}
-		}
-
-		if buf.String() != n.Value {
-			t.conf.Log.WithField("to", buf.String()).Debug("updating value")
-			n.Style = 0
-
-			switch tmplTag {
-			case node.SeqTag, node.MapTag:
-				var tmpNode yaml.Node
-
-				if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {
-					if !t.conf.Fail {
-						t.conf.Log.WithError(err).Warn("skipping value due to unmarshal error")
-						return nil
-					}
-					return NodeErr{Err: err, Node: n}
+func (t TemplateComments) Run(n *yaml.Node) error {
+	if len(n.Content) == 0 {
+		// Node has no children. Template current node.
+		tmplSrc, tmplTag := node.GetCommentTmpl(t.conf.Prefix, n)
+		if tmplSrc != "" {
+			if err := t.Template(n, tmplSrc, tmplTag); err != nil {
+				if t.conf.Fail {
+					return err
+				} else {
+					t.conf.Log.WithError(err).Warn("skipping value due to template error")
 				}
+			}
+		}
+		return nil
+	}
 
-				content := tmpNode.Content[0]
-				n.Content = content.Content
-				n.Kind = content.Kind
-				n.Value = content.Value
-			default:
-				n.SetString(buf.String())
+	switch n.Kind {
+	case yaml.MappingNode:
+		for i := 0; i < len(n.Content); i += 2 {
+			// Attempt to fetch template from comments on the key.
+			key, val := n.Content[i], n.Content[i+1]
+
+			tmplSrc, tmplTag := node.GetCommentTmpl(t.conf.Prefix, key)
+			if tmplSrc != "" {
+				if err := t.Template(val, tmplSrc, tmplTag); err != nil {
+					if t.conf.Fail {
+						return err
+					} else {
+						t.conf.Log.WithError(err).Warn("skipping value due to template error")
+					}
+				} else {
+					// Current node was templated, do not need to traverse children
+					continue
+				}
 			}
 
-			n.Tag = tmplTag.ToYaml()
+			// Key did not have comment, run again with value.
+			if err := t.Run(val); err != nil {
+				return err
+			}
 		}
+	default:
+		for _, n := range n.Content {
+			if err := t.Run(n); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag node.TmplTag) error {
+	t.conf.Log = t.conf.Log.WithFields(log.Fields{
+		"tmpl":    tmplSrc,
+		"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
+		"from":    n.Value,
+	})
+
+	tmpl, err := template.New("").
+		Funcs(template2.FuncMap()).
+		Delims(t.conf.LeftDelim, t.conf.RightDelim).
+		Option("missingkey=error").
+		Parse(tmplSrc)
+	if err != nil {
+		return NodeErr{Err: err, Node: n}
+	}
+
+	if t.conf.Values != nil {
+		t.conf.Values["Value"] = n.Value
+	}
+
+	var buf bytes.Buffer
+	if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
+		return NodeErr{Err: err, Node: n}
+	}
+
+	if buf.String() != n.Value {
+		t.conf.Log.WithField("to", buf.String()).Debug("updating value")
+		n.Style = 0
+
+		switch tmplTag {
+		case node.SeqTag, node.MapTag:
+			var tmpNode yaml.Node
+
+			if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {
+				return NodeErr{Err: err, Node: n}
+			}
+
+			content := tmpNode.Content[0]
+			n.Content = content.Content
+			n.Kind = content.Kind
+			n.Value = content.Value
+		default:
+			n.SetString(buf.String())
+		}
+
+		n.Tag = tmplTag.ToYaml()
 	}
 	return nil
 }

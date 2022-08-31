@@ -59,7 +59,22 @@ type FindArgs struct {
 	matchMap map[string]MatchSlice
 }
 
-func (visitor *FindArgs) Visit(n *yaml.Node) error {
+func (visitor *FindArgs) Run(n *yaml.Node) error {
+	if len(n.Content) == 0 {
+		if err := visitor.FindArgs(n); err != nil {
+			return err
+		}
+	} else {
+		for _, node := range n.Content {
+			if err := visitor.Run(node); err != nil {
+				return err
+			}
+		}
+	}
+	return nil
+}
+
+func (visitor *FindArgs) FindArgs(n *yaml.Node) error {
 	if tmplSrc, _ := node.GetCommentTmpl(visitor.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
