@@ -8,7 +8,6 @@ import (
 var (
 	logLevel  string
 	logFormat string
-	colored   bool
 )
 
 func init() {
@@ -55,9 +54,8 @@ func initLogFormat(format string) log.Formatter {
 	var formatter log.Formatter = &log.TextFormatter{}
 	switch format {
 	case "auto", "a":
-		colored = true
+		break
 	case "color", "c":
-		colored = true
 		formatter.(*log.TextFormatter).ForceColors = true
 	case "plain", "p":
 		formatter.(*log.TextFormatter).DisableColors = true
