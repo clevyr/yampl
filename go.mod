@@ -1,4 +1,4 @@
-module github.com/clevyr/go-yampl
+module github.com/clevyr/yampl
 
 go 1.18
 

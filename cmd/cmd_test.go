@@ -1,7 +1,7 @@
 package cmd
 
 import (
-	"github.com/clevyr/go-yampl/internal/config"
+	"github.com/clevyr/yampl/internal/config"
 	"github.com/spf13/cobra"
 	"io"
 	"os"

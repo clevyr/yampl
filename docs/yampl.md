@@ -13,7 +13,7 @@ This command can work on stdin/stdout or on files similarly to GNU sed:
  - The `-i` flag will make it update files in-place.
  - Multiple files can be given, and they will all be templated.
 
-Simple Examples (Full example at https://github.com/clevyr/go-yampl#examples):
+Simple Examples (Full example at https://github.com/clevyr/yampl#examples):
 
  $ echo 'name: Clevyr #yampl {{ .name }}' | yampl -v name='Clevyr Inc.'  
  name: Clevyr Inc. #yampl {{ .name }}  
@@ -23,11 +23,11 @@ Simple Examples (Full example at https://github.com/clevyr/go-yampl#examples):
  image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
 
 Template Function Reference:
- - https://github.com/clevyr/go-yampl#functions
+ - https://github.com/clevyr/yampl#functions
  - https://masterminds.github.io/sprig/
 
 Template Variable Reference:
- - https://github.com/clevyr/go-yampl#variables
+ - https://github.com/clevyr/yampl#variables
 
 
 ```

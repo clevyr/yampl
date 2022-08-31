@@ -24,7 +24,7 @@ RUN set -x \
 
 
 FROM alpine
-LABEL org.opencontainers.image.source https://github.com/clevyr/go-yampl
+LABEL org.opencontainers.image.source https://github.com/clevyr/yampl
 WORKDIR /data
 
 RUN apk add --no-cache git jq yq

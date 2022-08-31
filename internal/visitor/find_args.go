@@ -2,9 +2,9 @@ package visitor
 
 import (
 	"fmt"
-	"github.com/clevyr/go-yampl/internal/config"
-	"github.com/clevyr/go-yampl/internal/node"
-	template2 "github.com/clevyr/go-yampl/internal/template"
+	"github.com/clevyr/yampl/internal/config"
+	"github.com/clevyr/yampl/internal/node"
+	template2 "github.com/clevyr/yampl/internal/template"
 	"gopkg.in/yaml.v3"
 	"regexp"
 	"strconv"

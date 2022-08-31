@@ -1,7 +1,7 @@
 package main
 
 import (
-	"github.com/clevyr/go-yampl/cmd"
+	"github.com/clevyr/yampl/cmd"
 	"github.com/spf13/cobra/doc"
 	"log"
 	"os"

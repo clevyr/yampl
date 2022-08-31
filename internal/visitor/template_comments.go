@@ -3,9 +3,9 @@ package visitor
 import (
 	"bytes"
 	"fmt"
-	"github.com/clevyr/go-yampl/internal/config"
-	"github.com/clevyr/go-yampl/internal/node"
-	template2 "github.com/clevyr/go-yampl/internal/template"
+	"github.com/clevyr/yampl/internal/config"
+	"github.com/clevyr/yampl/internal/node"
+	template2 "github.com/clevyr/yampl/internal/template"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
 	"text/template"

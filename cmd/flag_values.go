@@ -2,8 +2,8 @@ package cmd
 
 import (
 	"errors"
-	"github.com/clevyr/go-yampl/internal/node"
-	"github.com/clevyr/go-yampl/internal/visitor"
+	"github.com/clevyr/yampl/internal/node"
+	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 	"io"
