@@ -57,7 +57,8 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 
 		if buf.String() != n.Value {
 			t.conf.Log.WithField("to", buf.String()).Debug("updating value")
-			n.Value = buf.String()
+			n.Style = 0
+			n.SetString(buf.String())
 		}
 	}
 	return nil
