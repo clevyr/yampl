@@ -109,6 +109,8 @@ func Test_templateReader(t *testing.T) {
 		{"simple", args{conf, strings.NewReader("a: a #yampl b")}, "a: b #yampl b\n", false},
 		{"dynamic", args{conf, strings.NewReader("a: a #yampl {{ .Value }}")}, "a: a #yampl {{ .Value }}\n", false},
 		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", false},
+		{"map", args{conf, strings.NewReader("a: {} #yampl:map {a: a}")}, "a:\n  a: a\n", false},
+		{"seq", args{conf, strings.NewReader("a: {} #yampl:seq [a]")}, "a:\n  - a\n", false},
 		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", true},
 		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", false},
 		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", true},
