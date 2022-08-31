@@ -30,7 +30,7 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 	for _, path := range args {
 		f, err := os.Open(path)
 		if err != nil {
-			break
+			continue
 		}
 
 		decoder := yaml.NewDecoder(f)
@@ -39,11 +39,11 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 			var n yaml.Node
 
 			if err := decoder.Decode(&n); err != nil {
-				break
+				continue
 			}
 
 			if err := node.Visit(v.Visit, &n); err != nil {
-				break
+				continue
 			}
 		}
 	}
