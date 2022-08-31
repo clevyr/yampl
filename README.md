@@ -201,6 +201,34 @@ image: nginx:1.21.6 #yampl {{ repo .Value }}:{{ .tag }}
 This would generate the same output, but I didn't have to type `nginx` twice.
 This becomes more useful when using custom Docker registries where repo names can get quite long.
 
+## Tags
+
+By default, templated values are not explicitly quoted. This can cause
+problems with some tools that require specific types. If you require a
+field specific type for a field, you can add a tag to the template prefix.
+
+Supported tags:
+
+- `#yampl:bool`
+- `#yampl:str`
+- `#yampl:int`
+- `#yampl:float`
+
+For example, the following could be interpreted as either a string or an int:
+
+```shell
+$ echo 'num: "" #yampl {{ .num }}' | yampl -v num=2009
+num: 2009 #yampl {{ .num }}
+```
+
+If this field must be a string, you could add the `str` tag:
+
+```shell
+$ echo 'num: "" #yampl:str {{ .num }}' | yampl -v num=2009
+num: "2009" #yampl:str {{ .num }}
+```
+
+
 ## Usage
 
 [View the generated docs for usage information.](docs/yampl.md)

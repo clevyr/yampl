@@ -25,7 +25,6 @@ func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]st
 	if !strings.HasPrefix(conf.Prefix, "#") {
 		conf.Prefix = "#" + conf.Prefix
 	}
-	conf.Prefix += " "
 
 	v := visitor.NewFindArgs(conf)
 

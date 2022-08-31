@@ -56,7 +56,6 @@ func preRun(cmd *cobra.Command, args []string) error {
 	if !strings.HasPrefix(conf.Prefix, "#") {
 		conf.Prefix = "#" + conf.Prefix
 	}
-	conf.Prefix += " "
 
 	if conf.Inplace && len(args) == 0 {
 		return errors.New("no input files")

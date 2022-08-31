@@ -22,7 +22,7 @@ type TemplateComments struct {
 }
 
 func (t TemplateComments) Visit(n *yaml.Node) error {
-	if tmplSrc := node.GetCommentTmpl(t.conf.Prefix, n); tmplSrc != "" {
+	if tmplSrc, tmplTag := node.GetCommentTmpl(t.conf.Prefix, n); tmplSrc != "" {
 		t.conf.Log = t.conf.Log.WithFields(log.Fields{
 			"tmpl":    tmplSrc,
 			"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
@@ -59,6 +59,12 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 			t.conf.Log.WithField("to", buf.String()).Debug("updating value")
 			n.Style = 0
 			n.SetString(buf.String())
+			switch tmplTag {
+			case node.DynamicTag:
+				n.Tag = ""
+			default:
+				n.Tag = "!!" + string(tmplTag)
+			}
 		}
 	}
 	return nil

@@ -60,7 +60,7 @@ type FindArgs struct {
 }
 
 func (visitor *FindArgs) Visit(n *yaml.Node) error {
-	if tmplSrc := node.GetCommentTmpl(visitor.conf.Prefix, n); tmplSrc != "" {
+	if tmplSrc, _ := node.GetCommentTmpl(visitor.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
 			Delims(visitor.conf.LeftDelim, visitor.conf.RightDelim).
