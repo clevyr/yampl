@@ -23,12 +23,22 @@ type TemplateComments struct {
 
 func (t TemplateComments) Visit(n *yaml.Node) error {
 	if tmplSrc := node.GetCommentTmpl(t.conf.Prefix, n); tmplSrc != "" {
+		t.conf.Log = t.conf.Log.WithFields(log.Fields{
+			"tmpl":    tmplSrc,
+			"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
+			"from":    n.Value,
+		})
+
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
 			Delims(t.conf.LeftDelim, t.conf.RightDelim).
 			Option("missingkey=error").
 			Parse(tmplSrc)
 		if err != nil {
+			if !t.conf.Fail {
+				t.conf.Log.WithError(err).Warn("skipping value due to template error")
+				return nil
+			}
 			return err
 		}
 
@@ -46,12 +56,7 @@ func (t TemplateComments) Visit(n *yaml.Node) error {
 		}
 
 		if buf.String() != n.Value {
-			t.conf.Log.WithFields(log.Fields{
-				"tmpl":    tmplSrc,
-				"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
-				"from":    n.Value,
-				"to":      buf.String(),
-			}).Debug("updating value")
+			t.conf.Log.WithField("to", buf.String()).Debug("updating value")
 			n.Value = buf.String()
 		}
 	}
