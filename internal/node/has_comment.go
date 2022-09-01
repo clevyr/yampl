@@ -34,16 +34,15 @@ var tags = []TmplTag{
 }
 
 func GetCommentTmpl(prefix string, n *yaml.Node) (string, TmplTag) {
-	for _, comment := range []string{n.LineComment, n.HeadComment, n.FootComment} {
-		fullPrefix := prefix + " "
+	comment := n.LineComment
+	fullPrefix := prefix + " "
+	if strings.HasPrefix(comment, fullPrefix) {
+		return comment[len(fullPrefix):], DynamicTag
+	}
+	for _, tag := range tags {
+		fullPrefix := prefix + ":" + string(tag) + " "
 		if strings.HasPrefix(comment, fullPrefix) {
-			return comment[len(fullPrefix):], DynamicTag
-		}
-		for _, tag := range tags {
-			fullPrefix := prefix + ":" + string(tag) + " "
-			if strings.HasPrefix(comment, fullPrefix) {
-				return comment[len(fullPrefix):], tag
-			}
+			return comment[len(fullPrefix):], tag
 		}
 	}
 	return "", DynamicTag
