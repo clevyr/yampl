@@ -3,8 +3,8 @@ package visitor
 import (
 	"bytes"
 	"fmt"
+	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
-	"github.com/clevyr/yampl/internal/node"
 	template2 "github.com/clevyr/yampl/internal/template"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
@@ -24,7 +24,7 @@ type TemplateComments struct {
 func (t TemplateComments) Run(n *yaml.Node) error {
 	if len(n.Content) == 0 {
 		// Node has no children. Template current node.
-		tmplSrc, tmplTag := node.GetCommentTmpl(t.conf.Prefix, n)
+		tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, n)
 		if tmplSrc != "" {
 			if err := t.Template(n, tmplSrc, tmplTag); err != nil {
 				if t.conf.Fail {
@@ -43,7 +43,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 			// Attempt to fetch template from comments on the key.
 			key, val := n.Content[i], n.Content[i+1]
 
-			tmplSrc, tmplTag := node.GetCommentTmpl(t.conf.Prefix, key)
+			tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, key)
 			if tmplSrc != "" {
 				if err := t.Template(val, tmplSrc, tmplTag); err != nil {
 					if t.conf.Fail {
@@ -53,7 +53,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					}
 				} else {
 					// Current node was templated, do not need to traverse children
-					node.MoveComment(key, val)
+					comment.Move(key, val)
 					continue
 				}
 			}
@@ -63,7 +63,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 				return err
 			}
 
-			node.MoveComment(key, val)
+			comment.Move(key, val)
 		}
 	default:
 		for _, n := range n.Content {
@@ -75,7 +75,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 	return nil
 }
 
-func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag node.TmplTag) error {
+func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment.Tag) error {
 	t.conf.Log = t.conf.Log.WithFields(log.Fields{
 		"tmpl":    tmplSrc,
 		"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
@@ -105,7 +105,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag node.Tm
 		n.Style = 0
 
 		switch tmplTag {
-		case node.SeqTag, node.MapTag:
+		case comment.SeqTag, comment.MapTag:
 			var tmpNode yaml.Node
 
 			if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {

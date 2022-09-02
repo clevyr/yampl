@@ -1,42 +1,12 @@
-package node
+package comment
 
 import (
 	"gopkg.in/yaml.v3"
 	"strings"
 )
 
-type TmplTag string
-
-func (t TmplTag) ToYaml() string {
-	if t == DynamicTag {
-		return ""
-	}
-	return "!!" + string(t)
-}
-
-const tagSep = ":"
-
-var (
-	DynamicTag TmplTag = ""
-	BoolTag    TmplTag = "bool"
-	StrTag     TmplTag = "str"
-	IntTag     TmplTag = "int"
-	FloatTag   TmplTag = "float"
-	SeqTag     TmplTag = "seq"
-	MapTag     TmplTag = "map"
-)
-
-var tags = []TmplTag{
-	BoolTag,
-	StrTag,
-	IntTag,
-	FloatTag,
-	SeqTag,
-	MapTag,
-}
-
-// GetCommentTmpl returns the template and tag from a yaml.Node LineComment
-func GetCommentTmpl(prefix string, n *yaml.Node) (string, TmplTag) {
+// Parse returns the template and tag from a yaml.Node LineComment
+func Parse(prefix string, n *yaml.Node) (string, Tag) {
 	comment := n.LineComment
 	if strings.HasPrefix(comment, prefix) {
 		// Comment has #yampl prefix
@@ -62,7 +32,7 @@ func GetCommentTmpl(prefix string, n *yaml.Node) (string, TmplTag) {
 	return "", DynamicTag
 }
 
-// MoveComment moves a comment between yaml.Node entries after a style change.
+// Move moves a comment between yaml.Node entries after a style change.
 // When a yaml.MappingNode or yaml.SequenceNode has an inline comment,
 // the decoder will set LineComment differently according to the node's style.
 //
@@ -71,7 +41,7 @@ func GetCommentTmpl(prefix string, n *yaml.Node) (string, TmplTag) {
 //
 // If templating changes the node's style, the comment needs to move or else
 // encoding errors will occur.
-func MoveComment(key, val *yaml.Node) {
+func Move(key, val *yaml.Node) {
 	if val.Kind != yaml.SequenceNode && val.Kind != yaml.MappingNode {
 		return
 	}

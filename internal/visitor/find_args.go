@@ -2,8 +2,8 @@ package visitor
 
 import (
 	"fmt"
+	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
-	"github.com/clevyr/yampl/internal/node"
 	template2 "github.com/clevyr/yampl/internal/template"
 	"gopkg.in/yaml.v3"
 	"regexp"
@@ -75,7 +75,7 @@ func (visitor *FindArgs) Run(n *yaml.Node) error {
 }
 
 func (visitor *FindArgs) FindArgs(n *yaml.Node) error {
-	if tmplSrc, _ := node.GetCommentTmpl(visitor.conf.Prefix, n); tmplSrc != "" {
+	if tmplSrc, _ := comment.Parse(visitor.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
 			Delims(visitor.conf.LeftDelim, visitor.conf.RightDelim).
