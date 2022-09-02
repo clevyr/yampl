@@ -53,14 +53,17 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					}
 				} else {
 					// Current node was templated, do not need to traverse children
+					node.MoveComment(key, val)
 					continue
 				}
 			}
 
-			// Key did not have comment, run again with value.
+			// Key did not have comment, traversing children.
 			if err := t.Run(val); err != nil {
 				return err
 			}
+
+			node.MoveComment(key, val)
 		}
 	default:
 		for _, n := range n.Content {
