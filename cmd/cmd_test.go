@@ -94,6 +94,9 @@ func Test_templateReader(t *testing.T) {
 	failConf := config.New()
 	failConf.Fail = true
 
+	stripConf := config.New()
+	stripConf.Strip = true
+
 	type args struct {
 		conf config.Config
 		r    io.Reader
@@ -116,6 +119,7 @@ func Test_templateReader(t *testing.T) {
 		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", true},
 		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", false},
 		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", true},
+		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

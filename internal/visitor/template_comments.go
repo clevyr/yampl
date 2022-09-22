@@ -95,6 +95,10 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 		t.conf.Values["Value"] = n.Value
 	}
 
+	if t.conf.Strip {
+		n.LineComment = ""
+	}
+
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
 		return NodeErr{Err: err, Node: n}
