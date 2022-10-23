@@ -96,27 +96,12 @@ Yampl is available in brew or as a Docker container.
      ```
 </details>
 
+## Usage
+
+[View the generated docs](docs/yampl.md) for flag and command reference.
+Also, see [templating](#templating) and [example](#examples) sections.
+
 ## Templating
-
-### Functions
-
-All [Sprig functions](https://masterminds.github.io/sprig/) are available in templates, along with some extra functions:
-
-### `repo`
-
-Splits a Docker repo and tag into the repo component:
-```gotemplate
-repo "nginx:stable-alpine"
-```
-The above produces `nginx`.
-
-### `tag`
-
-Splits a Docker repo and tag into the tag component:
-```gotemplate
-tag "nginx:stable-alpine"
-```
-The above produces `stable-alpine`
 
 ### Variables
 
@@ -125,22 +110,57 @@ For example, the variable `-v tag=latest` can be used as `{{ .tag }}`.
 
 The previous value is always available via `.Value` (`.Val` or `.V` if you're feeling lazy).
 
+### Functions
+
+All [Sprig functions](https://masterminds.github.io/sprig/) are available in templates, along with some extras:
+
+#### `repo`
+
+Splits a Docker repo and tag into the repo component:
+```gotemplate
+repo "nginx:stable-alpine"
+```
+The above produces `nginx`.
+
+#### `tag`
+
+Splits a Docker repo and tag into the tag component:
+```gotemplate
+tag "nginx:stable-alpine"
+```
+The above produces `stable-alpine`
+
 ## Examples
 
 ### Simple Examples
 
-```shell
-$ echo 'name: Clevyr #yampl {{ .name }}' | yampl -v name='Clevyr Inc.'
-name: Clevyr Inc. #yampl {{ .name }}
-$ echo 'name: Clevyr #yampl {{ upper .Value }}' | yampl
-name: CLEVYR #yampl {{ upper .Value }}
-$ echo 'image: nginx:stable-alpine #yampl {{ repo .Value }}:{{ .tag }}' | yampl -v tag=stable
-image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
-```
+1. Template with a single value:
+    ```shell
+    $ cat example.yaml
+    name: Clevyr #yampl {{ .name }}
+    $ yampl -v name='Clevyr Inc.' example.yaml
+    name: Clevyr Inc. #yampl {{ .name }}
+    ```
 
-### Full Example
+2. Template with multiple values:
+    ```shell
+    $ cat example.yaml
+    image: nginx:stable-alpine #yampl {{ repo .Value }}:{{ .tag }}
+    $ yampl -v tag=stable example.yaml
+    image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
+    ```
 
-Here is a simple Kubernetes nginx Deployment:
+3. Using a [Sprig](https://masterminds.github.io/sprig/) function:
+    ```shell
+    $ cat example.yaml
+    name: Clevyr #yampl {{ upper .Value }}
+    $ yampl example.yaml
+    name: CLEVYR #yampl {{ upper .Value }}
+    ```
+
+### Kubernetes Deployment
+
+Here is a simple Kubernetes Deployment with an Nginx image:
 
 ```yaml
 apiVersion: apps/v1
@@ -163,14 +183,14 @@ spec:
           - containerPort: 80
 ```
 
-In this example, notice the yaml comment to the right of the `image`.
+Notice the yaml comment on the same line as `image`.
 
-If this file was called `nginx.yaml`, then we could replace the image tag by running the following:
+If this file was called `nginx.yaml`, then we could replace the image tag by running:
 ```shell
 yampl -i nginx.yaml -v tag=1.21.6
 ```
 
-The file would be updated in-place and would end up looking like:
+The file would be updated in-place:
 ```yaml
 apiVersion: apps/v1
 kind: Deployment
@@ -199,7 +219,7 @@ image: nginx:1.21.6 #yampl {{ repo .Value }}:{{ .tag }}
 ```
 
 This would generate the same output, but I didn't have to type `nginx` twice.
-This becomes more useful when using custom Docker registries where repo names can get quite long.
+This becomes more useful when using custom Docker registries where repo names can get long.
 
 ## Tags
 
@@ -219,18 +239,17 @@ Supported tags:
 For example, the following could be interpreted as either a string or an int:
 
 ```shell
-$ echo 'num: "" #yampl {{ .num }}' | yampl -v num=2009
+$ cat example.yaml
+num: "" #yampl {{ .num }}
+$ yampl -v num=2009 example.yaml
 num: 2009 #yampl {{ .num }}
 ```
 
 If this field must be a string, you could add the `str` tag:
 
 ```shell
-$ echo 'num: "" #yampl:str {{ .num }}' | yampl -v num=2009
+$ cat example.yaml
+num: "" #yampl:str {{ .num }}
+$ yampl -v num=2009 example.yaml
 num: "2009" #yampl:str {{ .num }}
 ```
-
-
-## Usage
-
-[View the generated docs for usage information.](docs/yampl.md)
