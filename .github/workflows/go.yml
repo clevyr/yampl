@@ -16,8 +16,12 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ~${{ env.go_version }}
+          cache: true
       - name: Lint
         uses: golangci/golangci-lint-action@v3
+        with:
+          skip-build-cache: true
+          skip-pkg-cache: true
 
   test:
     name: Test
@@ -29,12 +33,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ~${{ env.go_version }}
-      - uses: actions/cache@v3
-        with:
-          path: ~/go/pkg/mod
-          key: ${{ runner.os }}-go-${{ hashFiles('**/go.sum') }}
-          restore-keys: |
-            ${{ runner.os }}-go-
+          cache: true
       - name: Test
         run: go test ./...
 
@@ -61,6 +60,7 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version: ~${{ env.go_version }}
+          cache: true
       - name: Run GoReleaser
         uses: goreleaser/goreleaser-action@v3
         with:
