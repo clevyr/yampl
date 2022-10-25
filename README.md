@@ -1,6 +1,6 @@
 # Yampl
 
-[![Go](https://github.com/clevyr/yampl/actions/workflows/go.yml/badge.svg)](https://github.com/clevyr/yampl/actions/workflows/go.yml)
+[![Build](https://github.com/clevyr/yampl/actions/workflows/build.yml/badge.svg)](https://github.com/clevyr/yampl/actions/workflows/build.yml)
 
 Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comments.
 
