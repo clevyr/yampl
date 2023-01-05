@@ -23,7 +23,7 @@ RUN set -x \
     && go build -ldflags='-w -s' -o yampl
 
 
-FROM alpine
+FROM alpine:3.17
 LABEL org.opencontainers.image.source https://github.com/clevyr/yampl
 WORKDIR /data
 
