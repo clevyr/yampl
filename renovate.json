@@ -19,5 +19,6 @@
       "matchUpdateTypes": ["rollback"],
       "commitMessagePrefix": ":arrow_down:"
     }
-  ]
+  ],
+  "postUpdateOptions": ["gomodTidy"]
 }
