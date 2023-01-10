@@ -26,6 +26,11 @@
     {
       "matchManagers": ["github-actions"],
       "automerge": true
+    },
+    {
+      "matchManagers": ["dockerfile"],
+      "matchPackageNames": ["alpine"],
+      "automerge": true
     }
   ],
   "postUpdateOptions": ["gomodTidy"]
