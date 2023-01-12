@@ -13,12 +13,8 @@ jobs:
         uses: actions/setup-go@v3
         with:
           go-version-file: go.mod
-          cache: true
       - name: Lint
         uses: golangci/golangci-lint-action@v3
-        with:
-          skip-build-cache: true
-          skip-pkg-cache: true
 
   test:
     name: Test
@@ -26,6 +22,8 @@ jobs:
     steps:
       - name: Checkout code
         uses: actions/checkout@v3
+      - name: Change Cache Key
+        run: echo '// ${{ github.job }}' >> go.sum
       - name: Set up Go
         uses: actions/setup-go@v3
         with:
