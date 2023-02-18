@@ -21,7 +21,7 @@ RUN <<EOT
     'linux/arm64') export GOARCH=arm64 ;;
     *) echo "Unsupported target: $TARGETPLATFORM" && exit 1 ;;
   esac
-  go build -ldflags='-w -s' -o yampl
+  go build -ldflags='-w -s'
 EOT
 
 
