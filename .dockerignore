@@ -6,3 +6,8 @@
 .idea/
 Dockerfile*
 README.md
+dist/
+docker-compose.yml
+docs/
+vendor/
+yampl
