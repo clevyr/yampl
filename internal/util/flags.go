@@ -15,7 +15,10 @@ func FixStringToStringNewlines(s []string) []string {
 			replaceNext = false
 			if strings.ContainsRune(arg, '=') {
 				if strings.ContainsRune(arg, '\n') {
-					s[i] = strings.ReplaceAll(arg, "\n", ",")
+					arg = strings.ReplaceAll(arg, "\n", ",")
+					arg = strings.Trim(arg, ",")
+					arg = strings.Replace(arg, "=,", "=", 1)
+					s[i] = arg
 				}
 			} else {
 				replaceNext = true

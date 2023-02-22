@@ -20,6 +20,7 @@ func TestFixStringToStringNewlines(t *testing.T) {
 		{"newline with space", args{[]string{"yampl", "--value", "a=a\nb=b"}}, []string{"yampl", "--value", "a=a,b=b"}},
 		{"newline in file", args{[]string{"yampl", "test\nfile.yaml"}}, []string{"yampl", "test\nfile.yaml"}},
 		{"newline after end of options", args{[]string{"yampl", "-v=a=a", "---", "-v\nfile.yaml"}}, []string{"yampl", "-v=a=a", "---", "-v\nfile.yaml"}},
+		{"trim newline", args{[]string{"yampl", "-v=\na=a\n"}}, []string{"yampl", "-v=a=a"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
