@@ -12,8 +12,13 @@ import (
 
 var rawValues map[string]string
 
+const (
+	ValueFlag      = "value"
+	ValueFlagShort = "v"
+)
+
 func init() {
-	Command.Flags().StringToStringVarP(&rawValues, "value", "v", rawValues, "Define a template variable. Can be used more than once.")
+	Command.Flags().StringToStringVarP(&rawValues, ValueFlag, ValueFlagShort, rawValues, "Define a template variable. Can be used more than once.")
 	err := Command.RegisterFlagCompletionFunc("value", valueCompletion)
 	if err != nil {
 		panic(err)
