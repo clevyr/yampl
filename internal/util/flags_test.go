@@ -21,6 +21,7 @@ func TestFixStringToStringNewlines(t *testing.T) {
 		{"newline in file", args{[]string{"yampl", "test\nfile.yaml"}}, []string{"yampl", "test\nfile.yaml"}},
 		{"newline after end of options", args{[]string{"yampl", "-v=a=a", "---", "-v\nfile.yaml"}}, []string{"yampl", "-v=a=a", "---", "-v\nfile.yaml"}},
 		{"trim newline", args{[]string{"yampl", "-v=\na=a\n"}}, []string{"yampl", "-v=a=a"}},
+		{"collapse newlines", args{[]string{"yampl", "-v=a=a\n\nb=b"}}, []string{"yampl", "-v=a=a,b=b"}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

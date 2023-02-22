@@ -2,6 +2,7 @@ package util
 
 import (
 	"github.com/clevyr/yampl/cmd"
+	"regexp"
 	"strings"
 )
 
@@ -15,7 +16,7 @@ func FixStringToStringNewlines(s []string) []string {
 			replaceNext = false
 			if strings.ContainsRune(arg, '=') {
 				if strings.ContainsRune(arg, '\n') {
-					arg = strings.ReplaceAll(arg, "\n", ",")
+					arg = regexp.MustCompile("\n+").ReplaceAllString(arg, ",")
 					arg = strings.Trim(arg, ",")
 					arg = strings.Replace(arg, "=,", "=", 1)
 					s[i] = arg
