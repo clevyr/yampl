@@ -26,6 +26,10 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 		// Node has no children. Template current node.
 		tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, n)
 		if tmplSrc != "" {
+			if t.conf.Strip {
+				n.LineComment = ""
+			}
+
 			if err := t.Template(n, tmplSrc, tmplTag); err != nil {
 				if t.conf.Fail {
 					return err
@@ -45,6 +49,10 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 
 			tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, key)
 			if tmplSrc != "" {
+				if t.conf.Strip {
+					key.LineComment = ""
+				}
+
 				if err := t.Template(val, tmplSrc, tmplTag); err != nil {
 					if t.conf.Fail {
 						return err
@@ -53,11 +61,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					}
 				} else {
 					// Current node was templated, do not need to traverse children
-					if t.conf.Strip {
-						key.LineComment = ""
-					} else {
-						comment.Move(key, val)
-					}
+					comment.Move(key, val)
 					continue
 				}
 			}
@@ -97,10 +101,6 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 
 	if t.conf.Values != nil {
 		t.conf.Values["Value"] = n.Value
-	}
-
-	if t.conf.Strip {
-		n.LineComment = ""
 	}
 
 	var buf bytes.Buffer
