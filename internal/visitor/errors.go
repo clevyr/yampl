@@ -13,3 +13,7 @@ type NodeErr struct {
 func (e NodeErr) Error() string {
 	return fmt.Sprintf("%d:%d: %s", e.Node.Line, e.Node.Column, e.Err)
 }
+
+func (e NodeErr) Unwrap() error {
+	return e.Err
+}
