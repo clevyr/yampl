@@ -53,7 +53,11 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					}
 				} else {
 					// Current node was templated, do not need to traverse children
-					comment.Move(key, val)
+					if t.conf.Strip {
+						key.LineComment = ""
+					} else {
+						comment.Move(key, val)
+					}
 					continue
 				}
 			}
