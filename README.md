@@ -234,7 +234,9 @@ The above produces `stable-alpine`
 
 </details>
 
-## Tags
+## Advanced Usage
+
+### Tags
 
 By default, templated values are not explicitly quoted. This can cause
 problems with some tools that require specific types. If you require a
