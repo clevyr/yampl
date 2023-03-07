@@ -60,30 +60,29 @@ type FindArgs struct {
 }
 
 func (visitor *FindArgs) Run(n *yaml.Node) error {
-	if len(n.Content) == 0 {
+	switch {
+	case len(n.Content) == 0:
+		// Node has no children. Search current node.
 		if err := visitor.FindArgs(n, n.Value); err != nil {
 			return err
 		}
-		return nil
-	}
-
-	switch n.Kind {
-	case yaml.MappingNode:
+	case n.Kind == yaml.MappingNode:
 		for i := 0; i < len(n.Content); i += 2 {
 			// Attempt to fetch template from comments on the key.
 			key, val := n.Content[i], n.Content[i+1]
 
 			tmplSrc, _ := comment.Parse(visitor.conf.Prefix, key)
-			if tmplSrc != "" {
+			if tmplSrc == "" {
+				// Key did not have comment, traversing children.
+				if err := visitor.Run(val); err != nil {
+					return err
+				}
+			} else {
+				// Template is on key's comment instead of value.
+				// This typically happens if the value is left empty with an implied null.
 				if err := visitor.FindArgs(key, val.Value); err != nil {
 					return err
 				}
-				continue
-			}
-
-			// Key did not have comment, traversing children.
-			if err := visitor.Run(val); err != nil {
-				return err
 			}
 		}
 	default:

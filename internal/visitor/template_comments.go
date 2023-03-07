@@ -22,7 +22,8 @@ type TemplateComments struct {
 }
 
 func (t TemplateComments) Run(n *yaml.Node) error {
-	if len(n.Content) == 0 {
+	switch {
+	case len(n.Content) == 0:
 		// Node has no children. Template current node.
 		tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, n)
 		if tmplSrc != "" {
@@ -38,17 +39,21 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 				}
 			}
 		}
-		return nil
-	}
-
-	switch n.Kind {
-	case yaml.MappingNode:
+	case n.Kind == yaml.MappingNode:
 		for i := 0; i < len(n.Content); i += 2 {
 			// Attempt to fetch template from comments on the key.
 			key, val := n.Content[i], n.Content[i+1]
 
 			tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, key)
-			if tmplSrc != "" {
+			if tmplSrc == "" {
+				// Key did not have comment, traversing children.
+				if err := t.Run(val); err != nil {
+					return err
+				}
+			} else {
+				// Template is on key's comment instead of value.
+				// This typically happens if the value is left empty with an implied null.
+
 				if t.conf.Strip {
 					key.LineComment = ""
 				}
@@ -59,21 +64,13 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					} else {
 						t.conf.Log.WithError(err).Warn("skipping value due to template error")
 					}
-				} else {
-					// Current node was templated, do not need to traverse children
-					comment.Move(key, val)
 					continue
 				}
 			}
-
-			// Key did not have comment, traversing children.
-			if err := t.Run(val); err != nil {
-				return err
-			}
-
 			comment.Move(key, val)
 		}
 	default:
+		// Iterate over children
 		for _, n := range n.Content {
 			if err := t.Run(n); err != nil {
 				return err
