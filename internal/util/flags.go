@@ -30,5 +30,8 @@ func FixStringToStringNewlines(s []string) []string {
 }
 
 func hasValueFlag(s string) bool {
-	return strings.HasPrefix(s, "-"+cmd.ValueFlagShort) || strings.HasPrefix(s, "--"+cmd.ValueFlag)
+	return s == "-"+cmd.ValueFlagShort ||
+		s == "--"+cmd.ValueFlag ||
+		strings.HasPrefix(s, "-"+cmd.ValueFlagShort+"=") ||
+		strings.HasPrefix(s, "--"+cmd.ValueFlag+"=")
 }
