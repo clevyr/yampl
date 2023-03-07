@@ -138,7 +138,7 @@ The above produces `stable-alpine`
     ```shell
     $ cat example.yaml
     name: Clevyr #yampl {{ .name }}
-    $ yampl -v name='Clevyr Inc.' example.yaml
+    $ yampl example.yaml -v name='Clevyr Inc.'
     name: Clevyr Inc. #yampl {{ .name }}
     ```
 
@@ -146,7 +146,7 @@ The above produces `stable-alpine`
     ```shell
     $ cat example.yaml
     image: nginx:stable-alpine #yampl {{ repo .Value }}:{{ .tag }}
-    $ yampl -v tag=stable example.yaml
+    $ yampl example.yaml -v tag=stable
     image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
     ```
 
@@ -256,7 +256,7 @@ For example, the following could be interpreted as either a string or an int:
 ```shell
 $ cat example.yaml
 num: #yampl {{ .num }}
-$ yampl -v num=2009 example.yaml
+$ yampl example.yaml -v num=2009
 num: 2009 #yampl {{ .num }}
 ```
 
@@ -265,6 +265,6 @@ If this field must be a string, you could add the `str` tag:
 ```shell
 $ cat example.yaml
 num: #yampl:str {{ .num }}
-$ yampl -v num=2009 example.yaml
+$ yampl example.yaml -v num=2009
 num: "2009" #yampl:str {{ .num }}
 ```
