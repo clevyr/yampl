@@ -61,10 +61,32 @@ type FindArgs struct {
 
 func (visitor *FindArgs) Run(n *yaml.Node) error {
 	if len(n.Content) == 0 {
-		if err := visitor.FindArgs(n); err != nil {
+		if err := visitor.FindArgs(n, n.Value); err != nil {
 			return err
 		}
-	} else {
+		return nil
+	}
+
+	switch n.Kind {
+	case yaml.MappingNode:
+		for i := 0; i < len(n.Content); i += 2 {
+			// Attempt to fetch template from comments on the key.
+			key, val := n.Content[i], n.Content[i+1]
+
+			tmplSrc, _ := comment.Parse(visitor.conf.Prefix, key)
+			if tmplSrc != "" {
+				if err := visitor.FindArgs(key, val.Value); err != nil {
+					return err
+				}
+				continue
+			}
+
+			// Key did not have comment, traversing children.
+			if err := visitor.Run(val); err != nil {
+				return err
+			}
+		}
+	default:
 		for _, node := range n.Content {
 			if err := visitor.Run(node); err != nil {
 				return err
@@ -74,7 +96,7 @@ func (visitor *FindArgs) Run(n *yaml.Node) error {
 	return nil
 }
 
-func (visitor *FindArgs) FindArgs(n *yaml.Node) error {
+func (visitor *FindArgs) FindArgs(n *yaml.Node, value string) error {
 	if tmplSrc, _ := comment.Parse(visitor.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
@@ -93,7 +115,7 @@ func (visitor *FindArgs) FindArgs(n *yaml.Node) error {
 						Line:     n.Line,
 						Column:   n.Column,
 					}
-					match.Value = n.Value
+					match.Value = value
 					visitor.matchMap[tok] = append(visitor.matchMap[tok], match)
 				}
 			}
