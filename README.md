@@ -31,7 +31,7 @@ Yampl is available in brew or as a Docker container.
 <details>
   <summary>Click to expand</summary>
 
-  yampl has a Docker image available at `ghcr.io/clevyr/yampl`
+  yampl has a Docker image available at [`ghcr.io/clevyr/yampl`](https://ghcr.io/clevyr/yampl)
 
   ```shell
   docker pull ghcr.io/clevyr/yampl
