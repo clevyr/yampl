@@ -10,7 +10,7 @@ func FixStringToStringNewlines(s []string) []string {
 	var replaceNext bool
 	for i, arg := range s {
 		switch {
-		case arg == "---":
+		case arg == "--":
 			return s
 		case hasValueFlag(arg) || replaceNext:
 			replaceNext = false
