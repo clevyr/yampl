@@ -240,7 +240,7 @@ For example, the following could be interpreted as either a string or an int:
 
 ```shell
 $ cat example.yaml
-num: "" #yampl {{ .num }}
+num: #yampl {{ .num }}
 $ yampl -v num=2009 example.yaml
 num: 2009 #yampl {{ .num }}
 ```
@@ -249,7 +249,7 @@ If this field must be a string, you could add the `str` tag:
 
 ```shell
 $ cat example.yaml
-num: "" #yampl:str {{ .num }}
+num: #yampl:str {{ .num }}
 $ yampl -v num=2009 example.yaml
 num: "2009" #yampl:str {{ .num }}
 ```
