@@ -168,66 +168,71 @@ The above produces `stable-alpine`
 
 ### Kubernetes Deployment
 
-Here is a simple Kubernetes Deployment with an Nginx image:
+<details>
+  <summary>Click to expand</summary>
 
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
+  Here is a simple Kubernetes Deployment with an Nginx image:
+
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: nginx-deployment
+  spec:
+    selector:
+      matchLabels:
         app: nginx
-    spec:
-      containers:
-        - name: nginx
-          image: nginx:1.20.2 #yampl nginx:{{ .tag }}
-          ports:
-          - containerPort: 80
-```
-
-Notice the yaml comment on the same line as `image`.
-
-If this file was called `nginx.yaml`, then we could replace the image tag by running:
-```shell
-yampl -i nginx.yaml -v tag=1.21.6
-```
-
-The file would be updated in-place:
-```yaml
-apiVersion: apps/v1
-kind: Deployment
-metadata:
-  name: nginx-deployment
-spec:
-  selector:
-    matchLabels:
-      app: nginx
-  template:
-    metadata:
-      labels:
-        app: nginx
-    spec:
-      containers:
-        - name: nginx
-          image: nginx:1.21.6 #yampl nginx:{{ .tag }}
-          ports:
+    template:
+      metadata:
+        labels:
+          app: nginx
+      spec:
+        containers:
+          - name: nginx
+            image: nginx:1.20.2 #yampl nginx:{{ .tag }}
+            ports:
             - containerPort: 80
-```
+  ```
 
-If I wanted to repeat myself even less, I could utilize the `repo` function to pull the existing repo through.
-I could define the `image` template as:
-```yaml
-image: nginx:1.21.6 #yampl {{ repo .Value }}:{{ .tag }}
-```
+  Notice the yaml comment on the same line as `image`.
 
-This would generate the same output, but I didn't have to type `nginx` twice.
-This becomes more useful when using custom Docker registries where repo names can get long.
+  If this file was called `nginx.yaml`, then we could replace the image tag by running:
+  ```shell
+  yampl -i nginx.yaml -v tag=1.21.6
+  ```
+
+  The file would be updated in-place:
+  ```yaml
+  apiVersion: apps/v1
+  kind: Deployment
+  metadata:
+    name: nginx-deployment
+  spec:
+    selector:
+      matchLabels:
+        app: nginx
+    template:
+      metadata:
+        labels:
+          app: nginx
+      spec:
+        containers:
+          - name: nginx
+            image: nginx:1.21.6 #yampl nginx:{{ .tag }}
+            ports:
+              - containerPort: 80
+  ```
+
+  If I wanted to repeat myself even less, I could utilize the `repo` function to pull the existing repo through.
+  I could define the `image` template as:
+  ```yaml
+  image: nginx:1.21.6 #yampl {{ repo .Value }}:{{ .tag }}
+  ```
+
+  This would generate the same output, but I didn't have to type `nginx` twice.
+  This becomes more useful when using custom Docker registries where repo names can get long.
+
+</details>
 
 ## Tags
 
