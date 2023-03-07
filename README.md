@@ -158,6 +158,14 @@ The above produces `stable-alpine`
     name: CLEVYR #yampl {{ upper .Value }}
     ```
 
+4. Using the [`repo`](#repo) helper function:
+    ```shell
+    $ cat example.yaml
+    image: nginx:1.20.1 #yampl {{ repo .Value }}:{{ .tag }}
+    $ yampl example.yaml -v tag=1.21.8
+    image: nginx:1.21.8 #yampl {{ repo .Value }}:{{ .tag }}
+    ```
+
 ### Kubernetes Deployment
 
 Here is a simple Kubernetes Deployment with an Nginx image:
