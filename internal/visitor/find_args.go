@@ -63,9 +63,7 @@ func (visitor *FindArgs) Run(n *yaml.Node) error {
 	switch {
 	case len(n.Content) == 0:
 		// Node has no children. Search current node.
-		if err := visitor.FindArgs(n, n.Value); err != nil {
-			return err
-		}
+		_ = visitor.FindArgs(n, n.Value)
 	case n.Kind == yaml.MappingNode:
 		for i := 0; i < len(n.Content); i += 2 {
 			// Attempt to fetch template from comments on the key.
@@ -80,9 +78,7 @@ func (visitor *FindArgs) Run(n *yaml.Node) error {
 			} else {
 				// Template is on key's comment instead of value.
 				// This typically happens if the value is left empty with an implied null.
-				if err := visitor.FindArgs(key, val.Value); err != nil {
-					return err
-				}
+				_ = visitor.FindArgs(key, val.Value)
 			}
 		}
 	default:
