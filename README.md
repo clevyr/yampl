@@ -23,7 +23,10 @@ Yampl is available in brew or as a Docker container.
 <details>
   <summary>Click to expand</summary>
 
-  There is an Action provided for use during CI/CD. See [clevyr/yampl-action](https://github.com/clevyr/yampl-action) for more details.
+  There are two actions available for CI/CD usage:
+  - **[clevyr/setup-yampl-action](https://github.com/clevyr/setup-yampl-action):** Installs yampl during a GitHub Action run.
+  - **[clevyr/yampl-action](https://github.com/clevyr/yampl-action):** Installs yampl, runs yampl with the given inputs, then optionally creates a commit for you.
+
 </details>
 
 ### Docker
