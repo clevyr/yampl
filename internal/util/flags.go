@@ -51,7 +51,7 @@ func fixArgNewlines(arg string) []string {
 		s := bufio.NewScanner(strings.NewReader(arg))
 		for s.Scan() {
 			if len(s.Bytes()) > 0 {
-				result = append(result, prefix+"="+s.Text())
+				result = append(result, prefix+"="+strings.TrimSpace(s.Text()))
 			}
 		}
 		return result
