@@ -1,5 +1,7 @@
 # Yampl
 
+<img src="./assets/icon.svg" alt="Yampl Icon" width="170" align="right">
+
 [![Build](https://github.com/clevyr/yampl/actions/workflows/build.yml/badge.svg)](https://github.com/clevyr/yampl/actions/workflows/build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/clevyr/yampl)](https://goreportcard.com/report/github.com/clevyr/yampl)
 
