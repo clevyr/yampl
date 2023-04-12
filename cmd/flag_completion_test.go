@@ -1,10 +1,11 @@
 package cmd
 
 import (
-	"github.com/spf13/cobra"
 	"io"
 	"reflect"
 	"testing"
+
+	"github.com/spf13/cobra"
 )
 
 func Test_completion(t *testing.T) {

@@ -4,14 +4,15 @@ import (
 	_ "embed"
 	"errors"
 	"fmt"
+	"io"
+	"os"
+	"strings"
+
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/clevyr/yampl/internal/visitor"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
-	"io"
-	"os"
-	"strings"
 )
 
 //go:embed description.md

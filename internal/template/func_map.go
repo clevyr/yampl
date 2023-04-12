@@ -1,8 +1,9 @@
 package template
 
 import (
-	"github.com/Masterminds/sprig/v3"
 	"text/template"
+
+	"github.com/Masterminds/sprig/v3"
 )
 
 func FuncMap() template.FuncMap {

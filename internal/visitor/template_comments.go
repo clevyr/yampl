@@ -3,12 +3,13 @@ package visitor
 import (
 	"bytes"
 	"fmt"
+	"text/template"
+
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
 	template2 "github.com/clevyr/yampl/internal/template"
 	log "github.com/sirupsen/logrus"
 	"gopkg.in/yaml.v3"
-	"text/template"
 )
 
 func NewTemplateComments(conf config.Config) TemplateComments {

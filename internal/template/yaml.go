@@ -1,8 +1,9 @@
 package template
 
 import (
-	"gopkg.in/yaml.v3"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 func toYaml(v interface{}) string {

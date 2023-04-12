@@ -1,9 +1,10 @@
 package main
 
 import (
+	"os"
+
 	"github.com/clevyr/yampl/cmd"
 	"github.com/clevyr/yampl/internal/util"
-	"os"
 )
 
 func main() {

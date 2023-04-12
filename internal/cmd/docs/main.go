@@ -1,10 +1,11 @@
 package main
 
 import (
-	"github.com/clevyr/yampl/cmd"
-	"github.com/spf13/cobra/doc"
 	"log"
 	"os"
+
+	"github.com/clevyr/yampl/cmd"
+	"github.com/spf13/cobra/doc"
 )
 
 func main() {
@@ -15,7 +16,7 @@ func main() {
 		log.Fatalf("failed to remove existing dir: %v", err)
 	}
 
-	if err = os.MkdirAll(output, 0755); err != nil {
+	if err = os.MkdirAll(output, 0o755); err != nil {
 		log.Fatalf("failed to mkdir: %v", err)
 	}
 

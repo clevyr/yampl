@@ -1,8 +1,9 @@
 package comment
 
 import (
-	"gopkg.in/yaml.v3"
 	"strings"
+
+	"gopkg.in/yaml.v3"
 )
 
 // Parse returns the template and tag from a yaml.Node LineComment

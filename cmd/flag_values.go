@@ -2,12 +2,13 @@ package cmd
 
 import (
 	"errors"
-	"github.com/clevyr/yampl/internal/visitor"
-	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 	"io"
 	"os"
 	"strings"
+
+	"github.com/clevyr/yampl/internal/visitor"
+	"github.com/spf13/cobra"
+	"gopkg.in/yaml.v3"
 )
 
 var rawValues map[string]string

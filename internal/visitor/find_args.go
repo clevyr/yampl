@@ -2,15 +2,16 @@ package visitor
 
 import (
 	"fmt"
-	"github.com/clevyr/yampl/internal/comment"
-	"github.com/clevyr/yampl/internal/config"
-	template2 "github.com/clevyr/yampl/internal/template"
-	"gopkg.in/yaml.v3"
 	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
 	"text/template/parse"
+
+	"github.com/clevyr/yampl/internal/comment"
+	"github.com/clevyr/yampl/internal/config"
+	template2 "github.com/clevyr/yampl/internal/template"
+	"gopkg.in/yaml.v3"
 )
 
 var fieldRe = regexp.MustCompile(`\.([A-Za-z\d_.]+)`)

@@ -1,9 +1,10 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
 	"reflect"
 	"testing"
+
+	log "github.com/sirupsen/logrus"
 )
 
 func Test_initLog(t *testing.T) {

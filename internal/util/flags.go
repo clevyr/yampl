@@ -2,8 +2,9 @@ package util
 
 import (
 	"bufio"
-	"github.com/clevyr/yampl/cmd"
 	"strings"
+
+	"github.com/clevyr/yampl/cmd"
 )
 
 func FixStringToStringNewlines(s []string) []string {

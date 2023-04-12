@@ -1,13 +1,14 @@
 package cmd
 
 import (
-	"github.com/clevyr/yampl/internal/config"
-	"github.com/spf13/cobra"
 	"io"
 	"os"
 	"reflect"
 	"strings"
 	"testing"
+
+	"github.com/clevyr/yampl/internal/config"
+	"github.com/spf13/cobra"
 )
 
 func Test_preRun(t *testing.T) {
