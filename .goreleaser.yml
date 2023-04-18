@@ -4,6 +4,8 @@ builds:
       - -s -w -X github.com/clevyr/yampl/cmd.Version={{.Version}} -X github.com/clevyr/yampl/cmd.Commit={{.Commit}}
     env:
       - CGO_ENABLED=0
+    flags:
+      - -trimpath
     goarch:
       - amd64
       - arm
