@@ -1,8 +1,6 @@
 project_name: yampl
 builds:
-  - ldflags:
-      - -s -w -X github.com/clevyr/yampl/cmd.Version={{.Version}} -X github.com/clevyr/yampl/cmd.Commit={{.Commit}}
-    env:
+  - env:
       - CGO_ENABLED=0
     flags:
       - -trimpath

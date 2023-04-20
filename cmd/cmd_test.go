@@ -13,7 +13,7 @@ import (
 
 func Test_preRun(t *testing.T) {
 	t.Run("silent usage", func(t *testing.T) {
-		cmd := Command
+		cmd := NewCommand("", "")
 		_ = preRun(cmd, []string{})
 		if !cmd.SilenceUsage {
 			t.Errorf("preRun() Command.SilenceUsage got = %v, want %v", cmd.SilenceUsage, false)
@@ -21,7 +21,7 @@ func Test_preRun(t *testing.T) {
 	})
 
 	t.Run("no error", func(t *testing.T) {
-		if err := preRun(Command, []string{}); err != nil {
+		if err := preRun(NewCommand("", ""), []string{}); err != nil {
 			t.Errorf("preRun() error = %v, wantErr %v", err, true)
 		}
 	})
@@ -32,7 +32,7 @@ func Test_preRun(t *testing.T) {
 			conf.Prefix = "#yampl"
 		}()
 
-		if err := preRun(&cobra.Command{}, []string{}); err != nil {
+		if err := preRun(NewCommand("", ""), []string{}); err != nil {
 			t.Errorf("preRun() error = %v, wantErr %v", err, false)
 		}
 
@@ -48,17 +48,18 @@ func Test_preRun(t *testing.T) {
 			conf.Inplace = false
 		}()
 
-		if err := preRun(&cobra.Command{}, []string{}); err == nil {
+		if err := preRun(NewCommand("", ""), []string{}); err == nil {
 			t.Errorf("preRun() error = %v, wantErr %v", err, true)
 		}
 	})
 
 	t.Run("completion flag enabled", func(t *testing.T) {
-		completionFlag = "zsh"
-		defer func() {
-			completionFlag = ""
-		}()
-		if err := preRun(&cobra.Command{}, []string{}); err != nil {
+		cmd := NewCommand("", "")
+		if err := cmd.Flags().Set(CompletionFlag, "zsh"); err != nil {
+			t.Error(err)
+			return
+		}
+		if err := preRun(NewCommand("", ""), []string{}); err != nil {
 			t.Errorf("preRun() error = %v, wantErr %v", err, true)
 		}
 	})

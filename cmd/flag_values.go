@@ -18,9 +18,9 @@ const (
 	ValueFlagShort = "v"
 )
 
-func init() {
-	Command.Flags().StringToStringVarP(&rawValues, ValueFlag, ValueFlagShort, rawValues, "Define a template variable. Can be used more than once.")
-	err := Command.RegisterFlagCompletionFunc("value", valueCompletion)
+func registerValuesFlag(cmd *cobra.Command) {
+	cmd.Flags().StringToStringVarP(&rawValues, ValueFlag, ValueFlagShort, rawValues, "Define a template variable. Can be used more than once.")
+	err := cmd.RegisterFlagCompletionFunc("value", valueCompletion)
 	if err != nil {
 		panic(err)
 	}

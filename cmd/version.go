@@ -1,14 +1,8 @@
 package cmd
 
-var (
-	Version = "0.0.0-next"
-	Commit  = ""
-)
-
-func buildVersion() string {
-	result := Version
-	if Commit != "" {
-		result += " (" + Commit + ")"
+func buildVersion(version, commit string) string {
+	if commit != "" {
+		version += " (" + commit + ")"
 	}
-	return result
+	return version
 }

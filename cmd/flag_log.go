@@ -10,11 +10,11 @@ var (
 	logFormat string
 )
 
-func init() {
+func registerLogFlags(cmd *cobra.Command) {
 	var err error
 
-	Command.Flags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (trace, debug, info, warning, error, fatal, panic)")
-	err = Command.RegisterFlagCompletionFunc(
+	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (trace, debug, info, warning, error, fatal, panic)")
+	err = cmd.RegisterFlagCompletionFunc(
 		"log-level",
 		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return []string{"trace", "debug", "info", "warning", "error", "fatal", "panic"}, cobra.ShellCompDirectiveNoFileComp
@@ -24,8 +24,8 @@ func init() {
 		panic(err)
 	}
 
-	Command.Flags().StringVar(&logFormat, "log-format", "color", "Log format (auto, color, plain, json)")
-	err = Command.RegisterFlagCompletionFunc(
+	cmd.Flags().StringVar(&logFormat, "log-format", "color", "Log format (auto, color, plain, json)")
+	err = cmd.RegisterFlagCompletionFunc(
 		"log-format",
 		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 			return []string{"auto", "color", "plain", "json"}, cobra.ShellCompDirectiveNoFileComp
@@ -34,8 +34,6 @@ func init() {
 	if err != nil {
 		panic(err)
 	}
-
-	cobra.OnInitialize(initLog)
 }
 
 func initLogLevel(level string) log.Level {

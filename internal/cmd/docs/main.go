@@ -20,7 +20,7 @@ func main() {
 		log.Fatalf("failed to mkdir: %v", err)
 	}
 
-	rootCmd := cmd.Command
+	rootCmd := cmd.NewCommand("", "")
 	if err = doc.GenMarkdownTree(rootCmd, output); err != nil {
 		log.Fatalf("failed to generate markdown: %v", err)
 	}

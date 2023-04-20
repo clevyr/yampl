@@ -7,9 +7,15 @@ import (
 	"github.com/clevyr/yampl/internal/util"
 )
 
+var (
+	version = "next"
+	commit  = ""
+)
+
 func main() {
 	os.Args = util.FixStringToStringNewlines(os.Args)
-	if err := cmd.Command.Execute(); err != nil {
+	rootCmd := cmd.NewCommand(version, commit)
+	if err := rootCmd.Execute(); err != nil {
 		os.Exit(1)
 	}
 }

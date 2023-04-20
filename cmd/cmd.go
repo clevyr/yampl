@@ -18,38 +18,49 @@ import (
 //go:embed description.md
 var description string
 
-var Command = &cobra.Command{
-	Use:                   "yampl [-i] [-p prefix] [-v key=value ...] [file ...]",
-	Short:                 "Inline YAML templating via line-comments",
-	Long:                  description,
-	DisableFlagsInUseLine: true,
-	DisableAutoGenTag:     true,
-	ValidArgsFunction:     validArgs,
-	Version:               buildVersion(),
-	PreRunE:               preRun,
-	RunE:                  run,
+func NewCommand(version, commit string) *cobra.Command {
+	cmd := &cobra.Command{
+		Use:                   "yampl [-i] [-p prefix] [-v key=value ...] [file ...]",
+		Short:                 "Inline YAML templating via line-comments",
+		Long:                  description,
+		DisableFlagsInUseLine: true,
+		DisableAutoGenTag:     true,
+		ValidArgsFunction:     validArgs,
+		Version:               buildVersion(version, commit),
+		PreRunE:               preRun,
+		RunE:                  run,
+	}
+
+	registerCompletionFlag(cmd)
+	registerLogFlags(cmd)
+	registerValuesFlag(cmd)
+	cmd.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
+	cmd.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Template comments must begin with this prefix. The beginning '#' is implied.")
+	cmd.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override template left delimiter")
+	cmd.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override template right delimiter")
+	cmd.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
+	cmd.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Exit with an error if a template variable is not set`)
+	cmd.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip template comments from output")
+
+	return cmd
 }
 
 var conf = config.New()
-
-func init() {
-	Command.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
-	Command.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Template comments must begin with this prefix. The beginning '#' is implied.")
-	Command.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override template left delimiter")
-	Command.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override template right delimiter")
-	Command.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
-	Command.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Exit with an error if a template variable is not set`)
-	Command.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip template comments from output")
-}
 
 func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
 	return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 }
 
 func preRun(cmd *cobra.Command, args []string) error {
+	completionFlag, err := cmd.Flags().GetString(CompletionFlag)
+	if err != nil {
+		panic(err)
+	}
 	if completionFlag != "" {
 		return nil
 	}
+
+	initLog()
 
 	cmd.SilenceUsage = true
 
@@ -67,6 +78,10 @@ func preRun(cmd *cobra.Command, args []string) error {
 }
 
 func run(cmd *cobra.Command, args []string) error {
+	completionFlag, err := cmd.Flags().GetString(CompletionFlag)
+	if err != nil {
+		panic(err)
+	}
 	if completionFlag != "" {
 		return completion(cmd, args)
 	}
