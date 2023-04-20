@@ -1,6 +1,10 @@
 package cmd
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_buildVersion(t *testing.T) {
 	t.Run("no commit", func(t *testing.T) {
@@ -8,9 +12,7 @@ func Test_buildVersion(t *testing.T) {
 		commit := ""
 		v := buildVersion(version, commit)
 		want := version
-		if v != want {
-			t.Errorf("buildVersion() got = %v, want %v", v, want)
-		}
+		assert.Equal(t, want, v)
 	})
 
 	t.Run("commit", func(t *testing.T) {
@@ -18,8 +20,6 @@ func Test_buildVersion(t *testing.T) {
 		commit := "123"
 		v := buildVersion(version, commit)
 		want := version + " (" + commit + ")"
-		if v != want {
-			t.Errorf("buildVersion() got = %v, want %v", v, want)
-		}
+		assert.Equal(t, want, v)
 	})
 }

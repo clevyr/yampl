@@ -1,10 +1,10 @@
 package cmd
 
 import (
-	"reflect"
 	"testing"
 
 	log "github.com/sirupsen/logrus"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_initLog(t *testing.T) {
@@ -37,9 +37,8 @@ func Test_initLogFormat(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := initLogFormat(tt.args.format); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("initLogFormat() = %v, want %v", got, tt.want)
-			}
+			got := initLogFormat(tt.args.format)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -64,9 +63,8 @@ func Test_initLogLevel(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := initLogLevel(tt.args.level); got != tt.want {
-				t.Errorf("initLogLevel() = %v, want %v", got, tt.want)
-			}
+			got := initLogLevel(tt.args.level)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

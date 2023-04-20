@@ -1,6 +1,10 @@
 package template
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func Test_toYaml(t *testing.T) {
 	type args struct {
@@ -15,9 +19,8 @@ func Test_toYaml(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := toYaml(tt.args.v); got != tt.want {
-				t.Errorf("toYaml() = %v, want %v", got, tt.want)
-			}
+			got := toYaml(tt.args.v)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }

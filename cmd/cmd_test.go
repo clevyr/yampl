@@ -3,27 +3,24 @@ package cmd
 import (
 	"io"
 	"os"
-	"reflect"
 	"strings"
 	"testing"
 
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_preRun(t *testing.T) {
 	t.Run("silent usage", func(t *testing.T) {
 		cmd := NewCommand("", "")
 		_ = preRun(cmd, []string{})
-		if !cmd.SilenceUsage {
-			t.Errorf("preRun() Command.SilenceUsage got = %v, want %v", cmd.SilenceUsage, false)
-		}
+		assert.True(t, cmd.SilenceUsage)
 	})
 
 	t.Run("no error", func(t *testing.T) {
-		if err := preRun(NewCommand("", ""), []string{}); err != nil {
-			t.Errorf("preRun() error = %v, wantErr %v", err, true)
-		}
+		err := preRun(NewCommand("", ""), []string{})
+		assert.NoError(t, err)
 	})
 
 	t.Run("invalid prefix", func(t *testing.T) {
@@ -32,14 +29,12 @@ func Test_preRun(t *testing.T) {
 			conf.Prefix = "#yampl"
 		}()
 
-		if err := preRun(NewCommand("", ""), []string{}); err != nil {
-			t.Errorf("preRun() error = %v, wantErr %v", err, false)
+		if err := preRun(NewCommand("", ""), []string{}); !assert.NoError(t, err) {
+			return
 		}
 
 		want := "#tmpl"
-		if conf.Prefix != want {
-			t.Errorf("preRun() prefix = %s, want %s", conf.Prefix, want)
-		}
+		assert.Equal(t, want, conf.Prefix)
 	})
 
 	t.Run("inplace no files", func(t *testing.T) {
@@ -48,20 +43,17 @@ func Test_preRun(t *testing.T) {
 			conf.Inplace = false
 		}()
 
-		if err := preRun(NewCommand("", ""), []string{}); err == nil {
-			t.Errorf("preRun() error = %v, wantErr %v", err, true)
-		}
+		err := preRun(NewCommand("", ""), []string{})
+		assert.Error(t, err)
 	})
 
 	t.Run("completion flag enabled", func(t *testing.T) {
 		cmd := NewCommand("", "")
-		if err := cmd.Flags().Set(CompletionFlag, "zsh"); err != nil {
-			t.Error(err)
+		if err := cmd.Flags().Set(CompletionFlag, "zsh"); !assert.NoError(t, err) {
 			return
 		}
-		if err := preRun(NewCommand("", ""), []string{}); err != nil {
-			t.Errorf("preRun() error = %v, wantErr %v", err, true)
-		}
+		err := preRun(NewCommand("", ""), []string{})
+		assert.NoError(t, err)
 	})
 }
 
@@ -82,12 +74,8 @@ func Test_validArgs(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1 := validArgs(tt.args.cmd, tt.args.args, tt.args.toComplete)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("validArgs() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("validArgs() got1 = %v, want %v", got1, tt.want1)
-			}
+			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want1, got1)
 		})
 	}
 }
@@ -126,13 +114,8 @@ func Test_templateReader(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := templateReader(tt.args.conf, tt.args.r)
-			if (err != nil) != tt.wantErr {
-				t.Errorf("templateReader() error = %v, wantErr %v", err, tt.wantErr)
-				return
-			}
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("templateReader() got = %v, want %v", string(got), string(tt.want))
-			}
+			assert.Equal(t, tt.wantErr, err != nil)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -168,15 +151,14 @@ func Test_openAndTemplate(t *testing.T) {
 		wantStdout bool
 		wantErr    bool
 	}{
-		{"simple", args{config.New(), "a: a"}, "a: a", true, false},
-		{"template", args{config.New(), "a: a #yampl b"}, "a: a #yampl b", true, false},
+		{"simple", args{config.New(), "a: a"}, "a: a\n", true, false},
+		{"template", args{config.New(), "a: a #yampl b"}, "a: b #yampl b\n", true, false},
 		{"inplace", args{inplaceConf, "a: a #yampl b"}, "a: b #yampl b\n", false, false},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			r, w, err := os.Pipe()
-			if err != nil {
-				t.Error(err)
+			if !assert.NoError(t, err) {
 				return
 			}
 
@@ -196,45 +178,33 @@ func Test_openAndTemplate(t *testing.T) {
 			os.Stdout = w
 
 			f, cleanup, err := tempFileWith(tt.args.contents)
-			if err != nil {
-				t.Error(err)
+			if !assert.NoError(t, err) {
 				return
 			}
 			defer cleanup()
 
-			if err := openAndTemplate(tt.args.conf, f.Name()); (err != nil) != tt.wantErr {
-				t.Errorf("openAndTemplate() error = %v, wantErr %v", err, tt.wantErr)
+			if err := openAndTemplate(tt.args.conf, f.Name()); !assert.Equal(t, tt.wantErr, err != nil) {
 				return
 			}
 
-			if _, err := f.Seek(0, io.SeekStart); err != nil {
-				t.Error(err)
+			if _, err := f.Seek(0, io.SeekStart); !assert.NoError(t, err) {
 				return
 			}
 
 			var buf strings.Builder
-			if _, err := io.Copy(&buf, f); err != nil {
-				t.Error(err)
+			if _, err := io.Copy(&buf, f); !assert.NoError(t, err) {
 				return
 			}
 
 			_ = w.Close()
 			<-ch
 
-			if (stdoutBuf.Len() != 0) != tt.wantStdout {
-				t.Errorf("openAndTemplate() got stdout len = %v, want stdout %v", stdoutBuf.Len(), tt.wantStdout)
-				return
-			}
-
-			var got string
 			if tt.wantStdout {
-				got = stdoutBuf.String()
+				assert.Equal(t, tt.want, stdoutBuf.String())
+				assert.Equal(t, tt.args.contents, buf.String())
 			} else {
-				got = buf.String()
-			}
-			if buf.String() != tt.want {
-				t.Errorf("openAndTemplate() got = %v, want %v", got, tt.want)
-				return
+				assert.Empty(t, stdoutBuf.String())
+				assert.Equal(t, tt.want, buf.String())
 			}
 		})
 	}

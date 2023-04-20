@@ -2,6 +2,8 @@ package template
 
 import (
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFuncMap(t *testing.T) {
@@ -15,9 +17,8 @@ func TestFuncMap(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got := FuncMap()
-			if _, ok := got[tt.wantFunc]; !ok {
-				t.Errorf("FuncMap() func not set: %v", tt.wantFunc)
-			}
+			_, ok := got[tt.wantFunc]
+			assert.True(t, ok)
 		})
 	}
 }

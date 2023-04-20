@@ -2,10 +2,10 @@ package cmd
 
 import (
 	"io"
-	"reflect"
 	"testing"
 
 	"github.com/spf13/cobra"
+	"github.com/stretchr/testify/assert"
 )
 
 func Test_completion(t *testing.T) {
@@ -37,12 +37,11 @@ func Test_completion(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			tt.args.cmd.SetOut(tt.w)
 
-			if err := tt.args.cmd.Flags().Set(CompletionFlag, tt.args.shell); err != nil {
-				t.Error(err)
+			if err := tt.args.cmd.Flags().Set(CompletionFlag, tt.args.shell); !assert.NoError(t, err) {
 				return
 			}
-			if err := completion(tt.args.cmd, tt.args.args); (err != nil) != tt.wantErr {
-				t.Errorf("completion() error = %v, wantErr %v", err, tt.wantErr)
+			if err := completion(tt.args.cmd, tt.args.args); !assert.Equal(t, tt.wantErr, err != nil) {
+				return
 			}
 		})
 	}
@@ -65,12 +64,8 @@ func Test_completionCompletion(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, got1 := completionCompletion(tt.args.cmd, tt.args.args, tt.args.toComplete)
-			if !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("completionCompletion() got = %v, want %v", got, tt.want)
-			}
-			if got1 != tt.want1 {
-				t.Errorf("completionCompletion() got1 = %v, want %v", got1, tt.want1)
-			}
+			assert.Equal(t, tt.want, got)
+			assert.Equal(t, tt.want1, got1)
 		})
 	}
 }

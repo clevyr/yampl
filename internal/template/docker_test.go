@@ -1,6 +1,10 @@
 package template
 
-import "testing"
+import (
+	"testing"
+
+	"github.com/stretchr/testify/assert"
+)
 
 func TestDockerRepo(t *testing.T) {
 	type args struct {
@@ -15,9 +19,8 @@ func TestDockerRepo(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := DockerRepo(tt.args.image); got != tt.want {
-				t.Errorf("DockerRepo() = %v, want %v", got, tt.want)
-			}
+			got := DockerRepo(tt.args.image)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -35,9 +38,8 @@ func TestDockerTag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := DockerTag(tt.args.image); got != tt.want {
-				t.Errorf("DockerTag() = %v, want %v", got, tt.want)
-			}
+			got := DockerTag(tt.args.image)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
