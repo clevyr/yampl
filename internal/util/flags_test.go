@@ -1,8 +1,9 @@
 package util
 
 import (
-	"reflect"
 	"testing"
+
+	"github.com/stretchr/testify/assert"
 )
 
 func TestFixStringToStringNewlines(t *testing.T) {
@@ -26,9 +27,8 @@ func TestFixStringToStringNewlines(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := FixStringToStringNewlines(tt.args.s); !reflect.DeepEqual(got, tt.want) {
-				t.Errorf("FixStringToStringNewlines() = %v, want %v", got, tt.want)
-			}
+			got := FixStringToStringNewlines(tt.args.s)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
@@ -50,9 +50,8 @@ func Test_hasValueFlag(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			if got := hasValueFlag(tt.args.s); got != tt.want {
-				t.Errorf("hasValueFlag() = %v, want %v", got, tt.want)
-			}
+			got := hasValueFlag(tt.args.s)
+			assert.Equal(t, tt.want, got)
 		})
 	}
 }
