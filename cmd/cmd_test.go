@@ -157,33 +157,17 @@ func Test_openAndTemplate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			r, w, err := os.Pipe()
-			if !assert.NoError(t, err) {
-				return
-			}
-
-			var stdoutBuf strings.Builder
-			ch := make(chan struct{})
-			go func() {
-				_, _ = io.Copy(&stdoutBuf, r)
-				ch <- struct{}{}
-			}()
-			defer func(w *os.File) {
-				_ = w.Close()
-			}(w)
-
-			defer func(stdout *os.File) {
-				os.Stdout = stdout
-			}(os.Stdout)
-			os.Stdout = w
-
 			f, cleanup, err := tempFileWith(tt.args.contents)
 			if !assert.NoError(t, err) {
 				return
 			}
 			defer cleanup()
 
-			if err := openAndTemplate(tt.args.conf, f.Name()); !assert.Equal(t, tt.wantErr, err != nil) {
+			cmd := NewCommand("", "")
+			var stdoutBuf strings.Builder
+			cmd.SetOut(&stdoutBuf)
+
+			if err := openAndTemplate(cmd, tt.args.conf, f.Name()); !assert.Equal(t, tt.wantErr, err != nil) {
 				return
 			}
 
@@ -195,9 +179,6 @@ func Test_openAndTemplate(t *testing.T) {
 			if _, err := io.Copy(&buf, f); !assert.NoError(t, err) {
 				return
 			}
-
-			_ = w.Close()
-			<-ch
 
 			if tt.wantStdout {
 				assert.Equal(t, tt.want, stdoutBuf.String())

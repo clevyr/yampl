@@ -96,7 +96,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	for i, p := range args {
-		if err := openAndTemplate(conf, p); err != nil {
+		if err := openAndTemplate(cmd, conf, p); err != nil {
 			return err
 		}
 
@@ -108,7 +108,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplate(conf config.Config, p string) (err error) {
+func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err error) {
 	defer func(logger *log.Entry) {
 		conf.Log = logger
 	}(conf.Log)
@@ -153,7 +153,9 @@ func openAndTemplate(conf config.Config, p string) (err error) {
 			return fmt.Errorf("%s: %w", p, err)
 		}
 	} else {
-		fmt.Print(s)
+		if _, err := fmt.Fprint(cmd.OutOrStdout(), s); err != nil {
+			return err
+		}
 	}
 
 	return f.Close()
