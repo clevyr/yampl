@@ -48,7 +48,7 @@ func (m Match) String() string {
 type MatchSlice []Match
 
 func (v MatchSlice) String() string {
-	var s []string
+	s := make([]string, 0, len(v))
 	for _, match := range v {
 		s = append(s, match.String())
 	}
