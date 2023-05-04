@@ -3,7 +3,6 @@ package visitor
 import (
 	"fmt"
 	"regexp"
-	"strconv"
 	"strings"
 	"text/template"
 	"text/template/parse"
@@ -38,9 +37,12 @@ func (m Match) String() string {
 	}
 	var result string
 	if m.Line != 0 {
-		result += "line " + strconv.Itoa(m.Line) + ": "
+		result += fmt.Sprintf("line %d: ", m.Line)
 	}
-	result += fmt.Sprintf("%s %#v", val, m.Template)
+	if val != "" {
+		result += fmt.Sprintf("%s ", val)
+	}
+	result += fmt.Sprintf("%q", m.Template)
 	result = strings.ReplaceAll(result, "\n", " ")
 	return result
 }
@@ -52,7 +54,7 @@ func (v MatchSlice) String() string {
 	for _, match := range v {
 		s = append(s, match.String())
 	}
-	return strings.Join(s, ";  ")
+	return strings.Join(s, "; ")
 }
 
 type FindArgs struct {
