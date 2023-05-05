@@ -2,7 +2,6 @@ package visitor
 
 import (
 	"fmt"
-	"regexp"
 	"strings"
 	"text/template"
 	"text/template/parse"
@@ -12,8 +11,6 @@ import (
 	template2 "github.com/clevyr/yampl/internal/template"
 	"gopkg.in/yaml.v3"
 )
-
-var fieldRe = regexp.MustCompile(`\.([A-Za-z\d_.]+)`)
 
 func NewFindArgs(conf config.Config) FindArgs {
 	return FindArgs{
@@ -106,17 +103,13 @@ func (visitor *FindArgs) FindArgs(n *yaml.Node, value string) error {
 		}
 
 		for _, field := range listTemplFields(tmpl) {
-			if tokens := fieldRe.FindStringSubmatch(field); tokens != nil {
-				for _, tok := range tokens[1:] {
-					match := Match{
-						Template: tmplSrc,
-						Line:     n.Line,
-						Column:   n.Column,
-					}
-					match.Value = value
-					visitor.matchMap[tok] = append(visitor.matchMap[tok], match)
-				}
+			match := Match{
+				Template: tmplSrc,
+				Line:     n.Line,
+				Column:   n.Column,
+				Value:    value,
 			}
+			visitor.matchMap[field] = append(visitor.matchMap[field], match)
 		}
 	}
 	return nil
@@ -127,14 +120,23 @@ func listTemplFields(t *template.Template) []string {
 }
 
 func listNodeFields(node parse.Node, res []string) []string {
-	if node.Type() == parse.NodeAction {
-		res = append(res, node.String())
-	}
-
-	if ln, ok := node.(*parse.ListNode); ok {
-		for _, n := range ln.Nodes {
-			res = listNodeFields(n, res)
+	switch node := node.(type) {
+	case *parse.ListNode:
+		for _, node := range node.Nodes {
+			res = listNodeFields(node, res)
 		}
+	case *parse.ActionNode:
+		res = listNodeFields(node.Pipe, res)
+	case *parse.PipeNode:
+		for _, node := range node.Cmds {
+			res = listNodeFields(node, res)
+		}
+	case *parse.CommandNode:
+		for _, node := range node.Args {
+			res = listNodeFields(node, res)
+		}
+	case *parse.FieldNode:
+		res = append(res, node.Ident[0])
 	}
 	return res
 }
