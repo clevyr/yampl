@@ -27,7 +27,7 @@ changelog:
       - "^:pencil:"
       - "^:white_check_mark:"
 brews:
-  - tap:
+  - repository:
       owner: clevyr
       name: homebrew-tap
     folder: Formula
