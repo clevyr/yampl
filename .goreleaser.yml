@@ -27,7 +27,10 @@ changelog:
       - "^:pencil:"
       - "^:white_check_mark:"
 brews:
-  - repository:
+  - homepage: https://github.com/clevyr/yampl
+    description: Yaml templating via line-comments
+    license: GPL-3.0
+    repository:
       owner: clevyr
       name: homebrew-tap
     folder: Formula
@@ -73,10 +76,13 @@ docker_manifests:
     name_template: ghcr.io/clevyr/{{ .ProjectName }}:{{ .Major }}.{{ .Minor }}
 nfpms:
   - id: packages
+    homepage: https://github.com/clevyr/yampl
+    description: Yaml templating via line-comments
+    license: GPL-3.0
+    maintainer: Gabe Cook <gabe@clevyr.com>
     formats:
       - deb
       - rpm
-    maintainer: Gabe Cook <gabe@clevyr.com>
 publishers:
   - name: fury.io
     ids:
