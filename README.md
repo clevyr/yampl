@@ -103,6 +103,15 @@ Yampl is available in brew or as a Docker container.
      ```
 </details>
 
+### AUR (Arch Linux)
+
+<details>
+  <summary>Click to expand</summary>
+
+Install [yampl-bin](https://aur.archlinux.org/packages/yampl-bin) with your [AUR helper](https://wiki.archlinux.org/index.php/AUR_helpers) of choice.
+</details>
+
+
 ## Usage
 
 [View the generated docs](docs/yampl.md) for flag and command reference.
