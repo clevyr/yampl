@@ -24,8 +24,8 @@ changelog:
   sort: asc
   filters:
     exclude:
-      - "^:pencil:"
-      - "^:white_check_mark:"
+      - "^docs"
+      - "^test"
 brews:
   - homepage: https://github.com/clevyr/yampl
     description: Yaml templating via line-comments
