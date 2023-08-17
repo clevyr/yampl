@@ -41,6 +41,7 @@ func NewCommand(version, commit string) *cobra.Command {
 	cmd.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
 	cmd.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Exit with an error if a template variable is not set`)
 	cmd.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip template comments from output")
+	cmd.InitDefaultVersionFlag()
 
 	return cmd
 }
