@@ -5,6 +5,7 @@
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/clevyr/yampl)](https://github.com/clevyr/yampl/releases)
 [![Build](https://github.com/clevyr/yampl/actions/workflows/build.yml/badge.svg)](https://github.com/clevyr/yampl/actions/workflows/build.yml)
 [![Go Report Card](https://goreportcard.com/badge/github.com/clevyr/yampl)](https://goreportcard.com/report/github.com/clevyr/yampl)
+[![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=clevyr_yampl&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=clevyr_yampl)
 
 Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comments.
 
