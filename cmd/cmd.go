@@ -158,7 +158,28 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 		}
 
 		if err := os.Rename(temp.Name(), p); err != nil {
-			return fmt.Errorf("%s: %w", p, err)
+			log.Debug("failed to rename file, attempting to copy contents")
+
+			in, err := os.Open(temp.Name())
+			if err != nil {
+				return fmt.Errorf("%s: %w", p, err)
+			}
+			defer func() {
+				_ = in.Close()
+			}()
+
+			out, err := os.OpenFile(p, os.O_WRONLY|os.O_TRUNC, stat.Mode())
+			if err != nil {
+				return fmt.Errorf("%s: %w", p, err)
+			}
+
+			if _, err := io.Copy(out, in); err != nil {
+				return fmt.Errorf("%s: %w", p, err)
+			}
+
+			if err := out.Close(); err != nil {
+				return err
+			}
 		}
 	} else {
 		if _, err := fmt.Fprint(cmd.OutOrStdout(), s); err != nil {
