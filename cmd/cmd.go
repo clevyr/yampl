@@ -158,7 +158,7 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 		}
 
 		if err := os.Rename(temp.Name(), p); err != nil {
-			log.Debug("failed to rename file, attempting to copy contents")
+			log.Trace("failed to rename file, attempting to copy contents")
 
 			in, err := os.Open(temp.Name())
 			if err != nil {
