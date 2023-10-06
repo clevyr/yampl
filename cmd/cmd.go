@@ -129,6 +129,11 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 		return fmt.Errorf("%s: %w", p, err)
 	}
 
+	stat, err := f.Stat()
+	if err != nil {
+		return fmt.Errorf("%s: %w", p, err)
+	}
+
 	_ = f.Close()
 
 	if conf.Inplace {
@@ -141,6 +146,10 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 		}()
 
 		if _, err := temp.WriteString(s); err != nil {
+			return fmt.Errorf("%s: %w", p, err)
+		}
+
+		if err := temp.Chmod(stat.Mode()); err != nil {
 			return fmt.Errorf("%s: %w", p, err)
 		}
 
