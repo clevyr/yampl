@@ -99,7 +99,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	for i, p := range args {
 		if err := openAndTemplate(cmd, conf, p); err != nil {
-			return err
+			return fmt.Errorf("%s: %w", p, err)
 		}
 
 		if !conf.Inplace && i != len(args)-1 {
@@ -118,7 +118,7 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 
 	f, err := os.Open(p)
 	if err != nil {
-		return fmt.Errorf("%s: %w", p, err)
+		return err
 	}
 	defer func(f *os.File) {
 		_ = f.Close()
@@ -126,12 +126,12 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 
 	s, err := templateReader(conf, f)
 	if err != nil {
-		return fmt.Errorf("%s: %w", p, err)
+		return err
 	}
 
 	stat, err := f.Stat()
 	if err != nil {
-		return fmt.Errorf("%s: %w", p, err)
+		return err
 	}
 
 	_ = f.Close()
@@ -139,22 +139,22 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 	if conf.Inplace {
 		temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(p))
 		if err != nil {
-			return fmt.Errorf("%s: %w", p, err)
+			return err
 		}
 		defer func() {
 			_ = os.RemoveAll(temp.Name())
 		}()
 
 		if _, err := temp.WriteString(s); err != nil {
-			return fmt.Errorf("%s: %w", p, err)
+			return err
 		}
 
 		if err := temp.Chmod(stat.Mode()); err != nil {
-			return fmt.Errorf("%s: %w", p, err)
+			return err
 		}
 
 		if err := temp.Close(); err != nil {
-			return fmt.Errorf("%s: %w", p, err)
+			return err
 		}
 
 		if err := os.Rename(temp.Name(), p); err != nil {
@@ -162,7 +162,7 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 
 			in, err := os.Open(temp.Name())
 			if err != nil {
-				return fmt.Errorf("%s: %w", p, err)
+				return err
 			}
 			defer func() {
 				_ = in.Close()
@@ -170,11 +170,11 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 
 			out, err := os.OpenFile(p, os.O_WRONLY|os.O_TRUNC, stat.Mode())
 			if err != nil {
-				return fmt.Errorf("%s: %w", p, err)
+				return err
 			}
 
 			if _, err := io.Copy(out, in); err != nil {
-				return fmt.Errorf("%s: %w", p, err)
+				return err
 			}
 
 			if err := out.Close(); err != nil {
