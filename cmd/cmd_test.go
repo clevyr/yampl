@@ -128,20 +128,21 @@ func Test_openAndTemplate(t *testing.T) {
 	inplaceConf := config.New()
 	inplaceConf.Inplace = true
 
-	tempFileWith := func(contents string) (*os.File, func(), error) {
+	tempFileWith := func(contents string) (string, error) {
 		f, err := os.CreateTemp("", "")
 		if err != nil {
-			return nil, func() {}, err
+			return f.Name(), err
 		}
 
 		if _, err := f.WriteString(contents); err != nil {
-			return nil, func() {}, err
+			return f.Name(), err
 		}
 
-		return f, func() {
-			_ = f.Close()
-			_ = os.Remove(f.Name())
-		}, nil
+		if err := f.Close(); err != nil {
+			return f.Name(), err
+		}
+
+		return f.Name(), nil
 	}
 
 	type args struct {
@@ -161,17 +162,19 @@ func Test_openAndTemplate(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			f, cleanup, err := tempFileWith(tt.args.contents)
+			p, err := tempFileWith(tt.args.contents)
+			defer func() {
+				_ = os.RemoveAll(p)
+			}()
 			if !assert.NoError(t, err) {
 				return
 			}
-			defer cleanup()
 
 			cmd := NewCommand("", "")
 			var stdoutBuf strings.Builder
 			cmd.SetOut(&stdoutBuf)
 
-			err = openAndTemplate(cmd, tt.args.conf, f.Name())
+			err = openAndTemplate(cmd, tt.args.conf, p)
 			if tt.wantErr {
 				if !assert.Error(t, err) {
 					return
@@ -182,21 +185,17 @@ func Test_openAndTemplate(t *testing.T) {
 				}
 			}
 
-			if _, err := f.Seek(0, io.SeekStart); !assert.NoError(t, err) {
-				return
-			}
-
-			var buf strings.Builder
-			if _, err := io.Copy(&buf, f); !assert.NoError(t, err) {
+			fileContents, err := os.ReadFile(p)
+			if !assert.NoError(t, err) {
 				return
 			}
 
 			if tt.wantStdout {
 				assert.Equal(t, tt.want, stdoutBuf.String())
-				assert.Equal(t, tt.args.contents, buf.String())
+				assert.EqualValues(t, tt.args.contents, fileContents)
 			} else {
 				assert.Empty(t, stdoutBuf.String())
-				assert.Equal(t, tt.want, buf.String())
+				assert.EqualValues(t, tt.want, fileContents)
 			}
 		})
 	}
