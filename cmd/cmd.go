@@ -6,6 +6,7 @@ import (
 	"fmt"
 	"io"
 	"os"
+	"path/filepath"
 	"strings"
 
 	"github.com/clevyr/yampl/internal/config"
@@ -115,22 +116,9 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 	}(conf.Log)
 	conf.Log = log.WithField("file", p)
 
-	var f *os.File
-	if conf.Inplace {
-		stat, err := os.Stat(p)
-		if err != nil {
-			return fmt.Errorf("%s: %w", p, err)
-		}
-
-		f, err = os.OpenFile(p, os.O_RDWR, stat.Mode())
-		if err != nil {
-			return fmt.Errorf("%s: %w", p, err)
-		}
-	} else {
-		f, err = os.Open(p)
-		if err != nil {
-			return fmt.Errorf("%s: %w", p, err)
-		}
+	f, err := os.Open(p)
+	if err != nil {
+		return fmt.Errorf("%s: %w", p, err)
 	}
 	defer func(f *os.File) {
 		_ = f.Close()
@@ -141,16 +129,26 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 		return fmt.Errorf("%s: %w", p, err)
 	}
 
+	_ = f.Close()
+
 	if conf.Inplace {
-		if err := f.Truncate(int64(len(s))); err != nil {
+		temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(p))
+		if err != nil {
+			return fmt.Errorf("%s: %w", p, err)
+		}
+		defer func() {
+			_ = os.RemoveAll(temp.Name())
+		}()
+
+		if _, err := temp.WriteString(s); err != nil {
 			return fmt.Errorf("%s: %w", p, err)
 		}
 
-		if _, err := f.Seek(0, io.SeekStart); err != nil {
+		if err := temp.Close(); err != nil {
 			return fmt.Errorf("%s: %w", p, err)
 		}
 
-		if _, err := f.WriteString(s); err != nil {
+		if err := os.Rename(temp.Name(), p); err != nil {
 			return fmt.Errorf("%s: %w", p, err)
 		}
 	} else {
@@ -159,7 +157,7 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err erro
 		}
 	}
 
-	return f.Close()
+	return nil
 }
 
 func templateReader(conf config.Config, r io.Reader) (string, error) {
