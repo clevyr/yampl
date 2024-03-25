@@ -10,6 +10,8 @@ import (
 	"strings"
 
 	"github.com/clevyr/yampl/internal/config"
+	"github.com/clevyr/yampl/internal/config/flags"
+	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
 	log "github.com/sirupsen/logrus"
 	"github.com/spf13/cobra"
@@ -35,13 +37,42 @@ func NewCommand(version, commit string) *cobra.Command {
 	registerCompletionFlag(cmd)
 	registerLogFlags(cmd)
 	registerValuesFlag(cmd)
+
 	cmd.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
+	if err := cmd.RegisterFlagCompletionFunc("inplace", util.BoolCompletion); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Template comments must begin with this prefix. The beginning '#' is implied.")
+	if err := cmd.RegisterFlagCompletionFunc("prefix", cobra.NoFileCompletions); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override template left delimiter")
+	if err := cmd.RegisterFlagCompletionFunc("left-delim", cobra.NoFileCompletions); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override template right delimiter")
+	if err := cmd.RegisterFlagCompletionFunc("right-delim", cobra.NoFileCompletions); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
+	if err := cmd.RegisterFlagCompletionFunc("indent", cobra.NoFileCompletions); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Exit with an error if a template variable is not set`)
+	if err := cmd.RegisterFlagCompletionFunc("fail", util.BoolCompletion); err != nil {
+		panic(err)
+	}
+
 	cmd.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip template comments from output")
+	if err := cmd.RegisterFlagCompletionFunc("strip", util.BoolCompletion); err != nil {
+		panic(err)
+	}
+
 	cmd.InitDefaultVersionFlag()
 
 	return cmd
@@ -77,7 +108,7 @@ func preRun(cmd *cobra.Command, args []string) error {
 		return ErrNoFiles
 	}
 
-	rawValues, err := cmd.Flags().GetStringToString(ValueFlag)
+	rawValues, err := cmd.Flags().GetStringToString(flags.ValueFlag)
 	if err != nil {
 		panic(err)
 	}

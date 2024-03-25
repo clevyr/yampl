@@ -6,18 +6,14 @@ import (
 	"os"
 	"strings"
 
+	"github.com/clevyr/yampl/internal/config/flags"
 	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
-const (
-	ValueFlag      = "value"
-	ValueFlagShort = "v"
-)
-
 func registerValuesFlag(cmd *cobra.Command) {
-	cmd.Flags().StringToStringP(ValueFlag, ValueFlagShort, map[string]string{}, "Define a template variable. Can be used more than once.")
+	cmd.Flags().StringToStringP(flags.ValueFlag, flags.ValueFlagShort, map[string]string{}, "Define a template variable. Can be used more than once.")
 	err := cmd.RegisterFlagCompletionFunc("value", valueCompletion)
 	if err != nil {
 		panic(err)

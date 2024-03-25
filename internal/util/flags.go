@@ -4,7 +4,7 @@ import (
 	"bufio"
 	"strings"
 
-	"github.com/clevyr/yampl/cmd"
+	"github.com/clevyr/yampl/internal/config/flags"
 )
 
 func FixStringToStringNewlines(s []string) []string {
@@ -35,10 +35,10 @@ func FixStringToStringNewlines(s []string) []string {
 }
 
 func hasValueFlag(s string) bool {
-	return s == "-"+cmd.ValueFlagShort ||
-		s == "--"+cmd.ValueFlag ||
-		strings.HasPrefix(s, "-"+cmd.ValueFlagShort+"=") ||
-		strings.HasPrefix(s, "--"+cmd.ValueFlag+"=")
+	return s == "-"+flags.ValueFlagShort ||
+		s == "--"+flags.ValueFlag ||
+		strings.HasPrefix(s, "-"+flags.ValueFlagShort+"=") ||
+		strings.HasPrefix(s, "--"+flags.ValueFlag+"=")
 }
 
 func fixArgNewlines(arg string) []string {
