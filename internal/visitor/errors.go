@@ -6,15 +6,15 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-type NodeErr struct {
+type NodeError struct {
 	Err  error
 	Node *yaml.Node
 }
 
-func (e NodeErr) Error() string {
+func (e NodeError) Error() string {
 	return fmt.Sprintf("%d:%d: %s", e.Node.Line, e.Node.Column, e.Err)
 }
 
-func (e NodeErr) Unwrap() error {
+func (e NodeError) Unwrap() error {
 	return e.Err
 }

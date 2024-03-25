@@ -7,19 +7,6 @@ import (
 	"github.com/stretchr/testify/assert"
 )
 
-func Test_initLog(t *testing.T) {
-	tests := []struct {
-		name string
-	}{
-		{"default"},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			initLog()
-		})
-	}
-}
-
 func Test_initLogFormat(t *testing.T) {
 	type args struct {
 		format string

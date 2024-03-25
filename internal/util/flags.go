@@ -56,7 +56,6 @@ func fixArgNewlines(arg string) []string {
 			}
 		}
 		return result
-	} else {
-		return []string{arg}
 	}
+	return []string{arg}
 }

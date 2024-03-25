@@ -5,18 +5,13 @@ import (
 	"github.com/spf13/cobra"
 )
 
-var (
-	logLevel  string
-	logFormat string
-)
-
 func registerLogFlags(cmd *cobra.Command) {
 	var err error
 
-	cmd.Flags().StringVarP(&logLevel, "log-level", "l", "info", "Log level (trace, debug, info, warning, error, fatal, panic)")
+	cmd.Flags().StringP("log-level", "l", "info", "Log level (trace, debug, info, warning, error, fatal, panic)")
 	err = cmd.RegisterFlagCompletionFunc(
 		"log-level",
-		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return []string{"trace", "debug", "info", "warning", "error", "fatal", "panic"}, cobra.ShellCompDirectiveNoFileComp
 		},
 	)
@@ -24,10 +19,10 @@ func registerLogFlags(cmd *cobra.Command) {
 		panic(err)
 	}
 
-	cmd.Flags().StringVar(&logFormat, "log-format", "color", "Log format (auto, color, plain, json)")
+	cmd.Flags().String("log-format", "color", "Log format (auto, color, plain, json)")
 	err = cmd.RegisterFlagCompletionFunc(
 		"log-format",
-		func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 			return []string{"auto", "color", "plain", "json"}, cobra.ShellCompDirectiveNoFileComp
 		},
 	)
@@ -39,8 +34,7 @@ func registerLogFlags(cmd *cobra.Command) {
 func initLogLevel(level string) log.Level {
 	parsed, err := log.ParseLevel(level)
 	if err != nil {
-		log.WithField("level", logLevel).Warn("invalid log level. defaulting to info.")
-		logLevel = "info"
+		log.WithField("level", level).Warn("invalid log level. defaulting to info.")
 		parsed = log.InfoLevel
 	}
 	log.SetLevel(parsed)
@@ -48,6 +42,7 @@ func initLogLevel(level string) log.Level {
 	return parsed
 }
 
+//nolint:ireturn
 func initLogFormat(format string) log.Formatter {
 	var formatter log.Formatter = &log.TextFormatter{}
 	switch format {
@@ -60,13 +55,22 @@ func initLogFormat(format string) log.Formatter {
 	case "json", "j":
 		formatter = &log.JSONFormatter{}
 	default:
-		log.WithField("format", logFormat).Warn("invalid log formatter. defaulting to auto.")
+		log.WithField("format", format).Warn("invalid log formatter. defaulting to auto.")
 	}
 	log.SetFormatter(formatter)
 	return formatter
 }
 
-func initLog() {
-	initLogLevel(logLevel)
-	initLogFormat(logFormat)
+func initLog(cmd *cobra.Command) {
+	level, err := cmd.Flags().GetString("log-level")
+	if err != nil {
+		panic(err)
+	}
+	initLogLevel(level)
+
+	format, err := cmd.Flags().GetString("log-format")
+	if err != nil {
+		panic(err)
+	}
+	initLogFormat(format)
 }

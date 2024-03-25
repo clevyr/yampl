@@ -11,22 +11,20 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var rawValues map[string]string
-
 const (
 	ValueFlag      = "value"
 	ValueFlagShort = "v"
 )
 
 func registerValuesFlag(cmd *cobra.Command) {
-	cmd.Flags().StringToStringVarP(&rawValues, ValueFlag, ValueFlagShort, rawValues, "Define a template variable. Can be used more than once.")
+	cmd.Flags().StringToStringP(ValueFlag, ValueFlagShort, map[string]string{}, "Define a template variable. Can be used more than once.")
 	err := cmd.RegisterFlagCompletionFunc("value", valueCompletion)
 	if err != nil {
 		panic(err)
 	}
 }
 
-func valueCompletion(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func valueCompletion(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
 	if !strings.HasPrefix(conf.Prefix, "#") {
 		conf.Prefix = "#" + conf.Prefix
 	}

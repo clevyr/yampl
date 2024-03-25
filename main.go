@@ -7,6 +7,7 @@ import (
 	"github.com/clevyr/yampl/internal/util"
 )
 
+//nolint:gochecknoglobals
 var (
 	version = "next"
 	commit  = ""

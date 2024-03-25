@@ -35,9 +35,8 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 			if err := t.Template(n, tmplSrc, tmplTag); err != nil {
 				if t.conf.Fail {
 					return err
-				} else {
-					t.conf.Log.WithError(err).Warn("skipping value due to template error")
 				}
+				t.conf.Log.WithError(err).Warn("skipping value due to template error")
 			}
 		}
 	case n.Kind == yaml.MappingNode:
@@ -62,9 +61,8 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 				if err := t.Template(val, tmplSrc, tmplTag); err != nil {
 					if t.conf.Fail {
 						return err
-					} else {
-						t.conf.Log.WithError(err).Warn("skipping value due to template error")
 					}
+					t.conf.Log.WithError(err).Warn("skipping value due to template error")
 					continue
 				}
 			}
@@ -94,7 +92,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 		Option("missingkey=error").
 		Parse(tmplSrc)
 	if err != nil {
-		return NodeErr{Err: err, Node: n}
+		return NodeError{Err: err, Node: n}
 	}
 
 	if t.conf.Values != nil {
@@ -103,7 +101,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
-		return NodeErr{Err: err, Node: n}
+		return NodeError{Err: err, Node: n}
 	}
 
 	if buf.String() != n.Value {
@@ -115,7 +113,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 			var tmpNode yaml.Node
 
 			if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {
-				return NodeErr{Err: err, Node: n}
+				return NodeError{Err: err, Node: n}
 			}
 
 			content := tmpNode.Content[0]

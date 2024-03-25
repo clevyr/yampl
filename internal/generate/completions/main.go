@@ -9,8 +9,6 @@ import (
 	"github.com/clevyr/yampl/cmd"
 )
 
-var Shells = []string{"bash", "zsh", "fish"}
-
 func main() {
 	if err := os.RemoveAll("completions"); err != nil {
 		panic(err)
@@ -24,7 +22,7 @@ func main() {
 	var buf bytes.Buffer
 	rootCmd.SetOut(&buf)
 
-	for _, shell := range Shells {
+	for _, shell := range []string{"bash", "zsh", "fish"} {
 		rootCmd.SetArgs([]string{"--completion=" + shell})
 		if err := rootCmd.Execute(); err != nil {
 			panic(err)

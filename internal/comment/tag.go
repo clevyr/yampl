@@ -11,7 +11,7 @@ func (t Tag) ToYaml() string {
 
 const tagSep = ":"
 
-var (
+const (
 	DynamicTag Tag = ""
 	BoolTag    Tag = "bool"
 	StrTag     Tag = "str"
@@ -21,6 +21,7 @@ var (
 	MapTag     Tag = "map"
 )
 
+//nolint:gochecknoglobals
 var tags = []Tag{
 	BoolTag,
 	StrTag,

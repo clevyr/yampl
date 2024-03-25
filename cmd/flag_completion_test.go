@@ -6,6 +6,7 @@ import (
 
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_completion(t *testing.T) {
@@ -21,17 +22,17 @@ func Test_completion(t *testing.T) {
 		name    string
 		w       io.Writer
 		args    args
-		wantErr bool
+		wantErr require.ErrorAssertionFunc
 	}{
-		{"bash", io.Discard, args{NewCommand("", ""), []string{}, "bash"}, false},
-		{"bash error", w, args{NewCommand("", ""), []string{}, "bash"}, true},
-		{"zsh", io.Discard, args{NewCommand("", ""), []string{}, "zsh"}, false},
-		{"zsh error", w, args{NewCommand("", ""), []string{}, "zsh"}, true},
-		{"fish", io.Discard, args{NewCommand("", ""), []string{}, "fish"}, false},
-		{"fish error", w, args{NewCommand("", ""), []string{}, "fish"}, true},
-		{"powershell", io.Discard, args{NewCommand("", ""), []string{}, "powershell"}, false},
-		{"powershell error", w, args{NewCommand("", ""), []string{}, "powershell"}, true},
-		{"other", io.Discard, args{NewCommand("", ""), []string{}, "other"}, true},
+		{"bash", io.Discard, args{NewCommand("", ""), []string{}, "bash"}, require.NoError},
+		{"bash error", w, args{NewCommand("", ""), []string{}, "bash"}, require.Error},
+		{"zsh", io.Discard, args{NewCommand("", ""), []string{}, "zsh"}, require.NoError},
+		{"zsh error", w, args{NewCommand("", ""), []string{}, "zsh"}, require.Error},
+		{"fish", io.Discard, args{NewCommand("", ""), []string{}, "fish"}, require.NoError},
+		{"fish error", w, args{NewCommand("", ""), []string{}, "fish"}, require.Error},
+		{"powershell", io.Discard, args{NewCommand("", ""), []string{}, "powershell"}, require.NoError},
+		{"powershell error", w, args{NewCommand("", ""), []string{}, "powershell"}, require.Error},
+		{"other", io.Discard, args{NewCommand("", ""), []string{}, "other"}, require.Error},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -41,11 +42,7 @@ func Test_completion(t *testing.T) {
 				return
 			}
 			err := completion(tt.args.cmd, tt.args.args)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
+			tt.wantErr(t, err)
 		})
 	}
 }

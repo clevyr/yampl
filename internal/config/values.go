@@ -2,8 +2,6 @@ package config
 
 import "strings"
 
-var ReservedKeys = []string{"Value", "Val", "V"}
-
 type Values map[string]any
 
 func (values Values) Fill(rawValues map[string]string) {

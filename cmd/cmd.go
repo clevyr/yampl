@@ -47,11 +47,14 @@ func NewCommand(version, commit string) *cobra.Command {
 	return cmd
 }
 
+//nolint:gochecknoglobals
 var conf = config.New()
 
-func validArgs(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 }
+
+var ErrNoFiles = errors.New("no input files")
 
 func preRun(cmd *cobra.Command, args []string) error {
 	completionFlag, err := cmd.Flags().GetString(CompletionFlag)
@@ -62,7 +65,7 @@ func preRun(cmd *cobra.Command, args []string) error {
 		return nil
 	}
 
-	initLog()
+	initLog(cmd)
 
 	cmd.SilenceUsage = true
 
@@ -71,7 +74,12 @@ func preRun(cmd *cobra.Command, args []string) error {
 	}
 
 	if conf.Inplace && len(args) == 0 {
-		return errors.New("no input files")
+		return ErrNoFiles
+	}
+
+	rawValues, err := cmd.Flags().GetStringToString(ValueFlag)
+	if err != nil {
+		panic(err)
 	}
 
 	conf.Values.Fill(rawValues)
@@ -94,6 +102,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
+		//nolint:forbidigo
 		fmt.Print(s)
 	}
 
@@ -103,6 +112,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		if !conf.Inplace && i != len(args)-1 {
+			//nolint:forbidigo
 			fmt.Println("---")
 		}
 	}
@@ -110,7 +120,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) (err error) {
+func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) error {
 	defer func(logger *log.Entry) {
 		conf.Log = logger
 	}(conf.Log)
@@ -207,7 +217,7 @@ func templateReader(conf config.Config, r io.Reader) (string, error) {
 		}
 
 		if buf.Len() > 0 {
-			buf.Write([]byte("---\n"))
+			buf.WriteString("---\n")
 		}
 
 		if err := v.Run(&n); err != nil {

@@ -37,7 +37,7 @@ func (m Match) String() string {
 		result += fmt.Sprintf("line %d: ", m.Line)
 	}
 	if val != "" {
-		result += fmt.Sprintf("%s ", val)
+		result += val + " "
 	}
 	result += fmt.Sprintf("%q", m.Template)
 	result = strings.ReplaceAll(result, "\n", " ")
@@ -99,7 +99,7 @@ func (visitor *FindArgs) FindArgs(n *yaml.Node, value string) error {
 			Option("missingkey=zero").
 			Parse(tmplSrc)
 		if err != nil {
-			return NodeErr{Err: err, Node: n}
+			return NodeError{Err: err, Node: n}
 		}
 
 		for _, field := range listTemplFields(tmpl) {
@@ -150,7 +150,7 @@ outer:
 				continue outer
 			}
 		}
-		for _, reserved := range config.ReservedKeys {
+		for _, reserved := range []string{"Value", "Val", "V"} {
 			if k == reserved {
 				continue outer
 			}

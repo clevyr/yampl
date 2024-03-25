@@ -9,6 +9,7 @@ import (
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_preRun(t *testing.T) {
@@ -20,7 +21,7 @@ func Test_preRun(t *testing.T) {
 
 	t.Run("no error", func(t *testing.T) {
 		err := preRun(NewCommand("", ""), []string{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 
 	t.Run("invalid prefix", func(t *testing.T) {
@@ -44,7 +45,7 @@ func Test_preRun(t *testing.T) {
 		}()
 
 		err := preRun(NewCommand("", ""), []string{})
-		assert.Error(t, err)
+		require.Error(t, err)
 	})
 
 	t.Run("completion flag enabled", func(t *testing.T) {
@@ -53,7 +54,7 @@ func Test_preRun(t *testing.T) {
 			return
 		}
 		err := preRun(NewCommand("", ""), []string{})
-		assert.NoError(t, err)
+		require.NoError(t, err)
 	})
 }
 
@@ -95,30 +96,26 @@ func Test_templateReader(t *testing.T) {
 		name    string
 		args    args
 		want    string
-		wantErr bool
+		wantErr require.ErrorAssertionFunc
 	}{
-		{"empty", args{conf, strings.NewReader("")}, "", false},
-		{"static", args{conf, strings.NewReader("a: a")}, "a: a\n", false},
-		{"simple", args{conf, strings.NewReader("a: a #yampl b")}, "a: b #yampl b\n", false},
-		{"dynamic", args{conf, strings.NewReader("a: a #yampl {{ .Value }}")}, "a: a #yampl {{ .Value }}\n", false},
-		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", false},
-		{"map flow to block", args{conf, strings.NewReader("a: {} #yampl:map {a: a}")}, "a: #yampl:map {a: a}\n  a: a\n", false},
-		{"map block to flow", args{conf, strings.NewReader("a: #yampl:map {}\n  a: a")}, "a: {} #yampl:map {}\n", false},
-		{"seq flow to block", args{conf, strings.NewReader("a: {} #yampl:seq [a]")}, "a: #yampl:seq [a]\n  - a\n", false},
-		{"seq block to flow", args{conf, strings.NewReader("a: #yampl:seq []\n  - b")}, "a: [] #yampl:seq []\n", false},
-		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", true},
-		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", false},
-		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", true},
-		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", false},
+		{"empty", args{conf, strings.NewReader("")}, "", require.NoError},
+		{"static", args{conf, strings.NewReader("a: a")}, "a: a\n", require.NoError},
+		{"simple", args{conf, strings.NewReader("a: a #yampl b")}, "a: b #yampl b\n", require.NoError},
+		{"dynamic", args{conf, strings.NewReader("a: a #yampl {{ .Value }}")}, "a: a #yampl {{ .Value }}\n", require.NoError},
+		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", require.NoError},
+		{"map flow to block", args{conf, strings.NewReader("a: {} #yampl:map {a: a}")}, "a: #yampl:map {a: a}\n  a: a\n", require.NoError},
+		{"map block to flow", args{conf, strings.NewReader("a: #yampl:map {}\n  a: a")}, "a: {} #yampl:map {}\n", require.NoError},
+		{"seq flow to block", args{conf, strings.NewReader("a: {} #yampl:seq [a]")}, "a: #yampl:seq [a]\n  - a\n", require.NoError},
+		{"seq block to flow", args{conf, strings.NewReader("a: #yampl:seq []\n  - b")}, "a: [] #yampl:seq []\n", require.NoError},
+		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", require.Error},
+		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", require.NoError},
+		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", require.Error},
+		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			got, err := templateReader(tt.args.conf, tt.args.r)
-			if tt.wantErr {
-				assert.Error(t, err)
-			} else {
-				assert.NoError(t, err)
-			}
+			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -154,11 +151,11 @@ func Test_openAndTemplate(t *testing.T) {
 		args       args
 		want       string
 		wantStdout bool
-		wantErr    bool
+		wantErr    require.ErrorAssertionFunc
 	}{
-		{"simple", args{config.New(), "a: a"}, "a: a\n", true, false},
-		{"template", args{config.New(), "a: a #yampl b"}, "a: b #yampl b\n", true, false},
-		{"inplace", args{inplaceConf, "a: a #yampl b"}, "a: b #yampl b\n", false, false},
+		{"simple", args{config.New(), "a: a"}, "a: a\n", true, require.NoError},
+		{"template", args{config.New(), "a: a #yampl b"}, "a: b #yampl b\n", true, require.NoError},
+		{"inplace", args{inplaceConf, "a: a #yampl b"}, "a: b #yampl b\n", false, require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -166,29 +163,17 @@ func Test_openAndTemplate(t *testing.T) {
 			defer func() {
 				_ = os.RemoveAll(p)
 			}()
-			if !assert.NoError(t, err) {
-				return
-			}
+			require.NoError(t, err)
 
 			cmd := NewCommand("", "")
 			var stdoutBuf strings.Builder
 			cmd.SetOut(&stdoutBuf)
 
 			err = openAndTemplate(cmd, tt.args.conf, p)
-			if tt.wantErr {
-				if !assert.Error(t, err) {
-					return
-				}
-			} else {
-				if !assert.NoError(t, err) {
-					return
-				}
-			}
+			tt.wantErr(t, err)
 
 			fileContents, err := os.ReadFile(p)
-			if !assert.NoError(t, err) {
-				return
-			}
+			require.NoError(t, err)
 
 			if tt.wantStdout {
 				assert.Equal(t, tt.want, stdoutBuf.String())
