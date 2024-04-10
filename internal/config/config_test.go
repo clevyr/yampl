@@ -3,7 +3,6 @@ package config
 import (
 	"testing"
 
-	log "github.com/sirupsen/logrus"
 	"github.com/stretchr/testify/assert"
 )
 
@@ -20,7 +19,6 @@ func TestNew(t *testing.T) {
 				LeftDelim:  "{{",
 				RightDelim: "}}",
 				Indent:     2,
-				Log:        log.NewEntry(log.StandardLogger()),
 			},
 		},
 	}

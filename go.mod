@@ -4,7 +4,9 @@ go 1.22.2
 
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
-	github.com/sirupsen/logrus v1.9.3
+	github.com/fatih/color v1.16.0
+	github.com/mattn/go-isatty v0.0.20
+	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
@@ -20,6 +22,7 @@ require (
 	github.com/huandu/xstrings v1.3.3 // indirect
 	github.com/imdario/mergo v0.3.11 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect
+	github.com/mattn/go-colorable v0.1.13 // indirect
 	github.com/mitchellh/copystructure v1.0.0 // indirect
 	github.com/mitchellh/reflectwalk v1.0.0 // indirect
 	github.com/pmezard/go-difflib v1.0.0 // indirect

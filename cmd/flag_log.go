@@ -1,14 +1,21 @@
 package cmd
 
 import (
-	log "github.com/sirupsen/logrus"
+	"fmt"
+	"io"
+	"os"
+
+	"github.com/fatih/color"
+	"github.com/mattn/go-isatty"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
 func registerLogFlags(cmd *cobra.Command) {
 	var err error
 
-	cmd.Flags().StringP("log-level", "l", "info", "Log level (trace, debug, info, warning, error, fatal, panic)")
+	cmd.Flags().StringP("log-level", "l", "info", "Log level (trace, debug, info, warn, error, fatal, panic)")
 	err = cmd.RegisterFlagCompletionFunc(
 		"log-level",
 		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
@@ -31,34 +38,50 @@ func registerLogFlags(cmd *cobra.Command) {
 	}
 }
 
-func initLogLevel(level string) log.Level {
-	parsed, err := log.ParseLevel(level)
-	if err != nil {
-		log.WithField("level", level).Warn("invalid log level. defaulting to info.")
-		parsed = log.InfoLevel
+func logLevel(level string) zerolog.Level {
+	parsedLevel, err := zerolog.ParseLevel(level)
+	if err != nil || parsedLevel == zerolog.NoLevel {
+		if level == "warning" {
+			parsedLevel = zerolog.WarnLevel
+		} else {
+			log.Warn().Str("value", level).Msg("invalid log level. defaulting to info.")
+			parsedLevel = zerolog.InfoLevel
+		}
 	}
-	log.SetLevel(parsed)
-
-	return parsed
+	return parsedLevel
 }
 
-//nolint:ireturn
-func initLogFormat(format string) log.Formatter {
-	var formatter log.Formatter = &log.TextFormatter{}
+func logFormat(out io.Writer, format string) io.Writer {
 	switch format {
-	case "auto", "a":
-		break
-	case "color", "c":
-		formatter.(*log.TextFormatter).ForceColors = true
-	case "plain", "p":
-		formatter.(*log.TextFormatter).DisableColors = true
 	case "json", "j":
-		formatter = &log.JSONFormatter{}
+		return out
 	default:
-		log.WithField("format", format).Warn("invalid log formatter. defaulting to auto.")
+		sprintf := fmt.Sprintf
+		var useColor bool
+		switch format {
+		case "auto", "a":
+			if w, ok := out.(*os.File); ok {
+				useColor = isatty.IsTerminal(w.Fd())
+				if useColor {
+					sprintf = color.New(color.Bold).Sprintf
+				}
+			}
+		case "color", "c":
+			useColor = true
+			sprintf = color.New(color.Bold).Sprintf
+		case "plain", "p":
+		default:
+			log.Warn().Str("value", format).Msg("invalid log formatter. defaulting to auto.")
+		}
+
+		return zerolog.ConsoleWriter{
+			Out:     out,
+			NoColor: !useColor,
+			FormatMessage: func(i interface{}) string {
+				return sprintf("%-45s", i)
+			},
+		}
 	}
-	log.SetFormatter(formatter)
-	return formatter
 }
 
 func initLog(cmd *cobra.Command) {
@@ -66,11 +89,11 @@ func initLog(cmd *cobra.Command) {
 	if err != nil {
 		panic(err)
 	}
-	initLogLevel(level)
+	zerolog.SetGlobalLevel(logLevel(level))
 
 	format, err := cmd.Flags().GetString("log-format")
 	if err != nil {
 		panic(err)
 	}
-	initLogFormat(format)
+	log.Logger = log.Output(logFormat(cmd.ErrOrStderr(), format))
 }

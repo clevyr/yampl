@@ -7,6 +7,7 @@ import (
 	"testing"
 
 	"github.com/clevyr/yampl/internal/config"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
@@ -114,7 +115,7 @@ func Test_templateReader(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := templateReader(tt.args.conf, tt.args.r)
+			got, err := templateReader(tt.args.conf, tt.args.r, log.Logger)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})

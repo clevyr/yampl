@@ -1,56 +1,66 @@
 package cmd
 
 import (
+	"io"
+	"os"
 	"testing"
 
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
-func Test_initLogFormat(t *testing.T) {
+func Test_logFormat(t *testing.T) {
 	type args struct {
 		format string
 	}
 	tests := []struct {
 		name string
 		args args
-		want log.Formatter
+		want io.Writer
 	}{
-		{"default", args{"auto"}, &log.TextFormatter{}},
-		{"color", args{"color"}, &log.TextFormatter{ForceColors: true}},
-		{"plain", args{"plain"}, &log.TextFormatter{DisableColors: true}},
-		{"json", args{"json"}, &log.JSONFormatter{}},
-		{"unknown", args{""}, &log.TextFormatter{}},
+		{"default", args{"auto"}, zerolog.ConsoleWriter{Out: os.Stderr, NoColor: true}},
+		{"color", args{"color"}, zerolog.ConsoleWriter{Out: os.Stderr}},
+		{"plain", args{"plain"}, zerolog.ConsoleWriter{Out: os.Stderr, NoColor: true}},
+		{"json", args{"json"}, os.Stderr},
+		{"unknown", args{""}, zerolog.ConsoleWriter{Out: os.Stderr, NoColor: true}},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := initLogFormat(tt.args.format)
-			assert.Equal(t, tt.want, got)
+			got := logFormat(os.Stderr, tt.args.format)
+			require.IsType(t, tt.want, got)
+			if want, ok := tt.want.(zerolog.ConsoleWriter); ok {
+				got := got.(zerolog.ConsoleWriter)
+				assert.NotNil(t, got.FormatMessage)
+				want.FormatMessage = got.FormatMessage
+				assert.Equal(t, want.Out, got.Out)
+				assert.Equal(t, want.NoColor, got.NoColor)
+			}
 		})
 	}
 }
 
-func Test_initLogLevel(t *testing.T) {
+func Test_logLevel(t *testing.T) {
 	type args struct {
 		level string
 	}
 	tests := []struct {
 		name string
 		args args
-		want log.Level
+		want zerolog.Level
 	}{
-		{"trace", args{"trace"}, log.TraceLevel},
-		{"debug", args{"debug"}, log.DebugLevel},
-		{"info", args{"info"}, log.InfoLevel},
-		{"warning", args{"warning"}, log.WarnLevel},
-		{"error", args{"error"}, log.ErrorLevel},
-		{"fatal", args{"fatal"}, log.FatalLevel},
-		{"panic", args{"panic"}, log.PanicLevel},
-		{"unknown", args{""}, log.InfoLevel},
+		{"trace", args{"trace"}, zerolog.TraceLevel},
+		{"debug", args{"debug"}, zerolog.DebugLevel},
+		{"info", args{"info"}, zerolog.InfoLevel},
+		{"warning", args{"warning"}, zerolog.WarnLevel},
+		{"error", args{"error"}, zerolog.ErrorLevel},
+		{"fatal", args{"fatal"}, zerolog.FatalLevel},
+		{"panic", args{"panic"}, zerolog.PanicLevel},
+		{"unknown", args{""}, zerolog.InfoLevel},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := initLogLevel(tt.args.level)
+			got := logLevel(tt.args.level)
 			assert.Equal(t, tt.want, got)
 		})
 	}

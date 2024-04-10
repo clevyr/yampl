@@ -44,7 +44,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
   -i, --inplace                Edit files in place
       --left-delim string      Override template left delimiter (default "{{")
       --log-format string      Log format (auto, color, plain, json) (default "color")
-  -l, --log-level string       Log level (trace, debug, info, warning, error, fatal, panic) (default "info")
+  -l, --log-level string       Log level (trace, debug, info, warn, error, fatal, panic) (default "info")
   -p, --prefix string          Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
       --right-delim string     Override template right delimiter (default "}}")
   -s, --strip                  Strip template comments from output

@@ -8,18 +8,20 @@ import (
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
 	template2 "github.com/clevyr/yampl/internal/template"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
 	"gopkg.in/yaml.v3"
 )
 
-func NewTemplateComments(conf config.Config) TemplateComments {
+func NewTemplateComments(conf config.Config, log zerolog.Logger) TemplateComments {
 	return TemplateComments{
 		conf: conf,
+		log:  log,
 	}
 }
 
 type TemplateComments struct {
 	conf config.Config
+	log  zerolog.Logger
 }
 
 func (t TemplateComments) Run(n *yaml.Node) error {
@@ -36,7 +38,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 				if t.conf.Fail {
 					return err
 				}
-				t.conf.Log.WithError(err).Warn("skipping value due to template error")
+				t.log.Warn().Err(err).Msg("skipping value due to template error")
 			}
 		}
 	case n.Kind == yaml.MappingNode:
@@ -62,7 +64,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					if t.conf.Fail {
 						return err
 					}
-					t.conf.Log.WithError(err).Warn("skipping value due to template error")
+					t.log.Warn().Err(err).Msg("skipping value due to template error")
 					continue
 				}
 			}
@@ -80,11 +82,11 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 }
 
 func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment.Tag) error {
-	t.conf.Log = t.conf.Log.WithFields(log.Fields{
-		"tmpl":    tmplSrc,
-		"filePos": fmt.Sprintf("%d:%d", n.Line, n.Column),
-		"from":    n.Value,
-	})
+	log := t.log.With().
+		Str("tmpl", tmplSrc).
+		Str("filePos", fmt.Sprintf("%d:%d", n.Line, n.Column)).
+		Str("from", n.Value).
+		Logger()
 
 	tmpl, err := template.New("").
 		Funcs(template2.FuncMap()).
@@ -105,7 +107,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 	}
 
 	if buf.String() != n.Value {
-		t.conf.Log.WithField("to", buf.String()).Debug("updating value")
+		log.Debug().Str("to", buf.String()).Msg("updating value")
 		n.Style = 0
 
 		switch tmplTag {

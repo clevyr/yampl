@@ -13,7 +13,8 @@ import (
 	"github.com/clevyr/yampl/internal/config/flags"
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
-	log "github.com/sirupsen/logrus"
+	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -128,7 +129,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		s, err := templateReader(conf, os.Stdin)
+		s, err := templateReader(conf, os.Stdin, log.Logger)
 		if err != nil {
 			return err
 		}
@@ -152,11 +153,6 @@ func run(cmd *cobra.Command, args []string) error {
 }
 
 func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) error {
-	defer func(logger *log.Entry) {
-		conf.Log = logger
-	}(conf.Log)
-	conf.Log = log.WithField("file", p)
-
 	f, err := os.Open(p)
 	if err != nil {
 		return err
@@ -165,7 +161,9 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) error {
 		_ = f.Close()
 	}(f)
 
-	s, err := templateReader(conf, f)
+	log := log.With().Str("file", p).Logger()
+
+	s, err := templateReader(conf, f, log)
 	if err != nil {
 		return err
 	}
@@ -199,7 +197,7 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) error {
 		}
 
 		if err := os.Rename(temp.Name(), p); err != nil {
-			log.Trace("failed to rename file, attempting to copy contents")
+			log.Trace().Msg("failed to rename file, attempting to copy contents")
 
 			in, err := os.Open(temp.Name())
 			if err != nil {
@@ -231,8 +229,8 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) error {
 	return nil
 }
 
-func templateReader(conf config.Config, r io.Reader) (string, error) {
-	v := visitor.NewTemplateComments(conf)
+func templateReader(conf config.Config, r io.Reader, log zerolog.Logger) (string, error) {
+	v := visitor.NewTemplateComments(conf, log)
 
 	decoder := yaml.NewDecoder(r)
 	var buf strings.Builder
