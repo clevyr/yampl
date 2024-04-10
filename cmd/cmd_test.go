@@ -26,12 +26,12 @@ func Test_preRun(t *testing.T) {
 	})
 
 	t.Run("invalid prefix", func(t *testing.T) {
+		cmd := NewCommand()
+		conf, ok := config.FromContext(cmd.Context())
+		require.True(t, ok)
 		conf.Prefix = "tmpl"
-		defer func() {
-			conf.Prefix = "#yampl"
-		}()
 
-		if err := preRun(NewCommand(), []string{}); !assert.NoError(t, err) {
+		if err := preRun(cmd, []string{}); !assert.NoError(t, err) {
 			return
 		}
 
@@ -40,22 +40,22 @@ func Test_preRun(t *testing.T) {
 	})
 
 	t.Run("inplace no files", func(t *testing.T) {
+		cmd := NewCommand()
+		conf, ok := config.FromContext(cmd.Context())
+		require.True(t, ok)
 		conf.Inplace = true
-		defer func() {
-			conf.Inplace = false
-		}()
 
-		err := preRun(NewCommand(), []string{})
+		err := preRun(cmd, []string{})
 		require.Error(t, err)
 	})
 
 	t.Run("recursive no files", func(t *testing.T) {
+		cmd := NewCommand()
+		conf, ok := config.FromContext(cmd.Context())
+		require.True(t, ok)
 		conf.Recursive = true
-		defer func() {
-			conf.Recursive = false
-		}()
 
-		err := preRun(NewCommand(), []string{})
+		err := preRun(cmd, []string{})
 		require.Error(t, err)
 	})
 
@@ -64,7 +64,7 @@ func Test_preRun(t *testing.T) {
 		if err := cmd.Flags().Set(CompletionFlag, "zsh"); !assert.NoError(t, err) {
 			return
 		}
-		err := preRun(NewCommand(), []string{})
+		err := preRun(cmd, []string{})
 		require.NoError(t, err)
 	})
 }
@@ -100,7 +100,7 @@ func Test_templateReader(t *testing.T) {
 	stripConf.Strip = true
 
 	type args struct {
-		conf config.Config
+		conf *config.Config
 		r    io.Reader
 	}
 	tests := []struct {
@@ -109,17 +109,17 @@ func Test_templateReader(t *testing.T) {
 		want    string
 		wantErr require.ErrorAssertionFunc
 	}{
-		{"empty", args{conf, strings.NewReader("")}, "", require.NoError},
-		{"static", args{conf, strings.NewReader("a: a")}, "a: a\n", require.NoError},
-		{"simple", args{conf, strings.NewReader("a: a #yampl b")}, "a: b #yampl b\n", require.NoError},
-		{"dynamic", args{conf, strings.NewReader("a: a #yampl {{ .Value }}")}, "a: a #yampl {{ .Value }}\n", require.NoError},
-		{"multi-doc", args{conf, strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", require.NoError},
-		{"map flow to block", args{conf, strings.NewReader("a: {} #yampl:map {a: a}")}, "a: #yampl:map {a: a}\n  a: a\n", require.NoError},
-		{"map block to flow", args{conf, strings.NewReader("a: #yampl:map {}\n  a: a")}, "a: {} #yampl:map {}\n", require.NoError},
-		{"seq flow to block", args{conf, strings.NewReader("a: {} #yampl:seq [a]")}, "a: #yampl:seq [a]\n  - a\n", require.NoError},
-		{"seq block to flow", args{conf, strings.NewReader("a: #yampl:seq []\n  - b")}, "a: [] #yampl:seq []\n", require.NoError},
-		{"invalid yaml", args{conf, strings.NewReader("a:\n- b\n  c: c")}, "", require.Error},
-		{"unset value allowed", args{conf, strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", require.NoError},
+		{"empty", args{config.New(), strings.NewReader("")}, "", require.NoError},
+		{"static", args{config.New(), strings.NewReader("a: a")}, "a: a\n", require.NoError},
+		{"simple", args{config.New(), strings.NewReader("a: a #yampl b")}, "a: b #yampl b\n", require.NoError},
+		{"dynamic", args{config.New(), strings.NewReader("a: a #yampl {{ .Value }}")}, "a: a #yampl {{ .Value }}\n", require.NoError},
+		{"multi-doc", args{config.New(), strings.NewReader("a: a\n---\nb: b")}, "a: a\n---\nb: b\n", require.NoError},
+		{"map flow to block", args{config.New(), strings.NewReader("a: {} #yampl:map {a: a}")}, "a: #yampl:map {a: a}\n  a: a\n", require.NoError},
+		{"map block to flow", args{config.New(), strings.NewReader("a: #yampl:map {}\n  a: a")}, "a: {} #yampl:map {}\n", require.NoError},
+		{"seq flow to block", args{config.New(), strings.NewReader("a: {} #yampl:seq [a]")}, "a: #yampl:seq [a]\n  - a\n", require.NoError},
+		{"seq block to flow", args{config.New(), strings.NewReader("a: #yampl:seq []\n  - b")}, "a: [] #yampl:seq []\n", require.NoError},
+		{"invalid yaml", args{config.New(), strings.NewReader("a:\n- b\n  c: c")}, "", require.Error},
+		{"unset value allowed", args{config.New(), strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", require.NoError},
 		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", require.Error},
 		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", require.NoError},
 	}
@@ -154,7 +154,7 @@ func Test_openAndTemplateFile(t *testing.T) {
 	}
 
 	type args struct {
-		conf     config.Config
+		conf     *config.Config
 		contents string
 	}
 	tests := []struct {

@@ -8,6 +8,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/clevyr/yampl/internal/config"
 	"github.com/clevyr/yampl/internal/config/flags"
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
@@ -15,46 +16,48 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func registerValuesFlag(cmd *cobra.Command) {
+func registerValuesFlag(cmd *cobra.Command, conf *config.Config) {
 	cmd.Flags().StringToStringP(flags.ValueFlag, flags.ValueFlagShort, map[string]string{}, "Define a template variable. Can be used more than once.")
-	err := cmd.RegisterFlagCompletionFunc("value", valueCompletion)
+	err := cmd.RegisterFlagCompletionFunc("value", valueCompletion(conf))
 	if err != nil {
 		panic(err)
 	}
 }
 
-func valueCompletion(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
-	if !strings.HasPrefix(conf.Prefix, "#") {
-		conf.Prefix = "#" + conf.Prefix
-	}
-
-	v := visitor.NewFindArgs(conf)
-
-	for _, path := range args {
-		stat, err := os.Stat(path)
-		if err != nil {
-			continue
+func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
+	return func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		if !strings.HasPrefix(conf.Prefix, "#") {
+			conf.Prefix = "#" + conf.Prefix
 		}
 
-		if stat.IsDir() {
-			err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-				if err != nil || d.IsDir() || !util.IsYaml(path) {
-					return err
-				}
+		v := visitor.NewFindArgs(conf)
 
-				return valueCompletionFile(path, v)
-			})
+		for _, path := range args {
+			stat, err := os.Stat(path)
 			if err != nil {
 				continue
 			}
-		} else {
-			if err := valueCompletionFile(path, v); err != nil {
-				continue
+
+			if stat.IsDir() {
+				err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+					if err != nil || d.IsDir() || !util.IsYaml(path) {
+						return err
+					}
+
+					return valueCompletionFile(path, v)
+				})
+				if err != nil {
+					continue
+				}
+			} else {
+				if err := valueCompletionFile(path, v); err != nil {
+					continue
+				}
 			}
 		}
-	}
 
-	return v.Values(), cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
+		return v.Values(), cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
+	}
 }
 
 func valueCompletionFile(path string, v *visitor.FindArgs) error {

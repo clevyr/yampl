@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"context"
 	_ "embed"
 	"errors"
 	"fmt"
@@ -37,10 +38,11 @@ func NewCommand() *cobra.Command {
 		PreRunE:               preRun,
 		RunE:                  run,
 	}
+	conf := config.New()
 
 	registerCompletionFlag(cmd)
 	registerLogFlags(cmd)
-	registerValuesFlag(cmd)
+	registerValuesFlag(cmd, conf)
 
 	cmd.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
 	if err := cmd.RegisterFlagCompletionFunc("inplace", util.BoolCompletion); err != nil {
@@ -84,17 +86,18 @@ func NewCommand() *cobra.Command {
 
 	cmd.InitDefaultVersionFlag()
 
+	cmd.SetContext(config.WithContext(context.Background(), conf))
 	return cmd
 }
-
-//nolint:gochecknoglobals
-var conf = config.New()
 
 func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 	return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 }
 
-var ErrNoFiles = errors.New("no input files")
+var (
+	ErrNoFiles       = errors.New("no input files")
+	ErrMissingConfig = errors.New("missing config")
+)
 
 func preRun(cmd *cobra.Command, args []string) error {
 	completionFlag, err := cmd.Flags().GetString(CompletionFlag)
@@ -108,6 +111,11 @@ func preRun(cmd *cobra.Command, args []string) error {
 	initLog(cmd)
 
 	cmd.SilenceUsage = true
+
+	conf, ok := config.FromContext(cmd.Context())
+	if !ok {
+		return ErrMissingConfig
+	}
 
 	if !strings.HasPrefix(conf.Prefix, "#") {
 		conf.Prefix = "#" + conf.Prefix
@@ -136,6 +144,11 @@ func run(cmd *cobra.Command, args []string) error {
 		return completion(cmd, args)
 	}
 
+	conf, ok := config.FromContext(cmd.Context())
+	if !ok {
+		return ErrMissingConfig
+	}
+
 	if len(args) == 0 {
 		s, err := templateReader(conf, os.Stdin, log.Logger)
 		if err != nil {
@@ -162,7 +175,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplate(cmd *cobra.Command, conf config.Config, path string) error {
+func openAndTemplate(cmd *cobra.Command, conf *config.Config, path string) error {
 	stat, err := os.Stat(path)
 	if err != nil {
 		return err
@@ -187,7 +200,7 @@ func openAndTemplate(cmd *cobra.Command, conf config.Config, path string) error 
 	return openAndTemplate(cmd, conf, path)
 }
 
-func openAndTemplateFile(cmd *cobra.Command, conf config.Config, p string) error {
+func openAndTemplateFile(cmd *cobra.Command, conf *config.Config, p string) error {
 	f, err := os.Open(p)
 	if err != nil {
 		return err
@@ -264,7 +277,7 @@ func openAndTemplateFile(cmd *cobra.Command, conf config.Config, p string) error
 	return nil
 }
 
-func templateReader(conf config.Config, r io.Reader, log zerolog.Logger) (string, error) {
+func templateReader(conf *config.Config, r io.Reader, log zerolog.Logger) (string, error) {
 	v := visitor.NewTemplateComments(conf, log)
 
 	decoder := yaml.NewDecoder(r)

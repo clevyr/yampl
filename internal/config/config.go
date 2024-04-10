@@ -12,8 +12,8 @@ type Config struct {
 	Strip      bool
 }
 
-func New() Config {
-	return Config{
+func New() *Config {
+	return &Config{
 		Values:     make(Values),
 		Prefix:     "#yampl",
 		LeftDelim:  "{{",

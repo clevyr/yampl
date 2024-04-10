@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func NewTemplateComments(conf config.Config, log zerolog.Logger) TemplateComments {
+func NewTemplateComments(conf *config.Config, log zerolog.Logger) TemplateComments {
 	return TemplateComments{
 		conf: conf,
 		log:  log,
@@ -20,7 +20,7 @@ func NewTemplateComments(conf config.Config, log zerolog.Logger) TemplateComment
 }
 
 type TemplateComments struct {
-	conf config.Config
+	conf *config.Config
 	log  zerolog.Logger
 }
 

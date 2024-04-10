@@ -12,7 +12,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func NewFindArgs(conf config.Config) *FindArgs {
+func NewFindArgs(conf *config.Config) *FindArgs {
 	return &FindArgs{
 		conf:     conf,
 		matchMap: make(map[string]MatchSlice),
@@ -55,7 +55,7 @@ func (v MatchSlice) String() string {
 }
 
 type FindArgs struct {
-	conf     config.Config
+	conf     *config.Config
 	matchMap map[string]MatchSlice
 }
 
