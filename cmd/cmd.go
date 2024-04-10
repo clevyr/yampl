@@ -140,8 +140,9 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		//nolint:forbidigo
-		fmt.Print(s)
+		if _, err := io.WriteString(cmd.OutOrStdout(), s); err != nil {
+			return err
+		}
 	}
 
 	for i, p := range args {
@@ -150,8 +151,9 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 
 		if !conf.Inplace && i != len(args)-1 {
-			//nolint:forbidigo
-			fmt.Println("---")
+			if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
+				return err
+			}
 		}
 	}
 
