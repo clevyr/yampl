@@ -20,10 +20,12 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+var version = "beta"
+
 //go:embed description.md
 var description string
 
-func NewCommand(version, commit string) *cobra.Command {
+func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:                   "yampl [-i] [-p prefix] [-v key=value ...] [file ...]",
 		Short:                 "Inline YAML templating via line-comments",
@@ -31,7 +33,7 @@ func NewCommand(version, commit string) *cobra.Command {
 		DisableFlagsInUseLine: true,
 		DisableAutoGenTag:     true,
 		ValidArgsFunction:     validArgs,
-		Version:               buildVersion(version, commit),
+		Version:               buildVersion(version),
 		PreRunE:               preRun,
 		RunE:                  run,
 	}

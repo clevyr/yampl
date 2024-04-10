@@ -15,13 +15,13 @@ import (
 
 func Test_preRun(t *testing.T) {
 	t.Run("silent usage", func(t *testing.T) {
-		cmd := NewCommand("", "")
+		cmd := NewCommand()
 		_ = preRun(cmd, []string{})
 		assert.True(t, cmd.SilenceUsage)
 	})
 
 	t.Run("no error", func(t *testing.T) {
-		err := preRun(NewCommand("", ""), []string{})
+		err := preRun(NewCommand(), []string{})
 		require.NoError(t, err)
 	})
 
@@ -31,7 +31,7 @@ func Test_preRun(t *testing.T) {
 			conf.Prefix = "#yampl"
 		}()
 
-		if err := preRun(NewCommand("", ""), []string{}); !assert.NoError(t, err) {
+		if err := preRun(NewCommand(), []string{}); !assert.NoError(t, err) {
 			return
 		}
 
@@ -45,7 +45,7 @@ func Test_preRun(t *testing.T) {
 			conf.Inplace = false
 		}()
 
-		err := preRun(NewCommand("", ""), []string{})
+		err := preRun(NewCommand(), []string{})
 		require.Error(t, err)
 	})
 
@@ -55,16 +55,16 @@ func Test_preRun(t *testing.T) {
 			conf.Recursive = false
 		}()
 
-		err := preRun(NewCommand("", ""), []string{})
+		err := preRun(NewCommand(), []string{})
 		require.Error(t, err)
 	})
 
 	t.Run("completion flag enabled", func(t *testing.T) {
-		cmd := NewCommand("", "")
+		cmd := NewCommand()
 		if err := cmd.Flags().Set(CompletionFlag, "zsh"); !assert.NoError(t, err) {
 			return
 		}
-		err := preRun(NewCommand("", ""), []string{})
+		err := preRun(NewCommand(), []string{})
 		require.NoError(t, err)
 	})
 }
@@ -176,7 +176,7 @@ func Test_openAndTemplateFile(t *testing.T) {
 			}()
 			require.NoError(t, err)
 
-			cmd := NewCommand("", "")
+			cmd := NewCommand()
 			var stdoutBuf strings.Builder
 			cmd.SetOut(&stdoutBuf)
 

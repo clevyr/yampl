@@ -50,5 +50,6 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
       --right-delim string     Override template right delimiter (default "}}")
   -s, --strip                  Strip template comments from output
   -v, --value stringToString   Define a template variable. Can be used more than once. (default [])
+      --version                version for yampl
 ```
 

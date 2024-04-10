@@ -32,7 +32,7 @@ func main() {
 		panic(err)
 	}
 
-	rootCmd := cmd.NewCommand("beta", "")
+	rootCmd := cmd.NewCommand()
 	name := rootCmd.Name()
 
 	date, err := time.Parse(time.RFC3339, dateParam)
