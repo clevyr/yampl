@@ -5,6 +5,7 @@ import (
 	"errors"
 	"fmt"
 	"io"
+	"io/fs"
 	"os"
 	"path/filepath"
 	"strings"
@@ -41,6 +42,11 @@ func NewCommand(version, commit string) *cobra.Command {
 
 	cmd.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
 	if err := cmd.RegisterFlagCompletionFunc("inplace", util.BoolCompletion); err != nil {
+		panic(err)
+	}
+
+	cmd.Flags().BoolVarP(&conf.Recursive, "recursive", "r", conf.Recursive, "Recursively update yaml files in the given directory")
+	if err := cmd.RegisterFlagCompletionFunc("recursive", util.BoolCompletion); err != nil {
 		panic(err)
 	}
 
@@ -105,7 +111,7 @@ func preRun(cmd *cobra.Command, args []string) error {
 		conf.Prefix = "#" + conf.Prefix
 	}
 
-	if conf.Inplace && len(args) == 0 {
+	if len(args) == 0 && (conf.Inplace || conf.Recursive) {
 		return ErrNoFiles
 	}
 
@@ -152,7 +158,32 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplate(cmd *cobra.Command, conf config.Config, p string) error {
+func openAndTemplate(cmd *cobra.Command, conf config.Config, path string) error {
+	stat, err := os.Stat(path)
+	if err != nil {
+		return err
+	}
+
+	if stat.IsDir() {
+		return filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() || !util.IsYaml(path) {
+				return err
+			}
+
+			if !conf.Inplace {
+				if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
+					return err
+				}
+			}
+
+			return openAndTemplateFile(cmd, conf, path)
+		})
+	}
+
+	return openAndTemplate(cmd, conf, path)
+}
+
+func openAndTemplateFile(cmd *cobra.Command, conf config.Config, p string) error {
 	f, err := os.Open(p)
 	if err != nil {
 		return err

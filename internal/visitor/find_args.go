@@ -12,8 +12,8 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func NewFindArgs(conf config.Config) FindArgs {
-	return FindArgs{
+func NewFindArgs(conf config.Config) *FindArgs {
+	return &FindArgs{
 		conf:     conf,
 		matchMap: make(map[string]MatchSlice),
 	}

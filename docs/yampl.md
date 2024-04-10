@@ -46,6 +46,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
       --log-format string      Log format (auto, color, plain, json) (default "color")
   -l, --log-level string       Log level (trace, debug, info, warn, error, fatal, panic) (default "info")
   -p, --prefix string          Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
+  -r, --recursive              Recursively update yaml files in the given directory
       --right-delim string     Override template right delimiter (default "}}")
   -s, --strip                  Strip template comments from output
   -v, --value stringToString   Define a template variable. Can be used more than once. (default [])

@@ -49,6 +49,16 @@ func Test_preRun(t *testing.T) {
 		require.Error(t, err)
 	})
 
+	t.Run("recursive no files", func(t *testing.T) {
+		conf.Recursive = true
+		defer func() {
+			conf.Recursive = false
+		}()
+
+		err := preRun(NewCommand("", ""), []string{})
+		require.Error(t, err)
+	})
+
 	t.Run("completion flag enabled", func(t *testing.T) {
 		cmd := NewCommand("", "")
 		if err := cmd.Flags().Set(CompletionFlag, "zsh"); !assert.NoError(t, err) {
@@ -122,7 +132,7 @@ func Test_templateReader(t *testing.T) {
 	}
 }
 
-func Test_openAndTemplate(t *testing.T) {
+func Test_openAndTemplateFile(t *testing.T) {
 	inplaceConf := config.New()
 	inplaceConf.Inplace = true
 
@@ -170,7 +180,7 @@ func Test_openAndTemplate(t *testing.T) {
 			var stdoutBuf strings.Builder
 			cmd.SetOut(&stdoutBuf)
 
-			err = openAndTemplate(cmd, tt.args.conf, p)
+			err = openAndTemplateFile(cmd, tt.args.conf, p)
 			tt.wantErr(t, err)
 
 			fileContents, err := os.ReadFile(p)
