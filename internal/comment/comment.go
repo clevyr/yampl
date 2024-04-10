@@ -22,7 +22,7 @@ func Parse(prefix string, n *yaml.Node) (string, Tag) {
 			// Match comment tag
 			comment = strings.TrimPrefix(comment, tagSep)
 
-			for _, tag := range tags {
+			for _, tag := range Tags() {
 				prefix := string(tag) + " "
 				if strings.HasPrefix(comment, prefix) {
 					return comment[len(prefix):], tag

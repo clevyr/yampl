@@ -21,12 +21,13 @@ const (
 	MapTag     Tag = "map"
 )
 
-//nolint:gochecknoglobals
-var tags = []Tag{
-	BoolTag,
-	StrTag,
-	IntTag,
-	FloatTag,
-	SeqTag,
-	MapTag,
+func Tags() []Tag {
+	return []Tag{
+		BoolTag,
+		StrTag,
+		IntTag,
+		FloatTag,
+		SeqTag,
+		MapTag,
+	}
 }
