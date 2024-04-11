@@ -197,7 +197,7 @@ func openAndTemplate(cmd *cobra.Command, conf *config.Config, path string) error
 		})
 	}
 
-	return openAndTemplate(cmd, conf, path)
+	return openAndTemplateFile(cmd, conf, path)
 }
 
 func openAndTemplateFile(cmd *cobra.Command, conf *config.Config, p string) error {
