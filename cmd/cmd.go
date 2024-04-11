@@ -161,7 +161,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	for i, p := range args {
-		if err := openAndTemplate(cmd, conf, p); err != nil {
+		if err := openAndTemplate(conf, cmd.OutOrStdout(), p); err != nil {
 			return fmt.Errorf("%s: %w", p, err)
 		}
 
@@ -175,7 +175,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplate(cmd *cobra.Command, conf *config.Config, path string) error {
+func openAndTemplate(conf *config.Config, w io.Writer, path string) error {
 	stat, err := os.Stat(path)
 	if err != nil {
 		return err
@@ -188,19 +188,19 @@ func openAndTemplate(cmd *cobra.Command, conf *config.Config, path string) error
 			}
 
 			if !conf.Inplace {
-				if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
+				if _, err := io.WriteString(w, "---\n"); err != nil {
 					return err
 				}
 			}
 
-			return openAndTemplateFile(cmd, conf, path)
+			return openAndTemplateFile(conf, w, path)
 		})
 	}
 
-	return openAndTemplateFile(cmd, conf, path)
+	return openAndTemplateFile(conf, w, path)
 }
 
-func openAndTemplateFile(cmd *cobra.Command, conf *config.Config, p string) error {
+func openAndTemplateFile(conf *config.Config, w io.Writer, p string) error {
 	f, err := os.Open(p)
 	if err != nil {
 		return err
@@ -269,7 +269,7 @@ func openAndTemplateFile(cmd *cobra.Command, conf *config.Config, p string) erro
 			}
 		}
 	} else {
-		if _, err := fmt.Fprint(cmd.OutOrStdout(), s); err != nil {
+		if _, err := fmt.Fprint(w, s); err != nil {
 			return err
 		}
 	}

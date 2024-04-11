@@ -176,11 +176,8 @@ func Test_openAndTemplateFile(t *testing.T) {
 			}()
 			require.NoError(t, err)
 
-			cmd := NewCommand()
 			var stdoutBuf strings.Builder
-			cmd.SetOut(&stdoutBuf)
-
-			err = openAndTemplateFile(cmd, tt.args.conf, p)
+			err = openAndTemplateFile(tt.args.conf, &stdoutBuf, p)
 			tt.wantErr(t, err)
 
 			fileContents, err := os.ReadFile(p)
