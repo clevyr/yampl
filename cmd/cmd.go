@@ -200,8 +200,8 @@ func openAndTemplate(conf *config.Config, w io.Writer, path string) error {
 	return openAndTemplateFile(conf, w, path)
 }
 
-func openAndTemplateFile(conf *config.Config, w io.Writer, p string) error {
-	f, err := os.Open(p)
+func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
+	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
@@ -209,7 +209,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, p string) error {
 		_ = f.Close()
 	}(f)
 
-	log := log.With().Str("file", p).Logger()
+	log := log.With().Str("file", path).Logger()
 
 	s, err := templateReader(conf, f, log)
 	if err != nil {
@@ -224,7 +224,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, p string) error {
 	_ = f.Close()
 
 	if conf.Inplace {
-		temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(p))
+		temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(path))
 		if err != nil {
 			return err
 		}
@@ -244,7 +244,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, p string) error {
 			return err
 		}
 
-		if err := os.Rename(temp.Name(), p); err != nil {
+		if err := os.Rename(temp.Name(), path); err != nil {
 			log.Trace().Msg("failed to rename file, attempting to copy contents")
 
 			in, err := os.Open(temp.Name())
@@ -255,7 +255,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, p string) error {
 				_ = in.Close()
 			}()
 
-			out, err := os.OpenFile(p, os.O_WRONLY|os.O_TRUNC, stat.Mode())
+			out, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, stat.Mode())
 			if err != nil {
 				return err
 			}
