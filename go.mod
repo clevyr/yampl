@@ -5,6 +5,7 @@ go 1.22.3
 require (
 	github.com/Masterminds/sprig/v3 v3.2.3
 	github.com/fatih/color v1.16.0
+	github.com/goccy/go-yaml v1.11.3
 	github.com/mattn/go-isatty v0.0.20
 	github.com/rs/zerolog v1.32.0
 	github.com/spf13/cobra v1.8.0
@@ -31,5 +32,6 @@ require (
 	github.com/spf13/cast v1.6.0 // indirect
 	golang.org/x/crypto v0.22.0 // indirect
 	golang.org/x/sys v0.19.0 // indirect
+	golang.org/x/xerrors v0.0.0-20200804184101-5ec99f83aff1 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )

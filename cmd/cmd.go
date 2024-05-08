@@ -11,6 +11,7 @@ import (
 	"path/filepath"
 	"strings"
 
+	"github.com/clevyr/yampl/internal/colorize"
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/clevyr/yampl/internal/config/flags"
 	"github.com/clevyr/yampl/internal/util"
@@ -269,7 +270,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 			}
 		}
 	} else {
-		if _, err := fmt.Fprint(w, s); err != nil {
+		if err := colorize.WriteString(w, s); err != nil {
 			return err
 		}
 	}
