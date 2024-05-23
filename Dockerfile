@@ -29,7 +29,7 @@ FROM alpine:3.20
 LABEL org.opencontainers.image.source="https://github.com/clevyr/yampl"
 WORKDIR /data
 
-RUN apk add --no-cache git jq yq
+RUN apk add --no-cache git jq yq-go
 
 COPY --from=builder /app/yampl /usr/local/bin/
 
