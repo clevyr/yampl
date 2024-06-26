@@ -50,7 +50,7 @@ func logFormat(out io.Writer, format string) io.Writer {
 		return zerolog.ConsoleWriter{
 			Out:     out,
 			NoColor: !useColor,
-			FormatMessage: func(i interface{}) string {
+			FormatMessage: func(i any) string {
 				return sprintf("%-45s", i)
 			},
 		}

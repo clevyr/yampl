@@ -8,7 +8,7 @@ import (
 
 func Test_toYaml(t *testing.T) {
 	type args struct {
-		v interface{}
+		v any
 	}
 	tests := []struct {
 		name string
