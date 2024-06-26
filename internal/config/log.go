@@ -46,6 +46,7 @@ func logFormat(out io.Writer, format string) io.Writer {
 		case Plain:
 		default:
 			log.Warn().Str("value", format).Msg("invalid log formatter. defaulting to auto.")
+			return logFormat(out, Auto)
 		}
 
 		return zerolog.ConsoleWriter{
