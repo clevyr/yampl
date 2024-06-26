@@ -2,7 +2,20 @@ package config
 
 import (
 	"github.com/clevyr/yampl/internal/util"
+	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
+)
+
+const (
+	Bash       = "bash"
+	Zsh        = "zsh"
+	Fish       = "fish"
+	Powershell = "powershell"
+
+	Auto  = "auto"
+	Color = "color"
+	Plain = "plain"
+	JSON  = "json"
 )
 
 func (c *Config) RegisterCompletions(cmd *cobra.Command) {
@@ -17,17 +30,25 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 		cmd.RegisterFlagCompletionFunc(StripFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(LogLevelFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return []string{"trace", "debug", "info", "warning", "error", "fatal", "panic"}, cobra.ShellCompDirectiveNoFileComp
+				return []string{
+					zerolog.TraceLevel.String(),
+					zerolog.DebugLevel.String(),
+					zerolog.InfoLevel.String(),
+					zerolog.WarnLevel.String(),
+					zerolog.ErrorLevel.String(),
+					zerolog.FatalLevel.String(),
+					zerolog.PanicLevel.String(),
+				}, cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 		cmd.RegisterFlagCompletionFunc(LogFormatFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return []string{"auto", "color", "plain", "json"}, cobra.ShellCompDirectiveNoFileComp
+				return []string{Auto, Color, Plain, JSON}, cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 		cmd.RegisterFlagCompletionFunc(CompletionFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return []string{"bash", "zsh", "fish", "powershell"}, cobra.ShellCompDirectiveNoFileComp
+				return []string{Bash, Zsh, Fish, Powershell}, cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 	)

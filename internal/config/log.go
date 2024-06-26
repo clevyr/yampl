@@ -27,23 +27,23 @@ func logLevel(level string) zerolog.Level {
 
 func logFormat(out io.Writer, format string) io.Writer {
 	switch format {
-	case "json", "j":
+	case JSON:
 		return out
 	default:
 		sprintf := fmt.Sprintf
 		var useColor bool
 		switch format {
-		case "auto", "a":
+		case Auto:
 			if w, ok := out.(*os.File); ok {
 				useColor = isatty.IsTerminal(w.Fd())
 				if useColor {
 					sprintf = color.New(color.Bold).Sprintf
 				}
 			}
-		case "color", "c":
+		case Color:
 			useColor = true
 			sprintf = color.New(color.Bold).Sprintf
-		case "plain", "p":
+		case Plain:
 		default:
 			log.Warn().Str("value", format).Msg("invalid log formatter. defaulting to auto.")
 		}

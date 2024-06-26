@@ -28,6 +28,6 @@ func New() *Config {
 		Indent:     2,
 
 		LogLevel:  zerolog.InfoLevel.String(),
-		LogFormat: "color",
+		LogFormat: Color,
 	}
 }
