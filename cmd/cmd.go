@@ -13,7 +13,6 @@ import (
 
 	"github.com/clevyr/yampl/internal/colorize"
 	"github.com/clevyr/yampl/internal/config"
-	"github.com/clevyr/yampl/internal/config/flags"
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/rs/zerolog"
@@ -36,57 +35,13 @@ func NewCommand() *cobra.Command {
 		DisableAutoGenTag:     true,
 		ValidArgsFunction:     validArgs,
 		Version:               buildVersion(version),
-		PreRunE:               preRun,
 		RunE:                  run,
 	}
 	conf := config.New()
-
-	registerCompletionFlag(cmd)
-	registerLogFlags(cmd)
-	registerValuesFlag(cmd, conf)
-
-	cmd.Flags().BoolVarP(&conf.Inplace, "inplace", "i", conf.Inplace, "Edit files in place")
-	if err := cmd.RegisterFlagCompletionFunc("inplace", util.BoolCompletion); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().BoolVarP(&conf.Recursive, "recursive", "r", conf.Recursive, "Recursively update yaml files in the given directory")
-	if err := cmd.RegisterFlagCompletionFunc("recursive", util.BoolCompletion); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().StringVarP(&conf.Prefix, "prefix", "p", conf.Prefix, "Template comments must begin with this prefix. The beginning '#' is implied.")
-	if err := cmd.RegisterFlagCompletionFunc("prefix", cobra.NoFileCompletions); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().StringVar(&conf.LeftDelim, "left-delim", conf.LeftDelim, "Override template left delimiter")
-	if err := cmd.RegisterFlagCompletionFunc("left-delim", cobra.NoFileCompletions); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().StringVar(&conf.RightDelim, "right-delim", conf.RightDelim, "Override template right delimiter")
-	if err := cmd.RegisterFlagCompletionFunc("right-delim", cobra.NoFileCompletions); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().IntVarP(&conf.Indent, "indent", "I", conf.Indent, "Override output indentation")
-	if err := cmd.RegisterFlagCompletionFunc("indent", cobra.NoFileCompletions); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().BoolVarP(&conf.Fail, "fail", "f", conf.Fail, `Exit with an error if a template variable is not set`)
-	if err := cmd.RegisterFlagCompletionFunc("fail", util.BoolCompletion); err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().BoolVarP(&conf.Strip, "strip", "s", conf.Strip, "Strip template comments from output")
-	if err := cmd.RegisterFlagCompletionFunc("strip", util.BoolCompletion); err != nil {
-		panic(err)
-	}
-
+	conf.RegisterFlags(cmd)
 	cmd.InitDefaultVersionFlag()
-
+	conf.RegisterCompletions(cmd)
+	visitor.RegisterCompletion(cmd, conf)
 	cmd.SetContext(config.WithContext(context.Background(), conf))
 	return cmd
 }
@@ -95,62 +50,28 @@ func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCom
 	return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 }
 
-var (
-	ErrNoFiles       = errors.New("no input files")
-	ErrMissingConfig = errors.New("missing config")
-)
-
-func preRun(cmd *cobra.Command, args []string) error {
-	completionFlag, err := cmd.Flags().GetString(CompletionFlag)
-	if err != nil {
-		panic(err)
-	}
-	if completionFlag != "" {
-		return nil
-	}
-
-	initLog(cmd)
-
-	cmd.SilenceUsage = true
-
-	conf, ok := config.FromContext(cmd.Context())
-	if !ok {
-		return ErrMissingConfig
-	}
-
-	if !strings.HasPrefix(conf.Prefix, "#") {
-		conf.Prefix = "#" + conf.Prefix
-	}
-
-	if len(args) == 0 && (conf.Inplace || conf.Recursive) {
-		return ErrNoFiles
-	}
-
-	rawValues, err := cmd.Flags().GetStringToString(flags.ValueFlag)
-	if err != nil {
-		panic(err)
-	}
-
-	conf.Values.Fill(rawValues)
-
-	return nil
-}
+var ErrNoFiles = errors.New("no input files")
 
 func run(cmd *cobra.Command, args []string) error {
-	completionFlag, err := cmd.Flags().GetString(CompletionFlag)
-	if err != nil {
-		panic(err)
-	}
-	if completionFlag != "" {
-		return completion(cmd, args)
-	}
-
 	conf, ok := config.FromContext(cmd.Context())
 	if !ok {
-		return ErrMissingConfig
+		panic("config missing from command context")
+	}
+
+	if err := conf.Load(cmd); err != nil {
+		return err
+	}
+
+	if conf.Completion != "" {
+		return completion(cmd, conf.Completion)
 	}
 
 	if len(args) == 0 {
+		if conf.Inplace || conf.Recursive {
+			return ErrNoFiles
+		}
+		cmd.SilenceUsage = true
+
 		s, err := templateReader(conf, os.Stdin, log.Logger)
 		if err != nil {
 			return err
@@ -160,6 +81,8 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
+
+	cmd.SilenceUsage = true
 
 	for i, p := range args {
 		if err := openAndTemplate(conf, cmd.OutOrStdout(), p); err != nil {

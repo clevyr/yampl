@@ -1,4 +1,4 @@
-package cmd
+package visitor
 
 import (
 	"errors"
@@ -9,19 +9,13 @@ import (
 	"strings"
 
 	"github.com/clevyr/yampl/internal/config"
-	"github.com/clevyr/yampl/internal/config/flags"
 	"github.com/clevyr/yampl/internal/util"
-	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
 
-func registerValuesFlag(cmd *cobra.Command, conf *config.Config) {
-	cmd.Flags().StringToStringP(flags.ValueFlag, flags.ValueFlagShort, map[string]string{}, "Define a template variable. Can be used more than once.")
-	err := cmd.RegisterFlagCompletionFunc("value", valueCompletion(conf))
-	if err != nil {
-		panic(err)
-	}
+func RegisterCompletion(cmd *cobra.Command, conf *config.Config) {
+	util.Must(cmd.RegisterFlagCompletionFunc(config.ValueFlag, valueCompletion(conf)))
 }
 
 func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
@@ -30,7 +24,7 @@ func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string
 			conf.Prefix = "#" + conf.Prefix
 		}
 
-		v := visitor.NewFindArgs(conf)
+		v := NewFindArgs(conf)
 
 		for _, path := range args {
 			stat, err := os.Stat(path)
@@ -60,7 +54,7 @@ func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string
 	}
 }
 
-func valueCompletionFile(path string, v *visitor.FindArgs) error {
+func valueCompletionFile(path string, v *FindArgs) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err

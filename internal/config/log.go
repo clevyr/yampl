@@ -1,4 +1,4 @@
-package cmd
+package config
 
 import (
 	"fmt"
@@ -11,32 +11,6 @@ import (
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
-
-func registerLogFlags(cmd *cobra.Command) {
-	var err error
-
-	cmd.Flags().StringP("log-level", "l", "info", "Log level (trace, debug, info, warn, error, fatal, panic)")
-	err = cmd.RegisterFlagCompletionFunc(
-		"log-level",
-		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-			return []string{"trace", "debug", "info", "warning", "error", "fatal", "panic"}, cobra.ShellCompDirectiveNoFileComp
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-
-	cmd.Flags().String("log-format", "color", "Log format (auto, color, plain, json)")
-	err = cmd.RegisterFlagCompletionFunc(
-		"log-format",
-		func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-			return []string{"auto", "color", "plain", "json"}, cobra.ShellCompDirectiveNoFileComp
-		},
-	)
-	if err != nil {
-		panic(err)
-	}
-}
 
 func logLevel(level string) zerolog.Level {
 	parsedLevel, err := zerolog.ParseLevel(level)

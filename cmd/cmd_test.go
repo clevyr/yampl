@@ -13,16 +13,15 @@ import (
 	"github.com/stretchr/testify/require"
 )
 
-func Test_preRun(t *testing.T) {
+func Test_run(t *testing.T) {
 	t.Run("silent usage", func(t *testing.T) {
 		cmd := NewCommand()
-		_ = preRun(cmd, []string{})
+		_ = run(cmd, []string{})
 		assert.True(t, cmd.SilenceUsage)
 	})
 
 	t.Run("no error", func(t *testing.T) {
-		err := preRun(NewCommand(), []string{})
-		require.NoError(t, err)
+		require.NoError(t, run(NewCommand(), []string{}))
 	})
 
 	t.Run("invalid prefix", func(t *testing.T) {
@@ -30,11 +29,7 @@ func Test_preRun(t *testing.T) {
 		conf, ok := config.FromContext(cmd.Context())
 		require.True(t, ok)
 		conf.Prefix = "tmpl"
-
-		if err := preRun(cmd, []string{}); !assert.NoError(t, err) {
-			return
-		}
-
+		require.NoError(t, run(cmd, []string{}))
 		want := "#tmpl"
 		assert.Equal(t, want, conf.Prefix)
 	})
@@ -44,9 +39,7 @@ func Test_preRun(t *testing.T) {
 		conf, ok := config.FromContext(cmd.Context())
 		require.True(t, ok)
 		conf.Inplace = true
-
-		err := preRun(cmd, []string{})
-		require.Error(t, err)
+		require.Error(t, run(cmd, []string{}))
 	})
 
 	t.Run("recursive no files", func(t *testing.T) {
@@ -54,18 +47,15 @@ func Test_preRun(t *testing.T) {
 		conf, ok := config.FromContext(cmd.Context())
 		require.True(t, ok)
 		conf.Recursive = true
-
-		err := preRun(cmd, []string{})
-		require.Error(t, err)
+		require.Error(t, run(cmd, []string{}))
 	})
 
 	t.Run("completion flag enabled", func(t *testing.T) {
 		cmd := NewCommand()
-		if err := cmd.Flags().Set(CompletionFlag, "zsh"); !assert.NoError(t, err) {
+		if err := cmd.Flags().Set(config.CompletionFlag, "zsh"); !assert.NoError(t, err) {
 			return
 		}
-		err := preRun(cmd, []string{})
-		require.NoError(t, err)
+		require.NoError(t, run(cmd, []string{}))
 	})
 }
 

@@ -1,5 +1,7 @@
 package config
 
+import "github.com/rs/zerolog"
+
 type Config struct {
 	Values     Values
 	Inplace    bool
@@ -10,6 +12,11 @@ type Config struct {
 	Indent     int
 	Fail       bool
 	Strip      bool
+
+	LogLevel  string
+	LogFormat string
+
+	Completion string
 }
 
 func New() *Config {
@@ -19,5 +26,8 @@ func New() *Config {
 		LeftDelim:  "{{",
 		RightDelim: "}}",
 		Indent:     2,
+
+		LogLevel:  zerolog.InfoLevel.String(),
+		LogFormat: "color",
 	}
 }
