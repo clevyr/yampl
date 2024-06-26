@@ -1,12 +1,19 @@
 package config
 
 import (
+	"os"
 	"testing"
 
 	"github.com/stretchr/testify/assert"
 )
 
 func TestFixStringToStringNewlines(t *testing.T) {
+	t.Run("env", func(t *testing.T) {
+		t.Setenv("YAMPL_VALUE", "a=a\nb=b")
+		FixStringToStringNewlines([]string{})
+		assert.Equal(t, "a=a,b=b", os.Getenv("YAMPL_VALUE"))
+	})
+
 	type args struct {
 		s []string
 	}

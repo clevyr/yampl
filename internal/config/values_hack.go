@@ -2,6 +2,7 @@ package config
 
 import (
 	"bufio"
+	"os"
 	"strings"
 )
 
@@ -28,6 +29,10 @@ func FixStringToStringNewlines(s []string) []string {
 		default:
 			result = append(result, arg)
 		}
+	}
+	envName := EnvPrefix + strings.ToUpper(ValueFlag)
+	if env := os.Getenv(envName); env != "" {
+		_ = os.Setenv(envName, strings.ReplaceAll(env, "\n", ","))
 	}
 	return result
 }
