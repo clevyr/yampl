@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func TestDockerRepo(t *testing.T) {
@@ -11,15 +12,18 @@ func TestDockerRepo(t *testing.T) {
 		image string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr require.ErrorAssertionFunc
 	}{
-		{"postgres:alpine", args{"postgres:alpine"}, "postgres"},
+		{"postgres:alpine", args{"postgres:alpine"}, "postgres", require.NoError},
+		{"postgres", args{"postgres"}, "postgres", require.Error},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := DockerRepo(tt.args.image)
+			got, err := DockerRepo(tt.args.image)
+			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
@@ -30,15 +34,18 @@ func TestDockerTag(t *testing.T) {
 		image string
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr require.ErrorAssertionFunc
 	}{
-		{"postgres:alpine", args{"postgres:alpine"}, "alpine"},
+		{"postgres:alpine", args{"postgres:alpine"}, "alpine", require.NoError},
+		{"postgres", args{"postgres"}, "", require.Error},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := DockerTag(tt.args.image)
+			got, err := DockerTag(tt.args.image)
+			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}

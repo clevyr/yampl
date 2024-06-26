@@ -1,15 +1,27 @@
 package template
 
 import (
+	"errors"
 	"strings"
 )
 
-func DockerRepo(image string) string {
-	repo, _, _ := strings.Cut(image, ":")
-	return repo
+var (
+	ErrRepoNotFound = errors.New("docker repo not found")
+	ErrTagNotFound  = errors.New("docker tag not found")
+)
+
+func DockerRepo(image string) (string, error) {
+	repo, _, found := strings.Cut(image, ":")
+	if !found {
+		return repo, ErrRepoNotFound
+	}
+	return repo, nil
 }
 
-func DockerTag(image string) string {
-	_, tag, _ := strings.Cut(image, ":")
-	return tag
+func DockerTag(image string) (string, error) {
+	_, tag, found := strings.Cut(image, ":")
+	if !found {
+		return tag, ErrTagNotFound
+	}
+	return tag, nil
 }

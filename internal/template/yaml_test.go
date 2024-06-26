@@ -4,6 +4,7 @@ import (
 	"testing"
 
 	"github.com/stretchr/testify/assert"
+	"github.com/stretchr/testify/require"
 )
 
 func Test_toYaml(t *testing.T) {
@@ -11,15 +12,17 @@ func Test_toYaml(t *testing.T) {
 		v any
 	}
 	tests := []struct {
-		name string
-		args args
-		want string
+		name    string
+		args    args
+		want    string
+		wantErr require.ErrorAssertionFunc
 	}{
-		{"map", args{map[string]any{"a": "a"}}, "a: a"},
+		{"map", args{map[string]any{"a": "a"}}, "a: a", require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got := toYaml(tt.args.v)
+			got, err := toYaml(tt.args.v)
+			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})
 	}
