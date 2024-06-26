@@ -1,8 +1,9 @@
+.DS_Store
 .idea/
-/yampl
-coverage.out
-dist/
-vendor/
-data/
 /completions/
 /manpages/
+/yampl
+coverage.out
+data/
+dist/
+vendor/
