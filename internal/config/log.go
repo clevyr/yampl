@@ -35,11 +35,11 @@ func logFormat(out io.Writer, format string) io.Writer {
 		switch format {
 		case Auto:
 			if w, ok := out.(*os.File); ok {
-				useColor = isatty.IsTerminal(w.Fd())
-				if useColor {
-					sprintf = color.New(color.Bold).Sprintf
+				if useColor = isatty.IsTerminal(w.Fd()); !useColor {
+					break
 				}
 			}
+			fallthrough
 		case Color:
 			useColor = true
 			sprintf = color.New(color.Bold).Sprintf
