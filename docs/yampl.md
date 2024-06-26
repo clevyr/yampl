@@ -43,7 +43,7 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
   -I, --indent int             Override output indentation (default 2)
   -i, --inplace                Edit files in place
       --left-delim string      Override template left delimiter (default "{{")
-      --log-format string      Log format (auto, color, plain, json) (default "color")
+      --log-format string      Log format (auto, color, plain, json) (default "auto")
   -l, --log-level string       Log level (trace, debug, info, warn, error, fatal, panic) (default "info")
   -p, --prefix string          Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
   -r, --recursive              Recursively update yaml files in the given directory
