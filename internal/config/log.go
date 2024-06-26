@@ -42,6 +42,7 @@ func logFormat(out io.Writer, format string) io.Writer {
 			fallthrough
 		case Color:
 			useColor = true
+			color.NoColor = false
 			sprintf = color.New(color.Bold).Sprintf
 		case Plain:
 		default:
