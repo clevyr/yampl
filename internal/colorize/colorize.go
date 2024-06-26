@@ -37,47 +37,51 @@ func WriteString(w io.Writer, s string) error {
 	return err
 }
 
+func Printer() *printer.Printer {
+	return &printer.Printer{
+		MapKey: func() *printer.Property {
+			return &printer.Property{
+				Prefix: format(color.FgCyan),
+				Suffix: format(color.Reset),
+			}
+		},
+		Anchor: func() *printer.Property {
+			return &printer.Property{
+				Prefix: format(color.FgHiYellow),
+				Suffix: format(color.Reset),
+			}
+		},
+		Alias: func() *printer.Property {
+			return &printer.Property{
+				Prefix: format(color.FgHiYellow),
+				Suffix: format(color.Reset),
+			}
+		},
+		Bool: func() *printer.Property {
+			return &printer.Property{
+				Prefix: format(color.FgHiMagenta),
+				Suffix: format(color.Reset),
+			}
+		},
+		String: func() *printer.Property {
+			return &printer.Property{
+				Prefix: format(color.FgGreen),
+				Suffix: format(color.Reset),
+			}
+		},
+		Number: func() *printer.Property {
+			return &printer.Property{
+				Prefix: format(color.FgHiMagenta),
+				Suffix: format(color.Reset),
+			}
+		},
+	}
+}
+
 func Colorize(s string) string {
 	// https://github.com/mikefarah/yq/blob/v4.43.1/pkg/yqlib/color_print.go
 	tokens := lexer.Tokenize(s)
-	var p printer.Printer
-	p.Bool = func() *printer.Property {
-		return &printer.Property{
-			Prefix: format(color.FgHiMagenta),
-			Suffix: format(color.Reset),
-		}
-	}
-	p.Number = func() *printer.Property {
-		return &printer.Property{
-			Prefix: format(color.FgHiMagenta),
-			Suffix: format(color.Reset),
-		}
-	}
-	p.MapKey = func() *printer.Property {
-		return &printer.Property{
-			Prefix: format(color.FgCyan),
-			Suffix: format(color.Reset),
-		}
-	}
-	p.Anchor = func() *printer.Property {
-		return &printer.Property{
-			Prefix: format(color.FgHiYellow),
-			Suffix: format(color.Reset),
-		}
-	}
-	p.Alias = func() *printer.Property {
-		return &printer.Property{
-			Prefix: format(color.FgHiYellow),
-			Suffix: format(color.Reset),
-		}
-	}
-	p.String = func() *printer.Property {
-		return &printer.Property{
-			Prefix: format(color.FgGreen),
-			Suffix: format(color.Reset),
-		}
-	}
-	s = p.PrintTokens(tokens)
+	s = Printer().PrintTokens(tokens)
 	if !strings.HasSuffix(s, "\n") {
 		return s + "\n"
 	}
