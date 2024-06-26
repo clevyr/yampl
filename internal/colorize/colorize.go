@@ -18,7 +18,7 @@ func format(attr color.Attribute) string {
 	return escape + "[" + strconv.Itoa(int(attr)) + "m"
 }
 
-func shouldColor(w io.Writer) bool {
+func ShouldColor(w io.Writer) bool {
 	if os.Getenv("NO_COLOR") != "" || os.Getenv("TERM") == "dumb" {
 		return false
 	}
@@ -29,7 +29,7 @@ func shouldColor(w io.Writer) bool {
 }
 
 func WriteString(w io.Writer, s string) error {
-	if shouldColor(w) {
+	if ShouldColor(w) {
 		s = Colorize(s)
 	}
 

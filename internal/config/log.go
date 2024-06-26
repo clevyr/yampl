@@ -3,10 +3,9 @@ package config
 import (
 	"fmt"
 	"io"
-	"os"
 
+	"github.com/clevyr/yampl/internal/colorize"
 	"github.com/fatih/color"
-	"github.com/mattn/go-isatty"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -34,10 +33,8 @@ func logFormat(out io.Writer, format string) io.Writer {
 		var useColor bool
 		switch format {
 		case Auto:
-			if w, ok := out.(*os.File); ok {
-				if useColor = isatty.IsTerminal(w.Fd()); !useColor {
-					break
-				}
+			if useColor = colorize.ShouldColor(out); !useColor {
+				break
 			}
 			fallthrough
 		case Color:
