@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 	"os"
+	"slices"
 	"strings"
 
 	"github.com/spf13/cobra"
@@ -12,9 +13,13 @@ import (
 const EnvPrefix = "YAMPL_"
 
 func (c *Config) Load(cmd *cobra.Command) error {
+	IgnoredEnvs := []string{
+		CompletionFlag,
+	}
+
 	var errs []error
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		if !f.Changed {
+		if !f.Changed && !slices.Contains(IgnoredEnvs, f.Name) {
 			if val, ok := os.LookupEnv(EnvName(f.Name)); ok {
 				if err := f.Value.Set(val); err != nil {
 					errs = append(errs, err)
