@@ -49,7 +49,7 @@ Yampl is available in brew or as a Docker container.
   Docker container. The container uses `/data` as its workdir, so if you wanted
   to template `example.yaml` in the current directory, you could run:
   ```shell
-  docker run --rm -it -v "$PWD:/data" ghcr.io/clevyr/yampl yampl example.yaml ...
+  docker run --rm -it -v "$PWD:/data" ghcr.io/clevyr/yampl example.yaml ...
   ```
 </details>
 

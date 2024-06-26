@@ -6,4 +6,4 @@ RUN apk add --no-cache git jq yq
 
 COPY yampl /usr/local/bin
 
-CMD ["yampl"]
+ENTRYPOINT ["yampl"]
