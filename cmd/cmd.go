@@ -82,7 +82,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if _, err := io.WriteString(cmd.OutOrStdout(), s); err != nil {
+		if err := colorize.WriteString(cmd.OutOrStdout(), s); err != nil {
 			return err
 		}
 	}
