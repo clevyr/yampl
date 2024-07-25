@@ -15,6 +15,7 @@ import (
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
+	"github.com/mattn/go-isatty"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
@@ -71,6 +72,10 @@ func run(cmd *cobra.Command, args []string) error {
 			return ErrNoFiles
 		}
 		cmd.SilenceUsage = true
+
+		if isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd()) {
+			return cmd.Help()
+		}
 
 		s, err := templateReader(conf, os.Stdin, log.Logger)
 		if err != nil {
