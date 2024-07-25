@@ -13,8 +13,11 @@ const (
 	LeftDelimFlag  = "left-delim"
 	RightDelimFlag = "right-delim"
 	IndentFlag     = "indent"
-	FailFlag       = "fail"
 	StripFlag      = "strip"
+
+	FailFlag                 = "fail"
+	IgnoreUnsetErrorsFlag    = "ignore-unset-errors"
+	IgnoreTemplateErrorsFlag = "ignore-template-errors"
 
 	LogLevelFlag  = "log-level"
 	LogFormatFlag = "log-format"
@@ -30,8 +33,14 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&c.LeftDelim, LeftDelimFlag, c.LeftDelim, "Override template left delimiter")
 	cmd.Flags().StringVar(&c.RightDelim, RightDelimFlag, c.RightDelim, "Override template right delimiter")
 	cmd.Flags().IntVarP(&c.Indent, IndentFlag, "I", c.Indent, "Override output indentation")
-	cmd.Flags().BoolVarP(&c.Fail, FailFlag, "f", c.Fail, `Exit with an error if a template variable is not set`)
 	cmd.Flags().BoolVarP(&c.Strip, StripFlag, "s", c.Strip, "Strip template comments from output")
+
+	cmd.Flags().BoolP(FailFlag, "f", false, `Exit with an error if a template variable is not set`)
+	cmd.Flags().BoolVar(&c.IgnoreUnsetErrors, IgnoreUnsetErrorsFlag, c.IgnoreUnsetErrors, "Exit with an error if a template variable is not set")
+	cmd.Flags().BoolVar(&c.IgnoreTemplateErrors, IgnoreTemplateErrorsFlag, c.IgnoreTemplateErrors, "Continue processing a file even if a template fails")
+	if err := cmd.Flags().MarkDeprecated(FailFlag, "use --"+IgnoreUnsetErrorsFlag+" and --"+IgnoreTemplateErrorsFlag+" instead"); err != nil {
+		panic(err)
+	}
 
 	cmd.Flags().StringVarP(&c.LogLevel, LogLevelFlag, "l", c.LogLevel, "Log level (trace, debug, info, warn, error, fatal, panic)")
 	cmd.Flags().StringVar(&c.LogFormat, LogFormatFlag, c.LogFormat, "Log format (auto, color, plain, json)")

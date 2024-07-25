@@ -10,8 +10,10 @@ type Config struct {
 	LeftDelim  string
 	RightDelim string
 	Indent     int
-	Fail       bool
 	Strip      bool
+
+	IgnoreUnsetErrors    bool
+	IgnoreTemplateErrors bool
 
 	LogLevel  string
 	LogFormat string
@@ -26,6 +28,8 @@ func New() *Config {
 		LeftDelim:  "{{",
 		RightDelim: "}}",
 		Indent:     2,
+
+		IgnoreUnsetErrors: true,
 
 		LogLevel:  zerolog.InfoLevel.String(),
 		LogFormat: Auto,

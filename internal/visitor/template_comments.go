@@ -3,6 +3,7 @@ package visitor
 import (
 	"bytes"
 	"fmt"
+	"strings"
 	"text/template"
 
 	"github.com/clevyr/yampl/internal/comment"
@@ -35,10 +36,9 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 			}
 
 			if err := t.Template(n, tmplSrc, tmplTag); err != nil {
-				if t.conf.Fail {
+				if err := t.handleTemplateError(err); err != nil {
 					return err
 				}
-				t.log.Warn().Err(err).Msg("skipping value due to template error")
 			}
 		}
 	case n.Kind == yaml.MappingNode:
@@ -61,11 +61,9 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 				}
 
 				if err := t.Template(val, tmplSrc, tmplTag); err != nil {
-					if t.conf.Fail {
+					if err := t.handleTemplateError(err); err != nil {
 						return err
 					}
-					t.log.Warn().Err(err).Msg("skipping value due to template error")
-					continue
 				}
 			}
 			comment.Move(key, val)
@@ -128,5 +126,22 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 
 		n.Tag = tmplTag.ToYaml()
 	}
+	return nil
+}
+
+func (t TemplateComments) handleTemplateError(err error) error {
+	level := zerolog.WarnLevel
+	switch {
+	case err != nil && strings.Contains(err.Error(), "map has no entry for key"):
+		if t.conf.IgnoreUnsetErrors {
+			level = zerolog.DebugLevel
+		} else {
+			return err
+		}
+	case t.conf.IgnoreTemplateErrors:
+	default:
+		return err
+	}
+	t.log.WithLevel(level).Err(err).Msg("skipping value due to template error")
 	return nil
 }

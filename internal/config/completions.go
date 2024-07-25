@@ -26,7 +26,8 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 		cmd.RegisterFlagCompletionFunc(LeftDelimFlag, cobra.NoFileCompletions),
 		cmd.RegisterFlagCompletionFunc(RightDelimFlag, cobra.NoFileCompletions),
 		cmd.RegisterFlagCompletionFunc(IndentFlag, cobra.NoFileCompletions),
-		cmd.RegisterFlagCompletionFunc(FailFlag, BoolCompletion),
+		cmd.RegisterFlagCompletionFunc(IgnoreUnsetErrorsFlag, BoolCompletion),
+		cmd.RegisterFlagCompletionFunc(IgnoreTemplateErrorsFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(StripFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(LogLevelFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {

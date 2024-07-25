@@ -37,19 +37,20 @@ yampl [-i] [-p prefix] [-v key=value ...] [file ...]
 ### Options
 
 ```
-      --completion string      Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
-  -f, --fail                   Exit with an error if a template variable is not set
-  -h, --help                   help for yampl
-  -I, --indent int             Override output indentation (default 2)
-  -i, --inplace                Edit files in place
-      --left-delim string      Override template left delimiter (default "{{")
-      --log-format string      Log format (auto, color, plain, json) (default "auto")
-  -l, --log-level string       Log level (trace, debug, info, warn, error, fatal, panic) (default "info")
-  -p, --prefix string          Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
-  -r, --recursive              Recursively update yaml files in the given directory
-      --right-delim string     Override template right delimiter (default "}}")
-  -s, --strip                  Strip template comments from output
-  -v, --value stringToString   Define a template variable. Can be used more than once. (default [])
-      --version                version for yampl
+      --completion string        Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
+  -h, --help                     help for yampl
+      --ignore-template-errors   Continue processing a file even if a template fails
+      --ignore-unset-errors      Exit with an error if a template variable is not set (default true)
+  -I, --indent int               Override output indentation (default 2)
+  -i, --inplace                  Edit files in place
+      --left-delim string        Override template left delimiter (default "{{")
+      --log-format string        Log format (auto, color, plain, json) (default "auto")
+  -l, --log-level string         Log level (trace, debug, info, warn, error, fatal, panic) (default "info")
+  -p, --prefix string            Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
+  -r, --recursive                Recursively update yaml files in the given directory
+      --right-delim string       Override template right delimiter (default "}}")
+  -s, --strip                    Strip template comments from output
+  -v, --value stringToString     Define a template variable. Can be used more than once. (default [])
+      --version                  version for yampl
 ```
 

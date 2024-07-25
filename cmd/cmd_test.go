@@ -83,8 +83,11 @@ func Test_validArgs(t *testing.T) {
 }
 
 func Test_templateReader(t *testing.T) {
-	failConf := config.New()
-	failConf.Fail = true
+	ignoreTemplateConf := config.New()
+	ignoreTemplateConf.IgnoreTemplateErrors = true
+
+	failUnsetConf := config.New()
+	failUnsetConf.IgnoreUnsetErrors = false
 
 	stripConf := config.New()
 	stripConf.Strip = true
@@ -109,8 +112,10 @@ func Test_templateReader(t *testing.T) {
 		{"seq flow to block", args{config.New(), strings.NewReader("a: {} #yampl:seq [a]")}, "a: #yampl:seq [a]\n  - a\n", require.NoError},
 		{"seq block to flow", args{config.New(), strings.NewReader("a: #yampl:seq []\n  - b")}, "a: [] #yampl:seq []\n", require.NoError},
 		{"invalid yaml", args{config.New(), strings.NewReader("a:\n- b\n  c: c")}, "", require.Error},
-		{"unset value allowed", args{config.New(), strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", require.NoError},
-		{"unset value error", args{failConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", require.Error},
+		{"invalid template", args{config.New(), strings.NewReader("a: a #yampl {{ .Value")}, "", require.Error},
+		{"invalid template ignored", args{ignoreTemplateConf, strings.NewReader("a: a #yampl {{ .Value")}, "a: a #yampl {{ .Value\n", require.NoError},
+		{"unset value ignored", args{config.New(), strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", require.NoError},
+		{"unset value error", args{failUnsetConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", require.Error},
 		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", require.NoError},
 	}
 	for _, tt := range tests {

@@ -19,10 +19,12 @@ func (c *Config) Load(cmd *cobra.Command) error {
 
 	var errs []error
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
-		if !f.Changed && !slices.Contains(IgnoredEnvs, f.Name) {
-			if val, ok := os.LookupEnv(EnvName(f.Name)); ok {
-				if err := f.Value.Set(val); err != nil {
-					errs = append(errs, err)
+		if !f.Changed {
+			if !slices.Contains(IgnoredEnvs, f.Name) {
+				if val, ok := os.LookupEnv(EnvName(f.Name)); ok {
+					if err := f.Value.Set(val); err != nil {
+						errs = append(errs, err)
+					}
 				}
 			}
 		}
@@ -42,6 +44,15 @@ func (c *Config) Load(cmd *cobra.Command) error {
 		return err
 	}
 	c.Values.Fill(rawValues)
+
+	if f := cmd.Flags().Lookup(FailFlag); f.Changed {
+		val, err := cmd.Flags().GetBool(FailFlag)
+		if err != nil {
+			return err
+		}
+		c.IgnoreUnsetErrors = !val
+		c.IgnoreTemplateErrors = !val
+	}
 
 	return nil
 }
