@@ -2,7 +2,6 @@ package cmd
 
 import (
 	"context"
-	_ "embed"
 	"errors"
 	"io"
 	"io/fs"
@@ -15,6 +14,7 @@ import (
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/mattn/go-isatty"
+	"github.com/muesli/termenv"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -22,19 +22,21 @@ import (
 
 var version = "beta"
 
-//go:embed description.md
-var description string
+//nolint:gochecknoglobals
+var description = `Yampl (yaml + tmpl) templates YAML values based on line-comments.
+YAML data can be piped to stdin or files/dirs can be passed as arguments.
+
+Full reference at ` + termenv.Hyperlink("https://github.com/clevyr/yampl#readme", "github.com/clevyr/yampl")
 
 func NewCommand() *cobra.Command {
 	cmd := &cobra.Command{
-		Use:                   "yampl [-i] [-p prefix] [-v key=value ...] [file ...]",
-		Short:                 "Inline YAML templating via line-comments",
-		Long:                  description,
-		DisableFlagsInUseLine: true,
-		DisableAutoGenTag:     true,
-		ValidArgsFunction:     validArgs,
-		Version:               buildVersion(version),
-		RunE:                  run,
+		Use:               "yampl [files | dirs] [-v key=value...]",
+		Short:             "Inline YAML templating via line-comments",
+		Long:              description,
+		DisableAutoGenTag: true,
+		ValidArgsFunction: validArgs,
+		Version:           buildVersion(version),
+		RunE:              run,
 	}
 	conf := config.New()
 	conf.RegisterFlags(cmd)

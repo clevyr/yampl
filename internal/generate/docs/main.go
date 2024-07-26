@@ -3,6 +3,7 @@ package main
 import (
 	"log"
 	"os"
+	"strings"
 
 	"github.com/clevyr/yampl/cmd"
 	"github.com/spf13/cobra/doc"
@@ -21,6 +22,9 @@ func main() {
 	}
 
 	rootCmd := cmd.NewCommand()
+	if i := strings.Index(rootCmd.Long, "\n\nFull reference at"); i != -1 {
+		rootCmd.Long = rootCmd.Long[:i]
+	}
 	if err = doc.GenMarkdownTree(rootCmd, output); err != nil {
 		log.Fatalf("failed to generate markdown: %v", err)
 	}

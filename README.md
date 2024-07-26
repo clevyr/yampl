@@ -7,7 +7,7 @@
 [![Go Report Card](https://goreportcard.com/badge/github.com/clevyr/yampl)](https://goreportcard.com/report/github.com/clevyr/yampl)
 [![Quality Gate Status](https://sonarcloud.io/api/project_badges/measure?project=clevyr_yampl&metric=alert_status)](https://sonarcloud.io/summary/new_code?id=clevyr_yampl)
 
-Yampl (yaml + tmpl) is a simple tool to template yaml values based on line-comments.
+Yampl (yaml + tmpl) templates YAML values based on line-comments.
 
 ## Installation
 
