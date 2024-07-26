@@ -257,7 +257,7 @@ The above produces `stable-alpine`
 
 By default, templated values are not explicitly quoted. This can cause
 problems with some tools that require specific types. If you require a
-field specific type for a field, you can add a tag to the template prefix.
+specific type for a field, you can add a tag to the template prefix.
 
 Supported tags:
 
