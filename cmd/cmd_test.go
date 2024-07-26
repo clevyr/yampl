@@ -48,6 +48,13 @@ func Test_run(t *testing.T) {
 		}
 		require.NoError(t, run(cmd, []string{}))
 	})
+
+	t.Run("has config", func(t *testing.T) {
+		cmd := NewCommand()
+		conf, ok := config.FromContext(cmd.Context())
+		assert.True(t, ok)
+		assert.NotNil(t, conf)
+	})
 }
 
 func Test_validArgs(t *testing.T) {
