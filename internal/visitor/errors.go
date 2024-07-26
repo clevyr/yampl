@@ -6,16 +6,24 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
+func NewNodeError(err error, name string, node *yaml.Node) NodeError {
+	return NodeError{
+		err:  err,
+		name: name,
+		node: node,
+	}
+}
+
 type NodeError struct {
-	Err  error
-	Name string
-	Node *yaml.Node
+	err  error
+	name string
+	node *yaml.Node
 }
 
 func (e NodeError) Error() string {
-	return fmt.Sprintf("%s:%d:%d: %s", e.Name, e.Node.Line, e.Node.Column, e.Err)
+	return fmt.Sprintf("%s:%d:%d: %s", e.name, e.node.Line, e.node.Column, e.err)
 }
 
 func (e NodeError) Unwrap() error {
-	return e.Err
+	return e.err
 }

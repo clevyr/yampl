@@ -100,7 +100,7 @@ func (visitor *FindArgs) FindArgs(n *yaml.Node, value string) error {
 			Option("missingkey=zero").
 			Parse(tmplSrc)
 		if err != nil {
-			return NodeError{Err: err, Name: visitor.path, Node: n}
+			return NewNodeError(err, visitor.path, n)
 		}
 
 		for _, field := range listTemplFields(tmpl) {

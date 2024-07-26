@@ -102,7 +102,7 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 		Option("missingkey=error").
 		Parse(tmplSrc)
 	if err != nil {
-		return NodeError{Err: err, Name: name, Node: n}
+		return NewNodeError(err, name, n)
 	}
 
 	if t.conf.Values != nil {
@@ -111,7 +111,7 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
-		return NodeError{Err: err, Name: name, Node: n}
+		return NewNodeError(err, name, n)
 	}
 
 	if buf.String() != n.Value {
@@ -123,7 +123,7 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 			var tmpNode yaml.Node
 
 			if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {
-				return NodeError{Err: err, Name: name, Node: n}
+				return NewNodeError(err, name, n)
 			}
 
 			content := tmpNode.Content[0]
