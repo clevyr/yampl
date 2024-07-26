@@ -14,8 +14,8 @@ import (
 
 func NewFindArgs(conf *config.Config) *FindArgs {
 	return &FindArgs{
-		conf:     conf,
-		matchMap: make(map[string]MatchSlice),
+		conf:    conf,
+		matches: make(map[string]MatchSlice),
 	}
 }
 
@@ -55,36 +55,36 @@ func (v MatchSlice) String() string {
 }
 
 type FindArgs struct {
-	conf     *config.Config
-	path     string
-	matchMap map[string]MatchSlice
+	conf    *config.Config
+	path    string
+	matches map[string]MatchSlice
 }
 
-func (visitor *FindArgs) Run(n *yaml.Node) error {
+func (f *FindArgs) Run(n *yaml.Node) error {
 	switch {
 	case len(n.Content) == 0:
 		// Node has no children. Search current node.
-		_ = visitor.FindArgs(n, n.Value)
+		_ = f.FindArgs(n, n.Value)
 	case n.Kind == yaml.MappingNode:
 		for i := 0; i < len(n.Content); i += 2 {
 			// Attempt to fetch template from comments on the key.
 			key, val := n.Content[i], n.Content[i+1]
 
-			tmplSrc, _ := comment.Parse(visitor.conf.Prefix, key)
+			tmplSrc, _ := comment.Parse(f.conf.Prefix, key)
 			if tmplSrc == "" {
 				// Key did not have comment, traversing children.
-				if err := visitor.Run(val); err != nil {
+				if err := f.Run(val); err != nil {
 					return err
 				}
 			} else {
 				// Template is on key's comment instead of value.
 				// This typically happens if the value is left empty with an implied null.
-				_ = visitor.FindArgs(key, val.Value)
+				_ = f.FindArgs(key, val.Value)
 			}
 		}
 	default:
 		for _, node := range n.Content {
-			if err := visitor.Run(node); err != nil {
+			if err := f.Run(node); err != nil {
 				return err
 			}
 		}
@@ -92,31 +92,31 @@ func (visitor *FindArgs) Run(n *yaml.Node) error {
 	return nil
 }
 
-func (visitor *FindArgs) FindArgs(n *yaml.Node, value string) error {
-	if tmplSrc, _ := comment.Parse(visitor.conf.Prefix, n); tmplSrc != "" {
+func (f *FindArgs) FindArgs(n *yaml.Node, value string) error {
+	if tmplSrc, _ := comment.Parse(f.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
 			Funcs(template2.FuncMap()).
-			Delims(visitor.conf.LeftDelim, visitor.conf.RightDelim).
+			Delims(f.conf.LeftDelim, f.conf.RightDelim).
 			Option("missingkey=zero").
 			Parse(tmplSrc)
 		if err != nil {
-			return NewNodeError(err, visitor.path, n)
+			return NewNodeError(err, f.path, n)
 		}
 
-		for _, field := range listTemplFields(tmpl) {
+		for _, field := range listTmplFields(tmpl) {
 			match := Match{
 				Template: tmplSrc,
 				Line:     n.Line,
 				Column:   n.Column,
 				Value:    value,
 			}
-			visitor.matchMap[field] = append(visitor.matchMap[field], match)
+			f.matches[field] = append(f.matches[field], match)
 		}
 	}
 	return nil
 }
 
-func listTemplFields(t *template.Template) []string {
+func listTmplFields(t *template.Template) []string {
 	return listNodeFields(t.Tree.Root, nil)
 }
 
@@ -142,21 +142,21 @@ func listNodeFields(node parse.Node, res []string) []string {
 	return res
 }
 
-func (visitor FindArgs) Values() []string {
-	result := make([]string, 0, len(visitor.matchMap))
+func (f FindArgs) Values() []string {
+	result := make([]string, 0, len(f.matches))
 outer:
-	for k, v := range visitor.matchMap {
-		for kconf := range visitor.conf.Values {
-			if k == kconf {
+	for key, val := range f.matches {
+		for kconf := range f.conf.Values {
+			if key == kconf {
 				continue outer
 			}
 		}
 		for _, reserved := range []string{"Value", "Val", "V"} {
-			if k == reserved {
+			if key == reserved {
 				continue outer
 			}
 		}
-		result = append(result, fmt.Sprintf("%s=\t%v", k, v))
+		result = append(result, fmt.Sprintf("%s=\t%v", key, val))
 	}
 	return result
 }
