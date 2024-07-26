@@ -15,7 +15,9 @@ import (
 )
 
 func RegisterCompletion(cmd *cobra.Command, conf *config.Config) {
-	util.Must(cmd.RegisterFlagCompletionFunc(config.ValueFlag, valueCompletion(conf)))
+	if err := cmd.RegisterFlagCompletionFunc(config.ValueFlag, valueCompletion(conf)); err != nil {
+		panic(err)
+	}
 }
 
 func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {

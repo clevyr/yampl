@@ -1,7 +1,8 @@
 package config
 
 import (
-	"github.com/clevyr/yampl/internal/util"
+	"errors"
+
 	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
@@ -19,7 +20,7 @@ const (
 )
 
 func (c *Config) RegisterCompletions(cmd *cobra.Command) {
-	util.Must(
+	if err := errors.Join(
 		cmd.RegisterFlagCompletionFunc(InplaceFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(RecursiveFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(PrefixFlag, cobra.NoFileCompletions),
@@ -52,7 +53,9 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 				return []string{Bash, Zsh, Fish, Powershell}, cobra.ShellCompDirectiveNoFileComp
 			},
 		),
-	)
+	); err != nil {
+		panic(err)
+	}
 }
 
 func BoolCompletion(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
