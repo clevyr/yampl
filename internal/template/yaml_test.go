@@ -17,7 +17,8 @@ func Test_toYaml(t *testing.T) {
 		want    string
 		wantErr require.ErrorAssertionFunc
 	}{
-		{"map", args{map[string]any{"a": "a"}}, "a: a", require.NoError},
+		{"map", args{map[string]any{"a": "b"}}, "a: b", require.NoError},
+		{"slice", args{[]string{"a", "b"}}, "- a\n- b", require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

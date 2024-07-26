@@ -1,7 +1,7 @@
 package template
 
 import (
-	"strings"
+	"bytes"
 
 	"gopkg.in/yaml.v3"
 )
@@ -11,5 +11,5 @@ func toYaml(v any) (string, error) {
 	if err != nil {
 		return "", err
 	}
-	return strings.TrimSuffix(string(data), "\n"), nil
+	return string(bytes.TrimSuffix(data, []byte("\n"))), nil
 }
