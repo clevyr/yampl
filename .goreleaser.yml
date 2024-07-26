@@ -51,7 +51,7 @@ changelog:
 brews:
   - homepage: https://github.com/clevyr/yampl
     description: Yaml templating via line-comments
-    license: GPL-3.0
+    license: Apache-2.0
     repository:
       owner: clevyr
       name: homebrew-tap
@@ -100,7 +100,7 @@ nfpms:
   - id: packages
     homepage: https://github.com/clevyr/yampl
     description: Yaml templating via line-comments
-    license: GPL-3.0
+    license: Apache-2.0
     maintainer: Gabe Cook <gabe@clevyr.com>
     formats:
       - deb
@@ -134,7 +134,7 @@ aurs:
     description: Yaml templating via line-comments
     maintainers:
       - Gabe Cook <gabe565@gmail.com>
-    license: GPL-3.0
+    license: Apache-2.0
     private_key: '{{ .Env.AUR_SSH_KEY }}'
     git_url: ssh://aur@aur.archlinux.org/{{ .ProjectName }}-bin.git
     skip_upload: auto
