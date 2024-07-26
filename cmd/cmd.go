@@ -67,9 +67,9 @@ func run(cmd *cobra.Command, args []string) error {
 		return completion(cmd, conf.Completion)
 	}
 
-	if len(args) == 0 {
-		cmd.SilenceUsage = true
+	cmd.SilenceUsage = true
 
+	if len(args) == 0 {
 		if isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd()) {
 			return cmd.Help()
 		}
@@ -87,8 +87,6 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 	}
-
-	cmd.SilenceUsage = true
 
 	for i, p := range args {
 		if err := openAndTemplate(conf, cmd.OutOrStdout(), p); err != nil {
