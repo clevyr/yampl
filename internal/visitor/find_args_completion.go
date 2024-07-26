@@ -55,6 +55,8 @@ func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string
 }
 
 func valueCompletionFile(path string, v *FindArgs) error {
+	v.path = path
+
 	f, err := os.Open(path)
 	if err != nil {
 		return err

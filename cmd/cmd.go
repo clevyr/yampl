@@ -4,7 +4,6 @@ import (
 	"context"
 	_ "embed"
 	"errors"
-	"fmt"
 	"io"
 	"io/fs"
 	"os"
@@ -16,7 +15,6 @@ import (
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/mattn/go-isatty"
-	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
@@ -77,7 +75,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return cmd.Help()
 		}
 
-		s, err := templateReader(conf, os.Stdin, log.Logger)
+		s, err := templateReader(conf, "stdin", os.Stdin)
 		if err != nil {
 			return err
 		}
@@ -91,7 +89,7 @@ func run(cmd *cobra.Command, args []string) error {
 
 	for i, p := range args {
 		if err := openAndTemplate(conf, cmd.OutOrStdout(), p); err != nil {
-			return fmt.Errorf("%s: %w", p, err)
+			return err
 		}
 
 		if !conf.Inplace && i != len(args)-1 {
@@ -138,9 +136,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 		_ = f.Close()
 	}(f)
 
-	log := log.With().Str("file", path).Logger()
-
-	s, err := templateReader(conf, f, log)
+	s, err := templateReader(conf, path, f)
 	if err != nil {
 		return err
 	}
@@ -206,8 +202,8 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 	return nil
 }
 
-func templateReader(conf *config.Config, r io.Reader, log zerolog.Logger) (string, error) {
-	v := visitor.NewTemplateComments(conf, log)
+func templateReader(conf *config.Config, path string, r io.Reader) (string, error) {
+	v := visitor.NewTemplateComments(conf, path)
 
 	decoder := yaml.NewDecoder(r)
 	var buf strings.Builder

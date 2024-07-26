@@ -56,6 +56,7 @@ func (v MatchSlice) String() string {
 
 type FindArgs struct {
 	conf     *config.Config
+	path     string
 	matchMap map[string]MatchSlice
 }
 
@@ -99,7 +100,7 @@ func (visitor *FindArgs) FindArgs(n *yaml.Node, value string) error {
 			Option("missingkey=zero").
 			Parse(tmplSrc)
 		if err != nil {
-			return NodeError{Err: err, Node: n}
+			return NodeError{Err: err, Name: visitor.path, Node: n}
 		}
 
 		for _, field := range listTemplFields(tmpl) {

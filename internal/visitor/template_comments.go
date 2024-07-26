@@ -10,19 +10,29 @@ import (
 	"github.com/clevyr/yampl/internal/config"
 	template2 "github.com/clevyr/yampl/internal/template"
 	"github.com/rs/zerolog"
+	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
-func NewTemplateComments(conf *config.Config, log zerolog.Logger) TemplateComments {
+func NewTemplateComments(conf *config.Config, path string) TemplateComments {
+	var l zerolog.Logger
+	if path == "" {
+		l = log.Logger
+	} else {
+		l = log.With().Str("file", path).Logger()
+	}
+
 	return TemplateComments{
 		conf: conf,
-		log:  log,
+		log:  l,
+		path: path,
 	}
 }
 
 type TemplateComments struct {
 	conf *config.Config
 	log  zerolog.Logger
+	path string
 }
 
 func (t TemplateComments) Run(n *yaml.Node) error {
@@ -35,7 +45,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 				n.LineComment = ""
 			}
 
-			if err := t.Template(n, tmplSrc, tmplTag); err != nil {
+			if err := t.Template(t.path, n, tmplSrc, tmplTag); err != nil {
 				if err := t.handleTemplateError(err); err != nil {
 					return err
 				}
@@ -60,7 +70,7 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 					key.LineComment = ""
 				}
 
-				if err := t.Template(val, tmplSrc, tmplTag); err != nil {
+				if err := t.Template(t.path, val, tmplSrc, tmplTag); err != nil {
 					if err := t.handleTemplateError(err); err != nil {
 						return err
 					}
@@ -79,20 +89,20 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 	return nil
 }
 
-func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment.Tag) error {
+func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tmplTag comment.Tag) error {
 	log := t.log.With().
 		Str("tmpl", tmplSrc).
 		Str("filePos", fmt.Sprintf("%d:%d", n.Line, n.Column)).
 		Str("from", n.Value).
 		Logger()
 
-	tmpl, err := template.New("").
+	tmpl, err := template.New("`"+tmplSrc+"`").
 		Funcs(template2.FuncMap()).
 		Delims(t.conf.LeftDelim, t.conf.RightDelim).
 		Option("missingkey=error").
 		Parse(tmplSrc)
 	if err != nil {
-		return NodeError{Err: err, Node: n}
+		return NodeError{Err: err, Name: name, Node: n}
 	}
 
 	if t.conf.Values != nil {
@@ -101,7 +111,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 
 	var buf bytes.Buffer
 	if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
-		return NodeError{Err: err, Node: n}
+		return NodeError{Err: err, Name: name, Node: n}
 	}
 
 	if buf.String() != n.Value {
@@ -113,7 +123,7 @@ func (t TemplateComments) Template(n *yaml.Node, tmplSrc string, tmplTag comment
 			var tmpNode yaml.Node
 
 			if err := yaml.Unmarshal(buf.Bytes(), &tmpNode); err != nil {
-				return NodeError{Err: err, Node: n}
+				return NodeError{Err: err, Name: name, Node: n}
 			}
 
 			content := tmpNode.Content[0]

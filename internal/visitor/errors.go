@@ -8,11 +8,12 @@ import (
 
 type NodeError struct {
 	Err  error
+	Name string
 	Node *yaml.Node
 }
 
 func (e NodeError) Error() string {
-	return fmt.Sprintf("%d:%d: %s", e.Node.Line, e.Node.Column, e.Err)
+	return fmt.Sprintf("%s:%d:%d: %s", e.Name, e.Node.Line, e.Node.Column, e.Err)
 }
 
 func (e NodeError) Unwrap() error {
