@@ -10,7 +10,6 @@ type Config struct {
 	Values               Values
 
 	Inplace    bool
-	Recursive  bool
 	Prefix     string
 	LeftDelim  string
 	RightDelim string

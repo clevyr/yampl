@@ -41,14 +41,6 @@ func Test_run(t *testing.T) {
 		require.Error(t, run(cmd, []string{}))
 	})
 
-	t.Run("recursive no files", func(t *testing.T) {
-		cmd := NewCommand()
-		conf, ok := config.FromContext(cmd.Context())
-		require.True(t, ok)
-		conf.Recursive = true
-		require.Error(t, run(cmd, []string{}))
-	})
-
 	t.Run("completion flag enabled", func(t *testing.T) {
 		cmd := NewCommand()
 		if err := cmd.Flags().Set(config.CompletionFlag, "zsh"); !assert.NoError(t, err) {

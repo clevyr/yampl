@@ -28,7 +28,10 @@ const (
 func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&c.Inplace, InplaceFlag, "i", c.Inplace, "Edit files in place")
 	cmd.Flags().VarP(c.valuesStringToString, ValueFlag, ValueFlagShort, "Define a template variable. Can be used more than once.")
-	cmd.Flags().BoolVarP(&c.Recursive, RecursiveFlag, "r", c.Recursive, "Recursively update yaml files in the given directory")
+	cmd.Flags().BoolP(RecursiveFlag, "r", true, "Recursively update yaml files in the given directory")
+	if err := cmd.Flags().MarkDeprecated(RecursiveFlag, cmd.Name()+" will always recurse if a given path is a directory"); err != nil {
+		panic(err)
+	}
 	cmd.Flags().StringVarP(&c.Prefix, PrefixFlag, "p", c.Prefix, "Template comments must begin with this prefix. The beginning '#' is implied.")
 	cmd.Flags().StringVar(&c.LeftDelim, LeftDelimFlag, c.LeftDelim, "Override template left delimiter")
 	cmd.Flags().StringVar(&c.RightDelim, RightDelimFlag, c.RightDelim, "Override template right delimiter")

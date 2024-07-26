@@ -66,7 +66,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if conf.Inplace || conf.Recursive {
+		if conf.Inplace {
 			return ErrNoFiles
 		}
 		cmd.SilenceUsage = true
