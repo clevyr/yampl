@@ -28,7 +28,7 @@ YAML data can be piped to stdin or files/dirs can be passed as arguments.
 
 Full reference at ` + termenv.Hyperlink("https://github.com/clevyr/yampl#readme", "github.com/clevyr/yampl")
 
-func NewCommand() *cobra.Command {
+func New() *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "yampl [files | dirs] [-v key=value...]",
 		Short:             "Inline YAML templating via line-comments",

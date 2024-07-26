@@ -14,17 +14,17 @@ import (
 
 func Test_run(t *testing.T) {
 	t.Run("silent usage", func(t *testing.T) {
-		cmd := NewCommand()
+		cmd := New()
 		_ = run(cmd, []string{})
 		assert.True(t, cmd.SilenceUsage)
 	})
 
 	t.Run("no error", func(t *testing.T) {
-		require.NoError(t, run(NewCommand(), []string{}))
+		require.NoError(t, run(New(), []string{}))
 	})
 
 	t.Run("invalid prefix", func(t *testing.T) {
-		cmd := NewCommand()
+		cmd := New()
 		conf, ok := config.FromContext(cmd.Context())
 		require.True(t, ok)
 		conf.Prefix = "tmpl"
@@ -34,7 +34,7 @@ func Test_run(t *testing.T) {
 	})
 
 	t.Run("inplace no files", func(t *testing.T) {
-		cmd := NewCommand()
+		cmd := New()
 		conf, ok := config.FromContext(cmd.Context())
 		require.True(t, ok)
 		conf.Inplace = true
@@ -42,7 +42,7 @@ func Test_run(t *testing.T) {
 	})
 
 	t.Run("completion flag enabled", func(t *testing.T) {
-		cmd := NewCommand()
+		cmd := New()
 		if err := cmd.Flags().Set(config.CompletionFlag, "zsh"); !assert.NoError(t, err) {
 			return
 		}
@@ -50,7 +50,7 @@ func Test_run(t *testing.T) {
 	})
 
 	t.Run("has config", func(t *testing.T) {
-		cmd := NewCommand()
+		cmd := New()
 		conf, ok := config.FromContext(cmd.Context())
 		assert.True(t, ok)
 		assert.NotNil(t, conf)

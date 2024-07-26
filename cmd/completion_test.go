@@ -24,15 +24,15 @@ func Test_completion(t *testing.T) {
 		args    args
 		wantErr require.ErrorAssertionFunc
 	}{
-		{"bash", io.Discard, args{NewCommand(), "bash"}, require.NoError},
-		{"bash error", w, args{NewCommand(), "bash"}, require.Error},
-		{"zsh", io.Discard, args{NewCommand(), "zsh"}, require.NoError},
-		{"zsh error", w, args{NewCommand(), "zsh"}, require.Error},
-		{"fish", io.Discard, args{NewCommand(), "fish"}, require.NoError},
-		{"fish error", w, args{NewCommand(), "fish"}, require.Error},
-		{"powershell", io.Discard, args{NewCommand(), "powershell"}, require.NoError},
-		{"powershell error", w, args{NewCommand(), "powershell"}, require.Error},
-		{"other", io.Discard, args{NewCommand(), "other"}, require.Error},
+		{"bash", io.Discard, args{New(), "bash"}, require.NoError},
+		{"bash error", w, args{New(), "bash"}, require.Error},
+		{"zsh", io.Discard, args{New(), "zsh"}, require.NoError},
+		{"zsh error", w, args{New(), "zsh"}, require.Error},
+		{"fish", io.Discard, args{New(), "fish"}, require.NoError},
+		{"fish error", w, args{New(), "fish"}, require.Error},
+		{"powershell", io.Discard, args{New(), "powershell"}, require.NoError},
+		{"powershell error", w, args{New(), "powershell"}, require.Error},
+		{"other", io.Discard, args{New(), "other"}, require.Error},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
