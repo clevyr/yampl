@@ -21,13 +21,14 @@ func RegisterCompletion(cmd *cobra.Command, conf *config.Config) {
 }
 
 func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return func(_ *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+	return func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+		_ = conf.Load(cmd)
+
 		if !strings.HasPrefix(conf.Prefix, "#") {
 			conf.Prefix = "#" + conf.Prefix
 		}
 
 		v := NewFindArgs(conf)
-
 		for _, path := range args {
 			stat, err := os.Stat(path)
 			if err != nil {
