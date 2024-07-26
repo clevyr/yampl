@@ -49,7 +49,7 @@ func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCom
 	return []string{"yaml", "yml"}, cobra.ShellCompDirectiveFilterFileExt
 }
 
-var ErrNoFiles = errors.New("no input files")
+var ErrStdinInplace = errors.New("-i or --inplace may not be used with stdin")
 
 func run(cmd *cobra.Command, args []string) error {
 	conf, ok := config.FromContext(cmd.Context())
@@ -66,13 +66,14 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	if len(args) == 0 {
-		if conf.Inplace {
-			return ErrNoFiles
-		}
 		cmd.SilenceUsage = true
 
 		if isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd()) {
 			return cmd.Help()
+		}
+
+		if conf.Inplace {
+			return ErrStdinInplace
 		}
 
 		s, err := templateReader(conf, "stdin", os.Stdin)
