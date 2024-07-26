@@ -1,9 +1,14 @@
 package config
 
-import "github.com/rs/zerolog"
+import (
+	"github.com/clevyr/yampl/internal/config/flag"
+	"github.com/rs/zerolog"
+)
 
 type Config struct {
-	Values     Values
+	valuesStringToString *flag.StringToString
+	Values               Values
+
 	Inplace    bool
 	Recursive  bool
 	Prefix     string
@@ -23,7 +28,9 @@ type Config struct {
 
 func New() *Config {
 	return &Config{
-		Values:     make(Values),
+		valuesStringToString: &flag.StringToString{},
+		Values:               make(Values),
+
 		Prefix:     "#yampl",
 		LeftDelim:  "{{",
 		RightDelim: "}}",
