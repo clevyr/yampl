@@ -8,7 +8,7 @@ import (
 
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
-	template2 "github.com/clevyr/yampl/internal/template"
+	yamplTemplate "github.com/clevyr/yampl/internal/template"
 	"gopkg.in/yaml.v3"
 )
 
@@ -95,7 +95,9 @@ func (f *FindArgs) Run(n *yaml.Node) error {
 func (f *FindArgs) FindArgs(n *yaml.Node, value string) error {
 	if tmplSrc, _ := comment.Parse(f.conf.Prefix, n); tmplSrc != "" {
 		tmpl, err := template.New("").
-			Funcs(template2.FuncMap()).
+			Funcs(yamplTemplate.FuncMap(
+				yamplTemplate.WithCurrent(n.Value),
+			)).
 			Delims(f.conf.LeftDelim, f.conf.RightDelim).
 			Option("missingkey=zero").
 			Parse(tmplSrc)
@@ -148,11 +150,6 @@ outer:
 	for key, val := range f.matches {
 		for kconf := range f.conf.Vars {
 			if key == kconf {
-				continue outer
-			}
-		}
-		for _, reserved := range []string{config.CurrentValueKey, "Val", "V"} {
-			if key == reserved {
 				continue outer
 			}
 		}

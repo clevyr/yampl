@@ -3,12 +3,14 @@ package visitor
 import (
 	"bytes"
 	"fmt"
+	"maps"
+	"regexp"
 	"strings"
 	"text/template"
 
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
-	template2 "github.com/clevyr/yampl/internal/template"
+	yamplTemplate "github.com/clevyr/yampl/internal/template"
 	"github.com/rs/zerolog"
 	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
@@ -97,7 +99,9 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 		Logger()
 
 	tmpl, err := template.New("`"+tmplSrc+"`").
-		Funcs(template2.FuncMap()).
+		Funcs(yamplTemplate.FuncMap(
+			yamplTemplate.WithCurrent(n.Value),
+		)).
 		Delims(t.conf.LeftDelim, t.conf.RightDelim).
 		Option("missingkey=error").
 		Parse(tmplSrc)
@@ -105,12 +109,16 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 		return NewNodeError(err, name, n)
 	}
 
-	if t.conf.Vars != nil {
-		t.conf.Vars[config.CurrentValueKey] = n.Value
+	data := maps.Clone(t.conf.Vars)
+	if data != nil {
+		if _, ok := data[config.CurrentValueKey]; !ok {
+			data[config.CurrentValueKey] = n.Value
+		}
+		t.checkDeprecated(tmplSrc)
 	}
 
 	var buf bytes.Buffer
-	if err = tmpl.Execute(&buf, t.conf.Vars); err != nil {
+	if err = tmpl.Execute(&buf, data); err != nil {
 		return NewNodeError(err, name, n)
 	}
 
@@ -137,6 +145,18 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 		n.Tag = tmplTag.ToYaml()
 	}
 	return nil
+}
+
+func (t TemplateComments) checkDeprecated(tmplSrc string) {
+	if t.conf.Vars != nil {
+		re := regexp.MustCompile(`(\.V(al(ue)?)?)(?:[ |)]|` + regexp.QuoteMeta(t.conf.RightDelim) + `)`)
+		for _, match := range re.FindAllStringSubmatch(tmplSrc, -1) {
+			key := match[1]
+			if _, ok := t.conf.Vars[key[1:]]; !ok {
+				log.Warn().Msg(key + " is deprecated, use `current` instead")
+			}
+		}
+	}
 }
 
 func (t TemplateComments) handleTemplateError(err error) error {

@@ -125,11 +125,13 @@ Also, see [templating](#templating) and [example](#examples) sections.
 All variables passed in with the `-v` flag are available during templating.  
 For example, the variable `-v tag=latest` can be used as `{{ .tag }}`.
 
-The previous value is always available via `.Value` (`.Val` or `.V` if you're feeling lazy).
-
 ### Functions
 
 All [Sprig functions](https://masterminds.github.io/sprig/) are available in templates, along with some extras:
+
+#### `current`
+
+Returns the current YAML node's value.
 
 #### `repo`
 
@@ -162,25 +164,25 @@ The above produces `stable-alpine`
 2. Template with multiple values:
     ```shell
     $ cat example.yaml
-    image: nginx:stable-alpine #yampl {{ repo .Value }}:{{ .tag }}
+    image: nginx:stable-alpine #yampl {{ repo current }}:{{ .tag }}
     $ yampl example.yaml -v tag=stable
-    image: nginx:stable #yampl {{ repo .Value }}:{{ .tag }}
+    image: nginx:stable #yampl {{ repo current }}:{{ .tag }}
     ```
 
 3. Using a [Sprig](https://masterminds.github.io/sprig/) function:
     ```shell
     $ cat example.yaml
-    name: Clevyr #yampl {{ upper .Value }}
+    name: Clevyr #yampl {{ upper current }}
     $ yampl example.yaml
-    name: CLEVYR #yampl {{ upper .Value }}
+    name: CLEVYR #yampl {{ upper current }}
     ```
 
 4. Using the [`repo`](#repo) helper function:
     ```shell
     $ cat example.yaml
-    image: nginx:1.20.1 #yampl {{ repo .Value }}:{{ .tag }}
+    image: nginx:1.20.1 #yampl {{ repo current }}:{{ .tag }}
     $ yampl example.yaml -v tag=1.21.8
-    image: nginx:1.21.8 #yampl {{ repo .Value }}:{{ .tag }}
+    image: nginx:1.21.8 #yampl {{ repo current }}:{{ .tag }}
     ```
 
 ### Kubernetes Deployment
@@ -243,7 +245,7 @@ The above produces `stable-alpine`
   If I wanted to repeat myself even less, I could utilize the `repo` function to pull the existing repo through.
   I could define the `image` template as:
   ```yaml
-  image: nginx:1.21.6 #yampl {{ repo .Value }}:{{ .tag }}
+  image: nginx:1.21.6 #yampl {{ repo current }}:{{ .tag }}
   ```
 
   This would generate the same output, but I didn't have to type `nginx` twice.

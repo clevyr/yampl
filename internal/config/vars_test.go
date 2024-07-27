@@ -56,6 +56,7 @@ func TestVars_V(t *testing.T) {
 		want any
 	}{
 		{"simple", Vars{"Value": "a"}, "a"},
+		{"existing", Vars{"Value": "a", "V": "b"}, "b"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
@@ -72,6 +73,7 @@ func TestVars_Val(t *testing.T) {
 		want any
 	}{
 		{"simple", Vars{"Value": "a"}, "a"},
+		{"existing", Vars{"Value": "a", "Val": "b"}, "b"},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
