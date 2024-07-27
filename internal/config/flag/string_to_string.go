@@ -94,6 +94,6 @@ func (s *StringToString) String() string {
 	return "[" + strings.TrimSpace(buf.String()) + "]"
 }
 
-func (s *StringToString) Values() map[string]string {
+func (s *StringToString) Value() map[string]string {
 	return maps.Clone(s.value)
 }

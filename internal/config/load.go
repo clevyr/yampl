@@ -39,7 +39,7 @@ func (c *Config) Load(cmd *cobra.Command) error {
 		c.Prefix = "#" + c.Prefix
 	}
 
-	c.Vars.Fill(c.valuesStringToString.Values())
+	c.Vars.Fill(c.valuesStringToString.Value())
 
 	if f := cmd.Flags().Lookup(FailFlag); f.Changed {
 		val, err := cmd.Flags().GetBool(FailFlag)
