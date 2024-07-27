@@ -1,6 +1,9 @@
 package config
 
 import (
+	"bytes"
+
+	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -53,4 +56,14 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&c.LogFormat, LogFormatFlag, c.LogFormat, "Log format (auto, color, plain, json)")
 
 	cmd.Flags().StringVar(&c.Completion, CompletionFlag, c.Completion, "Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.")
+
+	initLog(cmd)
+	cmd.Flags().SetOutput(DeprecatedWriter{})
+}
+
+type DeprecatedWriter struct{}
+
+func (d DeprecatedWriter) Write(b []byte) (int, error) {
+	log.Warn().Msg(string(bytes.TrimSpace(b)))
+	return len(b), nil
 }
