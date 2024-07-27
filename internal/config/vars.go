@@ -4,6 +4,8 @@ import (
 	"strings"
 )
 
+const CurrentValueKey = "Value"
+
 type Vars map[string]any
 
 func (vars Vars) Fill(src map[string]string) {
@@ -33,10 +35,14 @@ func setNested(vars Vars, val any, keys ...string) {
 	}
 }
 
+func (vars Vars) Value() any {
+	return vars[CurrentValueKey]
+}
+
 func (vars Vars) Val() any {
-	return vars["Value"]
+	return vars.Value()
 }
 
 func (vars Vars) V() any {
-	return vars["Value"]
+	return vars.Value()
 }

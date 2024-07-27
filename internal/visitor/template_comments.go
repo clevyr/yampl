@@ -106,7 +106,7 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 	}
 
 	if t.conf.Vars != nil {
-		t.conf.Vars["Value"] = n.Value
+		t.conf.Vars[config.CurrentValueKey] = n.Value
 	}
 
 	var buf bytes.Buffer

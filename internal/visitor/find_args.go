@@ -151,7 +151,7 @@ outer:
 				continue outer
 			}
 		}
-		for _, reserved := range []string{"Value", "Val", "V"} {
+		for _, reserved := range []string{config.CurrentValueKey, "Val", "V"} {
 			if key == reserved {
 				continue outer
 			}
