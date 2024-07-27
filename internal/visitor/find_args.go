@@ -146,7 +146,7 @@ func (f FindArgs) Values() []string {
 	result := make([]string, 0, len(f.matches))
 outer:
 	for key, val := range f.matches {
-		for kconf := range f.conf.Values {
+		for kconf := range f.conf.Vars {
 			if key == kconf {
 				continue outer
 			}

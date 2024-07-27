@@ -26,7 +26,7 @@ yampl [files | dirs] [-v key=value...] [flags]
   -p, --prefix string            Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
       --right-delim string       Override template right delimiter (default "}}")
   -s, --strip                    Strip template comments from output
-  -v, --value stringToString     Define a template variable. Can be used more than once. (default [])
+  -v, --var stringToString       Define a template variable. Can be used more than once. (default [])
       --version                  version for yampl
 ```
 

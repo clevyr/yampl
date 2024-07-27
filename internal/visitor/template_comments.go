@@ -105,12 +105,12 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 		return NewNodeError(err, name, n)
 	}
 
-	if t.conf.Values != nil {
-		t.conf.Values["Value"] = n.Value
+	if t.conf.Vars != nil {
+		t.conf.Vars["Value"] = n.Value
 	}
 
 	var buf bytes.Buffer
-	if err = tmpl.Execute(&buf, t.conf.Values); err != nil {
+	if err = tmpl.Execute(&buf, t.conf.Vars); err != nil {
 		return NewNodeError(err, name, n)
 	}
 

@@ -6,8 +6,8 @@ import (
 
 const (
 	InplaceFlag    = "inplace"
+	VarFlag        = "var"
 	ValueFlag      = "value"
-	ValueFlagShort = "v"
 	RecursiveFlag  = "recursive"
 	PrefixFlag     = "prefix"
 	LeftDelimFlag  = "left-delim"
@@ -27,7 +27,11 @@ const (
 
 func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVarP(&c.Inplace, InplaceFlag, "i", c.Inplace, "Edit files in place")
-	cmd.Flags().VarP(c.valuesStringToString, ValueFlag, ValueFlagShort, "Define a template variable. Can be used more than once.")
+	cmd.Flags().Var(c.valuesStringToString, ValueFlag, "Define a template variable. Can be used more than once.")
+	cmd.Flags().VarP(c.valuesStringToString, VarFlag, "v", "Define a template variable. Can be used more than once.")
+	if err := cmd.Flags().MarkDeprecated(ValueFlag, "use --"+VarFlag+" instead"); err != nil {
+		panic(err)
+	}
 	cmd.Flags().BoolP(RecursiveFlag, "r", true, "Recursively update yaml files in the given directory")
 	if err := cmd.Flags().MarkDeprecated(RecursiveFlag, cmd.Name()+" will always recurse if a given path is a directory"); err != nil {
 		panic(err)

@@ -7,7 +7,7 @@ import (
 
 type Config struct {
 	valuesStringToString *flag.StringToString
-	Values               Values
+	Vars                 Vars
 
 	Inplace    bool
 	Prefix     string
@@ -28,7 +28,7 @@ type Config struct {
 func New() *Config {
 	return &Config{
 		valuesStringToString: &flag.StringToString{},
-		Values:               make(Values),
+		Vars:                 make(Vars),
 
 		Prefix:     "#yampl",
 		LeftDelim:  "{{",
