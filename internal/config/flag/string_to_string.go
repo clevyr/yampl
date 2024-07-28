@@ -4,7 +4,6 @@ import (
 	"bytes"
 	"encoding/csv"
 	"errors"
-	"fmt"
 	"io"
 	"maps"
 	"strings"
@@ -24,7 +23,7 @@ func (s *StringToString) Set(val string) error {
 	records := make([]string, 0, count)
 	switch count {
 	case 0:
-		return fmt.Errorf("%s %w", val, ErrStringToStringFormat)
+		return ErrStringToStringFormat
 	case 1:
 		records = append(records, val)
 	default:
@@ -48,7 +47,7 @@ func (s *StringToString) Set(val string) error {
 				case len(records) != 0:
 					records[len(records)-1] += "\n" + v
 				default:
-					return fmt.Errorf("%s %w", v, ErrStringToStringFormat)
+					return ErrStringToStringFormat
 				}
 			}
 		}
@@ -58,7 +57,7 @@ func (s *StringToString) Set(val string) error {
 	for _, pair := range records {
 		kv := strings.SplitN(pair, "=", 2)
 		if len(kv) != 2 {
-			return fmt.Errorf("%s %w", pair, ErrStringToStringFormat)
+			return ErrStringToStringFormat
 		}
 		result[kv[0]] = kv[1]
 	}
