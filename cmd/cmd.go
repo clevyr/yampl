@@ -217,7 +217,7 @@ func templateReader(conf *config.Config, path string, r io.Reader, size int64) (
 			if errors.Is(err, io.EOF) {
 				break
 			}
-			return buf.String(), err
+			return "", err
 		}
 
 		if buf.Len() > 0 {
@@ -225,18 +225,18 @@ func templateReader(conf *config.Config, path string, r io.Reader, size int64) (
 		}
 
 		if err := v.Run(&n); err != nil {
-			return buf.String(), err
+			return "", err
 		}
 
 		encoder := yaml.NewEncoder(&buf)
 		encoder.SetIndent(conf.Indent)
 		if err := encoder.Encode(&n); err != nil {
 			_ = encoder.Close()
-			return buf.String(), err
+			return "", err
 		}
 
 		if err := encoder.Close(); err != nil {
-			return buf.String(), err
+			return "", err
 		}
 	}
 
