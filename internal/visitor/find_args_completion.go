@@ -33,26 +33,14 @@ func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string
 
 		v := NewFindArgs(conf)
 		for _, path := range args {
-			stat, err := os.Stat(path)
-			if err != nil {
+			if err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+				if err != nil || d.IsDir() || !util.IsYaml(path) {
+					return err
+				}
+
+				return valueCompletionFile(path, v)
+			}); err != nil {
 				continue
-			}
-
-			if stat.IsDir() {
-				err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-					if err != nil || d.IsDir() || !util.IsYaml(path) {
-						return err
-					}
-
-					return valueCompletionFile(path, v)
-				})
-				if err != nil {
-					continue
-				}
-			} else {
-				if err := valueCompletionFile(path, v); err != nil {
-					continue
-				}
 			}
 		}
 

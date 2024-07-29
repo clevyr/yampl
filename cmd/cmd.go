@@ -88,8 +88,20 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	for i, p := range args {
-		if err := openAndTemplate(conf, cmd.OutOrStdout(), p); err != nil {
+	for i, path := range args {
+		if err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() || !util.IsYaml(path) {
+				return err
+			}
+
+			if !conf.Inplace {
+				if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
+					return err
+				}
+			}
+
+			return openAndTemplateFile(conf, cmd.OutOrStdout(), path)
+		}); err != nil {
 			return err
 		}
 
@@ -101,31 +113,6 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	return nil
-}
-
-func openAndTemplate(conf *config.Config, w io.Writer, path string) error {
-	stat, err := os.Stat(path)
-	if err != nil {
-		return err
-	}
-
-	if stat.IsDir() {
-		return filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-			if err != nil || d.IsDir() || !util.IsYaml(path) {
-				return err
-			}
-
-			if !conf.Inplace {
-				if _, err := io.WriteString(w, "---\n"); err != nil {
-					return err
-				}
-			}
-
-			return openAndTemplateFile(conf, w, path)
-		})
-	}
-
-	return openAndTemplateFile(conf, w, path)
 }
 
 func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
