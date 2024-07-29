@@ -89,8 +89,8 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 
 	var i int
-	for _, path := range args {
-		if err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+	for _, arg := range args {
+		if err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() || !util.IsYaml(path) {
 				return err
 			}
@@ -102,7 +102,7 @@ func run(cmd *cobra.Command, args []string) error {
 			}
 			i++
 
-			return openAndTemplateFile(conf, cmd.OutOrStdout(), path)
+			return openAndTemplateFile(conf, cmd.OutOrStdout(), arg, path)
 		}); err != nil {
 			return err
 		}
@@ -111,7 +111,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
+func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -178,6 +178,16 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 			}
 		}
 	} else {
+		if rel, err := filepath.Rel(dir, path); err == nil && rel != "." {
+			source := "# Source: " + rel + "\n"
+			if !strings.HasPrefix(s, "---") {
+				s = source + s
+			}
+			if strings.Contains(s, "---") {
+				s = strings.ReplaceAll(s, "---\n", "---\n"+source)
+			}
+		}
+
 		if err := colorize.WriteString(w, s); err != nil {
 			return err
 		}

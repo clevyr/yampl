@@ -171,7 +171,7 @@ func Test_openAndTemplateFile(t *testing.T) {
 			require.NoError(t, err)
 
 			var stdoutBuf strings.Builder
-			err = openAndTemplateFile(tt.args.conf, &stdoutBuf, p)
+			err = openAndTemplateFile(tt.args.conf, &stdoutBuf, p, p)
 			tt.wantErr(t, err)
 
 			fileContents, err := os.ReadFile(p)
