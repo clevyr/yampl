@@ -260,7 +260,7 @@ The above produces `stable-alpine`
 ### Tags
 
 By default, templated values are not explicitly quoted. This can cause
-problems with some tools that require specific types. If you require a
+problems with tools that require specific types. If you require a
 specific type for a field, you can add a tag to the template prefix.
 
 Supported tags:
@@ -272,20 +272,46 @@ Supported tags:
 - `#yampl:seq`
 - `#yampl:map`
 
-For example, the following could be interpreted as either a string or an int:
+#### Examples
 
-```shell
-$ cat example.yaml
-num: #yampl {{ .num }}
-$ yampl example.yaml -v num=2009
-num: 2009 #yampl {{ .num }}
-```
+1. String
 
-If this field must be a string, you could add the `str` tag:
+   The following could be interpreted as either a string or an int:
 
-```shell
-$ cat example.yaml
-num: #yampl:str {{ .num }}
-$ yampl example.yaml -v num=2009
-num: "2009" #yampl:str {{ .num }}
-```
+   ```shell
+   $ cat example.yaml
+   num: #yampl {{ .num }}
+   $ yampl example.yaml -v num=2009
+   num: 2009 #yampl {{ .num }}
+   ```
+
+   If this field must be a string, you could add the `str` tag:
+
+   ```shell
+   $ cat example.yaml
+   num: #yampl:str {{ .num }}
+   $ yampl example.yaml -v num=2009
+   num: "2009" #yampl:str {{ .num }}
+   ```
+
+2. Sequence
+
+   ```shell
+   $ cat example.yaml
+   seq: #yampl:seq {{ .seq }}
+   $ yampl example.yaml -v seq='[a, b, c]'
+   seq: #yampl {{ .seq }}
+     - a
+     - b
+     - c
+   ```
+
+3. Map
+
+   ```shell
+   $ cat example.yaml
+   map: #yampl:map {{ .map }}
+   $ yampl example.yaml -v map='{message: hello world}'
+   map: #yampl {{ .map }}
+     message: hello world
+   ```
