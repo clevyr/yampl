@@ -169,9 +169,9 @@ func Test_openAndTemplateFile(t *testing.T) {
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
 			p, err := tempFileWith(tt.args.contents)
-			defer func() {
+			t.Cleanup(func() {
 				_ = os.RemoveAll(p)
-			}()
+			})
 			require.NoError(t, err)
 
 			var stdoutBuf strings.Builder
