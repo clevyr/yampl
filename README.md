@@ -133,10 +133,12 @@ Also, see [templating](#templating) and [example](#examples) sections.
 2. Template with multiple values:
     ```shell
     $ cat example.yaml
-    image: nginx:stable-alpine #yampl {{ repo current }}:{{ .tag }}
-    $ yampl example.yaml -v tag=stable
-    image: nginx:stable #yampl {{ repo current }}:{{ .tag }}
+    image: nginx:stable #yampl {{ .repo }}:{{ .tag }}
+    $ yampl example.yaml -v repo=docker.io/nginx -v tag=1.27.0
+    image: docker.io/nginx:1.27.0 #yampl {{ .repo }}:{{ .tag }}
     ```
+> [!NOTE]
+> All variables must be set for a node to be changed.
 
 3. Using a [Sprig](https://masterminds.github.io/sprig/) function:
     ```shell
@@ -149,9 +151,9 @@ Also, see [templating](#templating) and [example](#examples) sections.
 4. Using the [`repo`](#repo) helper function:
     ```shell
     $ cat example.yaml
-    image: nginx:1.20.1 #yampl {{ repo current }}:{{ .tag }}
-    $ yampl example.yaml -v tag=1.21.8
-    image: nginx:1.21.8 #yampl {{ repo current }}:{{ .tag }}
+    image: nginx:1.26.1 #yampl {{ repo current }}:{{ .tag }}
+    $ yampl example.yaml -v tag=1.27.0
+    image: nginx:1.27.0 #yampl {{ repo current }}:{{ .tag }}
     ```
 
 ### Kubernetes Deployment
