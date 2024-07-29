@@ -118,37 +118,6 @@ Install [yampl-bin](https://aur.archlinux.org/packages/yampl-bin) with your [AUR
 [View the generated docs](docs/yampl.md) for flag and command reference.
 Also, see [templating](#templating) and [example](#examples) sections.
 
-## Templating
-
-### Variables
-
-All variables passed in with the `-v` flag are available during templating.  
-For example, the variable `-v tag=latest` can be used as `{{ .tag }}`.
-
-### Functions
-
-All [Sprig functions](https://masterminds.github.io/sprig/) are available in templates, along with some extras:
-
-#### `current`
-
-Returns the current YAML node's value.
-
-#### `repo`
-
-Splits a Docker repo and tag into the repo component:
-```gotemplate
-repo "nginx:stable-alpine"
-```
-The above produces `nginx`.
-
-#### `tag`
-
-Splits a Docker repo and tag into the tag component:
-```gotemplate
-tag "nginx:stable-alpine"
-```
-The above produces `stable-alpine`
-
 ## Examples
 
 ### Simple Examples
@@ -252,6 +221,37 @@ The above produces `stable-alpine`
   This becomes more useful when using custom Docker registries where repo names can get long.
 
 </details>
+
+## Templating
+
+### Variables
+
+All variables passed in with the `-v` flag are available during templating.  
+For example, the variable `-v tag=latest` can be used as `{{ .tag }}`.
+
+### Functions
+
+All [Sprig functions](https://masterminds.github.io/sprig/) are available in templates, along with some extras:
+
+#### `current`
+
+Returns the current YAML node's value.
+
+#### `repo`
+
+Splits a Docker repo and tag into the repo component:
+```gotemplate
+repo "nginx:stable-alpine"
+```
+The above produces `nginx`.
+
+#### `tag`
+
+Splits a Docker repo and tag into the tag component:
+```gotemplate
+tag "nginx:stable-alpine"
+```
+The above produces `stable-alpine`
 
 ## Advanced Usage
 
