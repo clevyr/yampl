@@ -119,7 +119,11 @@ func Test_templateReader(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			got, err := templateReader(tt.args.conf, "", tt.args.r)
+			var size int64
+			if r, ok := tt.args.r.(*strings.Reader); ok {
+				size = r.Size()
+			}
+			got, err := templateReader(tt.args.conf, "", tt.args.r, size)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})

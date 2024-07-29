@@ -78,7 +78,12 @@ func run(cmd *cobra.Command, args []string) error {
 			return ErrStdinInplace
 		}
 
-		s, err := templateReader(conf, "stdin", os.Stdin)
+		var size int64
+		if stat, err := os.Stdin.Stat(); err == nil {
+			size = stat.Size()
+		}
+
+		s, err := templateReader(conf, "stdin", os.Stdin, size)
 		if err != nil {
 			return err
 		}
@@ -120,12 +125,12 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string) err
 		_ = f.Close()
 	}(f)
 
-	s, err := templateReader(conf, path, f)
+	stat, err := f.Stat()
 	if err != nil {
 		return err
 	}
 
-	stat, err := f.Stat()
+	s, err := templateReader(conf, path, f, stat.Size())
 	if err != nil {
 		return err
 	}
@@ -196,11 +201,14 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string) err
 	return nil
 }
 
-func templateReader(conf *config.Config, path string, r io.Reader) (string, error) {
+func templateReader(conf *config.Config, path string, r io.Reader, size int64) (string, error) {
 	v := visitor.NewTemplateComments(conf, path)
 
 	decoder := yaml.NewDecoder(r)
 	var buf strings.Builder
+	if size != 0 {
+		buf.Grow(int(size))
+	}
 
 	for {
 		var n yaml.Node
