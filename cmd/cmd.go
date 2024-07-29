@@ -88,27 +88,23 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	for i, path := range args {
+	var i int
+	for _, path := range args {
 		if err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
 			if err != nil || d.IsDir() || !util.IsYaml(path) {
 				return err
 			}
 
-			if !conf.Inplace {
+			if !conf.Inplace && i != 0 {
 				if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
 					return err
 				}
 			}
+			i++
 
 			return openAndTemplateFile(conf, cmd.OutOrStdout(), path)
 		}); err != nil {
 			return err
-		}
-
-		if !conf.Inplace && i != len(args)-1 {
-			if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
-				return err
-			}
 		}
 	}
 
