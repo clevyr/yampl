@@ -165,7 +165,7 @@ Also, see [templating](#templating) and [example](#examples) sections.
   apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: nginx-deployment
+    name: nginx
   spec:
     selector:
       matchLabels:
@@ -177,16 +177,16 @@ Also, see [templating](#templating) and [example](#examples) sections.
       spec:
         containers:
           - name: nginx
-            image: nginx:1.20.2 #yampl nginx:{{ .tag }}
+            image: nginx:1.26.1 #yampl nginx:{{ .tag }}
             ports:
             - containerPort: 80
   ```
 
   Notice the yaml comment on the same line as `image`.
 
-  If this file was called `nginx.yaml`, then we could replace the image tag by running:
+  If this file was called `nginx.yaml`, then you could replace the image tag by running:
   ```shell
-  yampl -i nginx.yaml -v tag=1.21.6
+  yampl -i nginx.yaml -v tag=1.27.0
   ```
 
   The file would be updated in-place:
@@ -194,7 +194,7 @@ Also, see [templating](#templating) and [example](#examples) sections.
   apiVersion: apps/v1
   kind: Deployment
   metadata:
-    name: nginx-deployment
+    name: nginx
   spec:
     selector:
       matchLabels:
@@ -206,18 +206,18 @@ Also, see [templating](#templating) and [example](#examples) sections.
       spec:
         containers:
           - name: nginx
-            image: nginx:1.21.6 #yampl nginx:{{ .tag }}
+            image: nginx:1.27.0 #yampl nginx:{{ .tag }}
             ports:
               - containerPort: 80
   ```
 
-  If I wanted to repeat myself even less, I could utilize the `repo` function to pull the existing repo through.
-  I could define the `image` template as:
+  If you wanted to repeat yourself even less, you could use the [`repo`](#repo) function to pull the existing repo through to the output.
+  For example, you could change the `image` line to:
   ```yaml
-  image: nginx:1.21.6 #yampl {{ repo current }}:{{ .tag }}
+  image: nginx:1.27.0 #yampl {{ repo current }}:{{ .tag }}
   ```
 
-  This would generate the same output, but I didn't have to type `nginx` twice.
+  This would generate the same output, but you wouldn't have to type `nginx` twice.
   This becomes more useful when using custom Docker registries where repo names can get long.
 
 </details>
