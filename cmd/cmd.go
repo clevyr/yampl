@@ -93,6 +93,19 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	withSrcComment := len(args) > 1
+	if !withSrcComment {
+		for _, arg := range args {
+			stat, err := os.Stat(arg)
+			if err != nil {
+				return err
+			}
+			if withSrcComment = stat.IsDir(); withSrcComment {
+				break
+			}
+		}
+	}
+
 	var i int
 	for _, arg := range args {
 		if err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
@@ -107,7 +120,7 @@ func run(cmd *cobra.Command, args []string) error {
 			}
 			i++
 
-			return openAndTemplateFile(conf, cmd.OutOrStdout(), arg, path)
+			return openAndTemplateFile(conf, cmd.OutOrStdout(), arg, path, withSrcComment)
 		}); err != nil {
 			return err
 		}
@@ -116,7 +129,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return nil
 }
 
-func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string) error {
+func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string, withSrcComment bool) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -183,7 +196,13 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string) err
 			}
 		}
 	} else {
-		if rel, err := filepath.Rel(dir, path); err == nil && rel != "." {
+		rel := path
+		if !withSrcComment {
+			if rel, err = filepath.Rel(dir, path); err == nil && rel != "." {
+				withSrcComment = true
+			}
+		}
+		if withSrcComment {
 			source := "# Source: " + rel + "\n"
 			if !strings.HasPrefix(s, "---") {
 				s = source + s
