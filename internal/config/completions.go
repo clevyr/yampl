@@ -22,7 +22,6 @@ const (
 func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 	if err := errors.Join(
 		cmd.RegisterFlagCompletionFunc(InplaceFlag, BoolCompletion),
-		cmd.RegisterFlagCompletionFunc(RecursiveFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(PrefixFlag, cobra.NoFileCompletions),
 		cmd.RegisterFlagCompletionFunc(LeftDelimFlag, cobra.NoFileCompletions),
 		cmd.RegisterFlagCompletionFunc(RightDelimFlag, cobra.NoFileCompletions),

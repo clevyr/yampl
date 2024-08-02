@@ -15,10 +15,7 @@ import (
 )
 
 func RegisterCompletion(cmd *cobra.Command, conf *config.Config) {
-	if err := errors.Join(
-		cmd.RegisterFlagCompletionFunc(config.VarFlag, valueCompletion(conf)),
-		cmd.RegisterFlagCompletionFunc(config.ValueFlag, valueCompletion(conf)),
-	); err != nil {
+	if err := cmd.RegisterFlagCompletionFunc(config.VarFlag, valueCompletion(conf)); err != nil {
 		panic(err)
 	}
 }
