@@ -11,12 +11,13 @@ import (
 const (
 	VarFlag = "var"
 
-	InplaceFlag    = "inplace"
-	PrefixFlag     = "prefix"
-	LeftDelimFlag  = "left-delim"
-	RightDelimFlag = "right-delim"
-	IndentFlag     = "indent"
-	StripFlag      = "strip"
+	InplaceFlag         = "inplace"
+	PrefixFlag          = "prefix"
+	LeftDelimFlag       = "left-delim"
+	RightDelimFlag      = "right-delim"
+	IndentFlag          = "indent"
+	StripFlag           = "strip"
+	NoSourceCommentFlag = "no-source-comment"
 
 	IgnoreUnsetErrorsFlag    = "ignore-unset-errors"
 	IgnoreTemplateErrorsFlag = "ignore-template-errors"
@@ -43,6 +44,7 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().StringVar(&c.RightDelim, RightDelimFlag, c.RightDelim, "Override template right delimiter")
 	cmd.Flags().IntVarP(&c.Indent, IndentFlag, "I", c.Indent, "Override output indentation")
 	cmd.Flags().BoolVarP(&c.Strip, StripFlag, "s", c.Strip, "Strip template comments from output")
+	cmd.Flags().BoolVar(&c.NoSourceComment, NoSourceCommentFlag, c.NoSourceComment, "Disables source path comment when run against multiple files or a dir")
 
 	cmd.Flags().BoolVar(&c.IgnoreUnsetErrors, IgnoreUnsetErrorsFlag, c.IgnoreUnsetErrors, "Exit with an error if a template variable is not set")
 	cmd.Flags().BoolVar(&c.IgnoreTemplateErrors, IgnoreTemplateErrorsFlag, c.IgnoreTemplateErrors, "Continue processing a file even if a template fails")

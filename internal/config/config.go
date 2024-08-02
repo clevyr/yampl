@@ -9,12 +9,13 @@ type Config struct {
 	valuesStringToString *flag.StringToString
 	Vars                 Vars
 
-	Inplace    bool
-	Prefix     string
-	LeftDelim  string
-	RightDelim string
-	Indent     int
-	Strip      bool
+	Inplace         bool
+	Prefix          string
+	LeftDelim       string
+	RightDelim      string
+	Indent          int
+	Strip           bool
+	NoSourceComment bool
 
 	IgnoreUnsetErrors    bool
 	IgnoreTemplateErrors bool

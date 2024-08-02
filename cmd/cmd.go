@@ -196,19 +196,21 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string, wit
 			}
 		}
 	} else {
-		rel := path
-		if !withSrcComment {
-			if rel, err = filepath.Rel(dir, path); err == nil && rel != "." {
-				withSrcComment = true
+		if !conf.NoSourceComment {
+			rel := path
+			if !withSrcComment {
+				if rel, err = filepath.Rel(dir, path); err == nil && rel != "." {
+					withSrcComment = true
+				}
 			}
-		}
-		if withSrcComment {
-			source := "# Source: " + rel + "\n"
-			if !strings.HasPrefix(s, "---") {
-				s = source + s
-			}
-			if strings.Contains(s, "---") {
-				s = strings.ReplaceAll(s, "---\n", "---\n"+source)
+			if withSrcComment {
+				source := "# Source: " + rel + "\n"
+				if !strings.HasPrefix(s, "---") {
+					s = source + s
+				}
+				if strings.Contains(s, "---") {
+					s = strings.ReplaceAll(s, "---\n", "---\n"+source)
+				}
 			}
 		}
 
