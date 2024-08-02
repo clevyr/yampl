@@ -26,8 +26,11 @@ const (
 
 	CompletionFlag = "completion"
 
+	// Deprecated: Replaced by VarFlag
 	ValueFlag = "value"
+	// Deprecated: Removed. Yampl will always recurse if a given path is a directory
 	RecursiveFlag = "recursive"
+	// Deprecated: Replaced by IgnoreUnsetErrorsFlag and IgnoreTemplateErrorsFlag
 	FailFlag = "fail"
 )
 
