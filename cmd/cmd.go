@@ -20,30 +20,31 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-var version = "beta"
-
 //nolint:gochecknoglobals
 var description = `Yampl (yaml + tmpl) templates YAML values based on line-comments.
 YAML data can be piped to stdin or files/dirs can be passed as arguments.
 
 Full reference at ` + termenv.Hyperlink("https://github.com/clevyr/yampl#readme", "github.com/clevyr/yampl")
 
-func New() *cobra.Command {
+func New(opts ...Option) *cobra.Command {
 	cmd := &cobra.Command{
 		Use:               "yampl [files | dirs] [-v key=value...]",
 		Short:             "Inline YAML templating via line-comments",
 		Long:              description,
 		DisableAutoGenTag: true,
 		ValidArgsFunction: validArgs,
-		Version:           buildVersion(version),
 		RunE:              run,
 	}
 	conf := config.New()
 	conf.RegisterFlags(cmd)
-	cmd.InitDefaultVersionFlag()
 	conf.RegisterCompletions(cmd)
 	visitor.RegisterCompletion(cmd, conf)
 	cmd.SetContext(config.WithContext(context.Background(), conf))
+
+	for _, opt := range opts {
+		opt(cmd)
+	}
+
 	return cmd
 }
 

@@ -21,7 +21,7 @@ func main() {
 		log.Fatalf("failed to mkdir: %v", err)
 	}
 
-	rootCmd := cmd.New()
+	rootCmd := cmd.New(cmd.WithVersion("beta"))
 	if i := strings.Index(rootCmd.Long, "\n\nFull reference at"); i != -1 {
 		rootCmd.Long = rootCmd.Long[:i]
 	}
