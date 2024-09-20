@@ -7,6 +7,7 @@ import (
 	"regexp"
 	"strings"
 	"text/template"
+	"unicode/utf8"
 
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
@@ -122,8 +123,9 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 		return NewNodeError(err, name, n)
 	}
 
-	if buf.String() != n.Value {
-		log.Debug().Str("to", buf.String()).Msg("updating value")
+	str := buf.String()
+	if str != n.Value {
+		log.Debug().Str("to", str).Msg("updating value")
 		n.Style = 0
 
 		switch tmplTag {
@@ -139,7 +141,12 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 			n.Kind = content.Kind
 			n.Value = content.Value
 		default:
-			n.SetString(buf.String())
+			n.SetString(str)
+			switch {
+			case n.Style != yaml.LiteralStyle && !utf8.ValidString(str),
+				strings.HasPrefix(str, "\t"):
+				n.Style = yaml.DoubleQuotedStyle
+			}
 		}
 
 		n.Tag = tmplTag.ToYaml()
