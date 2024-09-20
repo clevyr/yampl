@@ -1,15 +1,18 @@
 package cmd
 
 import (
+	"encoding/base64"
 	"io"
 	"os"
 	"strings"
 	"testing"
+	"unicode/utf8"
 
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/spf13/cobra"
 	"github.com/stretchr/testify/assert"
 	"github.com/stretchr/testify/require"
+	"gopkg.in/yaml.v3"
 )
 
 func Test_run(t *testing.T) {
@@ -182,4 +185,37 @@ func Test_openAndTemplateFile(t *testing.T) {
 			}
 		})
 	}
+}
+
+func Fuzz_templateReader(f *testing.F) {
+	const template = `value: "" #yampl {{ .newVal }}`
+	f.Add("hello world")
+	f.Add("123")
+	f.Add("true")
+
+	f.Fuzz(func(t *testing.T, content string) {
+		conf := config.New()
+		conf.Vars = config.Vars{"newVal": content}
+
+		got, err := templateReader(conf, "", strings.NewReader(template), int64(len(content)))
+		require.NoError(t, err)
+
+		var decoded map[string]any
+		require.NoError(t, yaml.Unmarshal([]byte(got), &decoded))
+
+		switch val := decoded["value"].(type) {
+		case string:
+			if utf8.ValidString(content) {
+				assert.Equal(t, content, val)
+			} else {
+				raw, err := base64.StdEncoding.DecodeString(val)
+				require.NoError(t, err)
+				assert.Equal(t, content, string(raw))
+			}
+		default:
+			var want any
+			require.NoError(t, yaml.Unmarshal([]byte(content), &want))
+			assert.Equal(t, want, val)
+		}
+	})
 }
