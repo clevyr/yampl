@@ -1,8 +1,11 @@
 package util
 
-import "path/filepath"
+import (
+	"path/filepath"
+	"strings"
+)
 
 func IsYaml(path string) bool {
 	ext := filepath.Ext(path)
-	return ext == ".yaml" || ext == ".yml"
+	return strings.EqualFold(ext, ".yaml") || strings.EqualFold(ext, ".yml")
 }
