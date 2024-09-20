@@ -134,21 +134,18 @@ func Test_openAndTemplateFile(t *testing.T) {
 	inplaceConf := config.New()
 	inplaceConf.Inplace = true
 
-	tempFileWith := func(contents string) (string, error) {
+	tempFile := func(t *testing.T, contents string) string {
 		f, err := os.CreateTemp("", "")
-		if err != nil {
-			return f.Name(), err
-		}
+		require.NoError(t, err)
+		t.Cleanup(func() {
+			_ = f.Close()
+			_ = os.Remove(f.Name())
+		})
 
-		if _, err := f.WriteString(contents); err != nil {
-			return f.Name(), err
-		}
-
-		if err := f.Close(); err != nil {
-			return f.Name(), err
-		}
-
-		return f.Name(), nil
+		_, err = f.WriteString(contents)
+		require.NoError(t, err)
+		require.NoError(t, f.Close())
+		return f.Name()
 	}
 
 	type args struct {
@@ -168,15 +165,10 @@ func Test_openAndTemplateFile(t *testing.T) {
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			p, err := tempFileWith(tt.args.contents)
-			t.Cleanup(func() {
-				_ = os.RemoveAll(p)
-			})
-			require.NoError(t, err)
+			p := tempFile(t, tt.args.contents)
 
 			var stdoutBuf strings.Builder
-			err = openAndTemplateFile(tt.args.conf, &stdoutBuf, p, p, false)
-			tt.wantErr(t, err)
+			tt.wantErr(t, openAndTemplateFile(tt.args.conf, &stdoutBuf, p, p, false))
 
 			fileContents, err := os.ReadFile(p)
 			require.NoError(t, err)
