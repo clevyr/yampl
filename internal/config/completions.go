@@ -3,7 +3,6 @@ package config
 import (
 	"errors"
 
-	"github.com/rs/zerolog"
 	"github.com/spf13/cobra"
 )
 
@@ -12,11 +11,6 @@ const (
 	Zsh        = "zsh"
 	Fish       = "fish"
 	Powershell = "powershell"
-
-	Auto  = "auto"
-	Color = "color"
-	Plain = "plain"
-	JSON  = "json"
 )
 
 func (c *Config) RegisterCompletions(cmd *cobra.Command) {
@@ -31,20 +25,12 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 		cmd.RegisterFlagCompletionFunc(StripFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(LogLevelFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return []string{
-					zerolog.TraceLevel.String(),
-					zerolog.DebugLevel.String(),
-					zerolog.InfoLevel.String(),
-					zerolog.WarnLevel.String(),
-					zerolog.ErrorLevel.String(),
-					zerolog.FatalLevel.String(),
-					zerolog.PanicLevel.String(),
-				}, cobra.ShellCompDirectiveNoFileComp
+				return LogLevelStrings(), cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 		cmd.RegisterFlagCompletionFunc(LogFormatFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return []string{Auto, Color, Plain, JSON}, cobra.ShellCompDirectiveNoFileComp
+				return LogFormatStrings(), cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 		cmd.RegisterFlagCompletionFunc(CompletionFlag,

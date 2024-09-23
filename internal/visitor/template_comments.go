@@ -2,7 +2,9 @@ package visitor
 
 import (
 	"bytes"
+	"context"
 	"fmt"
+	"log/slog"
 	"maps"
 	"regexp"
 	"strings"
@@ -12,29 +14,25 @@ import (
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
 	yamplTemplate "github.com/clevyr/yampl/internal/template"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
 	"gopkg.in/yaml.v3"
 )
 
 func NewTemplateComments(conf *config.Config, path string) TemplateComments {
-	var l zerolog.Logger
-	if path == "" {
-		l = log.Logger
-	} else {
-		l = log.With().Str("file", path).Logger()
+	logger := slog.Default()
+	if path != "" {
+		logger = logger.With("file", path)
 	}
 
 	return TemplateComments{
 		conf: conf,
-		log:  l,
+		log:  logger,
 		path: path,
 	}
 }
 
 type TemplateComments struct {
 	conf *config.Config
-	log  zerolog.Logger
+	log  *slog.Logger
 	path string
 }
 
@@ -93,11 +91,11 @@ func (t TemplateComments) Run(n *yaml.Node) error {
 }
 
 func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tmplTag comment.Tag) error {
-	log := t.log.With().
-		Str("tmpl", tmplSrc).
-		Str("filePos", fmt.Sprintf("%d:%d", n.Line, n.Column)).
-		Str("from", n.Value).
-		Logger()
+	log := t.log.With(
+		"tmpl", tmplSrc,
+		"filePos", fmt.Sprintf("%d:%d", n.Line, n.Column),
+		"from", n.Value,
+	)
 
 	tmpl, err := template.New("`"+tmplSrc+"`").
 		Funcs(yamplTemplate.FuncMap(
@@ -125,7 +123,7 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 
 	str := buf.String()
 	if str != n.Value {
-		log.Debug().Str("to", str).Msg("updating value")
+		log.Debug("Updating value", "to", str)
 		n.Style = 0
 
 		switch tmplTag {
@@ -160,18 +158,18 @@ func (t TemplateComments) checkDeprecated(tmplSrc string) {
 		for _, match := range re.FindAllStringSubmatch(tmplSrc, -1) {
 			key := match[1]
 			if _, ok := t.conf.Vars[key[1:]]; !ok {
-				log.Warn().Msg(key + " is deprecated, use `current` instead")
+				slog.Warn(key + " is deprecated, use `current` instead")
 			}
 		}
 	}
 }
 
 func (t TemplateComments) handleTemplateError(err error) error {
-	level := zerolog.WarnLevel
+	level := slog.LevelWarn
 	switch {
 	case err != nil && strings.Contains(err.Error(), "map has no entry for key"):
 		if t.conf.IgnoreUnsetErrors {
-			level = zerolog.DebugLevel
+			level = slog.LevelDebug
 		} else {
 			return err
 		}
@@ -179,6 +177,6 @@ func (t TemplateComments) handleTemplateError(err error) error {
 	default:
 		return err
 	}
-	t.log.WithLevel(level).Err(err).Msg("skipping value due to template error")
+	t.log.Log(context.Background(), level, "Skipping value due to template error", "error", err)
 	return nil
 }

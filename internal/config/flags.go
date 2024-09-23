@@ -3,8 +3,8 @@ package config
 import (
 	"bytes"
 	"errors"
+	"log/slog"
 
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 )
 
@@ -66,13 +66,13 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 		panic(err)
 	}
 
-	initLog(cmd)
+	c.InitLog(cmd.ErrOrStderr())
 	cmd.Flags().SetOutput(DeprecatedWriter{})
 }
 
 type DeprecatedWriter struct{}
 
 func (d DeprecatedWriter) Write(b []byte) (int, error) {
-	log.Warn().Msg(string(bytes.TrimSpace(b)))
+	slog.Warn(string(bytes.TrimSpace(b)))
 	return len(b), nil
 }

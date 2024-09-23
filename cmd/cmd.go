@@ -5,6 +5,7 @@ import (
 	"errors"
 	"io"
 	"io/fs"
+	"log/slog"
 	"os"
 	"path/filepath"
 	"strings"
@@ -15,7 +16,6 @@ import (
 	"github.com/clevyr/yampl/internal/visitor"
 	"github.com/mattn/go-isatty"
 	"github.com/muesli/termenv"
-	"github.com/rs/zerolog/log"
 	"github.com/spf13/cobra"
 	"gopkg.in/yaml.v3"
 )
@@ -38,7 +38,7 @@ func New(opts ...Option) *cobra.Command {
 	conf := config.New()
 	conf.RegisterFlags(cmd)
 	conf.RegisterCompletions(cmd)
-	visitor.RegisterCompletion(cmd, conf)
+	visitor.RegisterCompletion(cmd)
 	cmd.SetContext(config.WithContext(context.Background(), conf))
 
 	for _, opt := range opts {
@@ -55,12 +55,8 @@ func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCom
 var ErrStdinInplace = errors.New("-i or --inplace may not be used with stdin")
 
 func run(cmd *cobra.Command, args []string) error {
-	conf, ok := config.FromContext(cmd.Context())
-	if !ok {
-		panic("config missing from command context")
-	}
-
-	if err := conf.Load(cmd); err != nil {
+	conf, err := config.Load(cmd)
+	if err != nil {
 		return err
 	}
 
@@ -173,7 +169,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string, wit
 		}
 
 		if err := os.Rename(temp.Name(), path); err != nil {
-			log.Trace().Msg("failed to rename file, attempting to copy contents")
+			slog.Debug("Failed to rename file. Attempting to copy contents.")
 
 			in, err := os.Open(temp.Name())
 			if err != nil {

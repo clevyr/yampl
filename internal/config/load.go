@@ -12,7 +12,14 @@ import (
 
 const EnvPrefix = "YAMPL_"
 
-func (c *Config) Load(cmd *cobra.Command) error {
+var ErrCmdMissingConfig = errors.New("config missing from command context")
+
+func Load(cmd *cobra.Command) (*Config, error) {
+	conf, ok := FromContext(cmd.Context())
+	if !ok {
+		return nil, ErrCmdMissingConfig
+	}
+
 	IgnoredEnvs := []string{
 		CompletionFlag,
 	}
@@ -30,27 +37,27 @@ func (c *Config) Load(cmd *cobra.Command) error {
 		}
 	})
 	if len(errs) != 0 {
-		return errors.Join(errs...)
+		return nil, errors.Join(errs...)
 	}
 
-	initLog(cmd)
+	conf.InitLog(cmd.ErrOrStderr())
 
-	if !strings.HasPrefix(c.Prefix, "#") {
-		c.Prefix = "#" + c.Prefix
+	if !strings.HasPrefix(conf.Prefix, "#") {
+		conf.Prefix = "#" + conf.Prefix
 	}
 
-	c.Vars.Fill(c.valuesStringToString.Value())
+	conf.Vars.Fill(conf.valuesStringToString.Value())
 
 	if f := cmd.Flags().Lookup(FailFlag); f.Changed {
 		val, err := cmd.Flags().GetBool(FailFlag)
 		if err != nil {
-			return err
+			return nil, err
 		}
-		c.IgnoreUnsetErrors = !val
-		c.IgnoreTemplateErrors = !val
+		conf.IgnoreUnsetErrors = !val
+		conf.IgnoreTemplateErrors = !val
 	}
 
-	return nil
+	return conf, nil
 }
 
 func EnvName(name string) string {

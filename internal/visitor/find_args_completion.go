@@ -14,35 +14,36 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-func RegisterCompletion(cmd *cobra.Command, conf *config.Config) {
-	if err := cmd.RegisterFlagCompletionFunc(config.VarFlag, valueCompletion(conf)); err != nil {
+func RegisterCompletion(cmd *cobra.Command) {
+	if err := cmd.RegisterFlagCompletionFunc(config.VarFlag, valueCompletion); err != nil {
 		panic(err)
 	}
 }
 
-func valueCompletion(conf *config.Config) func(cmd *cobra.Command, args []string, toComplete string) ([]string, cobra.ShellCompDirective) {
-	return func(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
-		_ = conf.Load(cmd)
-
-		if !strings.HasPrefix(conf.Prefix, "#") {
-			conf.Prefix = "#" + conf.Prefix
-		}
-
-		v := NewFindArgs(conf)
-		for _, path := range args {
-			if err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
-				if err != nil || d.IsDir() || !util.IsYaml(path) {
-					return err
-				}
-
-				return valueCompletionFile(path, v)
-			}); err != nil {
-				continue
-			}
-		}
-
-		return v.Values(), cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
+func valueCompletion(cmd *cobra.Command, args []string, _ string) ([]string, cobra.ShellCompDirective) {
+	conf, err := config.Load(cmd)
+	if err != nil {
+		return nil, cobra.ShellCompDirectiveError
 	}
+
+	if !strings.HasPrefix(conf.Prefix, "#") {
+		conf.Prefix = "#" + conf.Prefix
+	}
+
+	v := NewFindArgs(conf)
+	for _, path := range args {
+		if err := filepath.WalkDir(path, func(path string, d fs.DirEntry, err error) error {
+			if err != nil || d.IsDir() || !util.IsYaml(path) {
+				return err
+			}
+
+			return valueCompletionFile(path, v)
+		}); err != nil {
+			continue
+		}
+	}
+
+	return v.Values(), cobra.ShellCompDirectiveNoSpace | cobra.ShellCompDirectiveNoFileComp
 }
 
 func valueCompletionFile(path string, v *FindArgs) error {

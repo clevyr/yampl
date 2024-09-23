@@ -1,8 +1,10 @@
 package config
 
 import (
+	"log/slog"
+	"strings"
+
 	"github.com/clevyr/yampl/internal/config/flag"
-	"github.com/rs/zerolog"
 )
 
 type Config struct {
@@ -38,7 +40,7 @@ func New() *Config {
 
 		IgnoreUnsetErrors: true,
 
-		LogLevel:  zerolog.InfoLevel.String(),
-		LogFormat: Auto,
+		LogLevel:  strings.ToLower(slog.LevelInfo.String()),
+		LogFormat: FormatAuto.String(),
 	}
 }

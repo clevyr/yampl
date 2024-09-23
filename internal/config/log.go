@@ -1,72 +1,79 @@
 package config
 
 import (
-	"fmt"
 	"io"
+	"log/slog"
+	"os"
+	"strings"
+	"time"
 
-	"github.com/clevyr/yampl/internal/colorize"
-	"github.com/fatih/color"
-	"github.com/rs/zerolog"
-	"github.com/rs/zerolog/log"
-	"github.com/spf13/cobra"
+	"github.com/lmittmann/tint"
+	"github.com/mattn/go-isatty"
 )
 
-func logLevel(level string) zerolog.Level {
-	parsedLevel, err := zerolog.ParseLevel(level)
-	if err != nil || parsedLevel == zerolog.NoLevel {
-		if level == "warning" {
-			parsedLevel = zerolog.WarnLevel
-		} else {
-			log.Warn().Str("value", level).Msg("invalid log level. defaulting to info.")
-			parsedLevel = zerolog.InfoLevel
-		}
+//go:generate enumer -type LogFormat -trimprefix Format -transform lower -text
+
+type LogFormat uint8
+
+const (
+	FormatAuto LogFormat = iota
+	FormatColor
+	FormatPlain
+	FormatJSON
+)
+
+func (c *Config) InitLog(w io.Writer) {
+	var level slog.Level
+	if err := level.UnmarshalText([]byte(c.LogLevel)); err != nil {
+		slog.Warn("Invalid log level. Defaulting to info.", "value", c.LogLevel)
+		level = slog.LevelInfo
+		c.LogLevel = strings.ToLower(level.String())
 	}
-	return parsedLevel
+
+	var format LogFormat
+	if err := format.UnmarshalText([]byte(c.LogFormat)); err != nil {
+		slog.Warn("Invalid log format. Defaulting to auto.", "value", c.LogFormat)
+		format = FormatAuto
+		c.LogFormat = format.String()
+	}
+
+	InitLog(w, level, format)
 }
 
-func logFormat(out io.Writer, format string) io.Writer {
+func InitLog(w io.Writer, level slog.Level, format LogFormat) {
 	switch format {
-	case JSON:
-		return out
+	case FormatJSON:
+		slog.SetDefault(slog.New(
+			slog.NewJSONHandler(w, &slog.HandlerOptions{
+				Level: level,
+			}),
+		))
 	default:
-		sprintf := fmt.Sprintf
-		var useColor bool
+		var color bool
 		switch format {
-		case Auto:
-			if useColor = colorize.ShouldColor(out); !useColor {
-				break
+		case FormatAuto:
+			if f, ok := w.(*os.File); ok {
+				color = isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
 			}
-			fallthrough
-		case Color:
-			useColor = true
-			color.NoColor = false
-			sprintf = color.New(color.Bold).Sprintf
-		case Plain:
-		default:
-			log.Warn().Str("value", format).Msg("invalid log formatter. defaulting to auto.")
-			return logFormat(out, Auto)
+		case FormatColor:
+			color = true
 		}
 
-		return zerolog.ConsoleWriter{
-			Out:     out,
-			NoColor: !useColor,
-			FormatMessage: func(i any) string {
-				return sprintf("%-45s", i)
-			},
-		}
+		slog.SetDefault(slog.New(
+			tint.NewHandler(w, &tint.Options{
+				Level:      level,
+				TimeFormat: time.DateTime,
+				NoColor:    !color,
+			}),
+		))
 	}
 }
 
-func initLog(cmd *cobra.Command) {
-	level, err := cmd.Flags().GetString("log-level")
-	if err != nil {
-		panic(err)
+func LogLevelStrings() []string {
+	return []string{
+		strings.ToLower(slog.LevelDebug.String()),
+		strings.ToLower(slog.LevelInfo.String()),
+		strings.ToLower(slog.LevelWarn.String()),
+		strings.ToLower(slog.LevelError.String()),
 	}
-	zerolog.SetGlobalLevel(logLevel(level))
-
-	format, err := cmd.Flags().GetString("log-format")
-	if err != nil {
-		panic(err)
-	}
-	log.Logger = log.Output(logFormat(cmd.ErrOrStderr(), format))
 }
