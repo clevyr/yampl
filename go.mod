@@ -9,7 +9,7 @@ require (
 	github.com/lmittmann/tint v1.0.5
 	github.com/mattn/go-isatty v0.0.20
 	github.com/muesli/termenv v0.15.2
-	github.com/spf13/cobra v1.8.1
+	github.com/spf13/cobra v1.8.2-0.20240824230244-78bfc837fe35
 	github.com/spf13/pflag v1.0.5
 	github.com/stretchr/testify v1.9.0
 	gopkg.in/yaml.v3 v3.0.1
