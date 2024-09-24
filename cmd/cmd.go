@@ -219,20 +219,12 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 	if err := os.Rename(temp.Name(), path); err != nil {
 		slog.Debug("Failed to rename file. Attempting to copy contents.")
 
-		in, err := os.Open(temp.Name())
-		if err != nil {
-			return err
-		}
-		defer func() {
-			_ = in.Close()
-		}()
-
 		out, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, stat.Mode())
 		if err != nil {
 			return err
 		}
 
-		if _, err := io.Copy(out, in); err != nil {
+		if _, err := out.WriteString(s); err != nil {
 			return err
 		}
 
