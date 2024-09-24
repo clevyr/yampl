@@ -67,20 +67,22 @@ func run(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 
 	if len(args) == 0 {
-		if isatty.IsTerminal(os.Stdin.Fd()) || isatty.IsCygwinTerminal(os.Stdin.Fd()) {
-			return cmd.Help()
+		var size int64
+		if f, ok := cmd.InOrStdin().(*os.File); ok {
+			if isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd()) {
+				return cmd.Help()
+			}
+
+			if stat, err := f.Stat(); err == nil {
+				size = stat.Size()
+			}
 		}
 
 		if conf.Inplace {
 			return ErrStdinInplace
 		}
 
-		var size int64
-		if stat, err := os.Stdin.Stat(); err == nil {
-			size = stat.Size()
-		}
-
-		s, err := templateReader(conf, "stdin", os.Stdin, size)
+		s, err := templateReader(conf, "stdin", cmd.InOrStdin(), size)
 		if err != nil {
 			return err
 		}
