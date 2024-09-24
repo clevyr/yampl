@@ -54,7 +54,7 @@ func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCom
 
 var ErrStdinInplace = errors.New("-i or --inplace may not be used with stdin")
 
-func run(cmd *cobra.Command, args []string) error { //nolint:gocyclo
+func run(cmd *cobra.Command, args []string) error {
 	conf, err := config.Load(cmd)
 	if err != nil {
 		return err
@@ -92,6 +92,10 @@ func run(cmd *cobra.Command, args []string) error { //nolint:gocyclo
 		return nil
 	}
 
+	return walkPaths(cmd, conf, args)
+}
+
+func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error {
 	var hasDir bool
 	for _, arg := range args {
 		if stat, err := os.Lstat(arg); err == nil {
