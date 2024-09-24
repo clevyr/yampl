@@ -93,21 +93,26 @@ func run(cmd *cobra.Command, args []string) error {
 	withSrcComment := len(args) > 1
 	if !withSrcComment {
 		for _, arg := range args {
-			stat, err := os.Stat(arg)
-			if err != nil {
-				return err
-			}
-			if withSrcComment = stat.IsDir(); withSrcComment {
-				break
+			if stat, err := os.Stat(arg); err == nil {
+				if withSrcComment = stat.IsDir(); withSrcComment {
+					break
+				}
 			}
 		}
 	}
 
 	var i int
+	var errs []error
 	for _, arg := range args {
 		if err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
-			if err != nil || d.IsDir() || !util.IsYaml(path) {
-				return err
+			if err != nil {
+				slog.Error("Failed to template file", "error", err)
+				errs = append(errs, err)
+				return nil
+			}
+
+			if d.IsDir() || !util.IsYaml(path) {
+				return nil
 			}
 
 			if !conf.Inplace && i != 0 {
@@ -117,13 +122,24 @@ func run(cmd *cobra.Command, args []string) error {
 			}
 			i++
 
-			return openAndTemplateFile(conf, cmd.OutOrStdout(), arg, path, withSrcComment)
+			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), arg, path, withSrcComment); err != nil {
+				slog.Error("Failed to template file", "error", err)
+				errs = append(errs, err)
+			}
+			return nil
 		}); err != nil {
 			return err
 		}
 	}
 
-	return nil
+	switch len(errs) {
+	case 0:
+		return nil
+	case 1:
+		return errs[0]
+	default:
+		return errors.Join(errs...)
+	}
 }
 
 func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string, withSrcComment bool) error {
