@@ -124,7 +124,7 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error {
 				return nil
 			}
 
-			if d.IsDir() || !util.IsYaml(path) {
+			if d.IsDir() || path != arg && !util.IsYaml(path) {
 				return nil
 			}
 
