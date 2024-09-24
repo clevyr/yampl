@@ -54,7 +54,7 @@ func validArgs(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCom
 
 var ErrStdinInplace = errors.New("-i or --inplace may not be used with stdin")
 
-func run(cmd *cobra.Command, args []string) error {
+func run(cmd *cobra.Command, args []string) error { //nolint:gocyclo
 	conf, err := config.Load(cmd)
 	if err != nil {
 		return err
@@ -100,6 +100,7 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
+	logErrors := len(args) > 1 || hasDir
 	if !conf.NoSourceComment {
 		conf.NoSourceComment = len(args) <= 1 && !hasDir
 	}
@@ -109,7 +110,9 @@ func run(cmd *cobra.Command, args []string) error {
 	for _, arg := range args {
 		if err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
-				slog.Error("Failed to template file", "error", err)
+				if logErrors {
+					slog.Error("Failed to template file", "error", err)
+				}
 				errs = append(errs, err)
 				return nil
 			}
@@ -126,7 +129,9 @@ func run(cmd *cobra.Command, args []string) error {
 			i++
 
 			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), path); err != nil {
-				slog.Error("Failed to template file", "error", err)
+				if logErrors {
+					slog.Error("Failed to template file", "error", err)
+				}
 				errs = append(errs, err)
 			}
 			return nil
