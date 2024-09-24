@@ -88,6 +88,8 @@ func run(cmd *cobra.Command, args []string) error { //nolint:gocyclo
 		if err := colorize.WriteString(cmd.OutOrStdout(), s); err != nil {
 			return err
 		}
+
+		return nil
 	}
 
 	var hasDir bool
