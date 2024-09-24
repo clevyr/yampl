@@ -200,6 +200,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 		return err
 	}
 	defer func() {
+		_ = temp.Close()
 		_ = os.RemoveAll(temp.Name())
 	}()
 
