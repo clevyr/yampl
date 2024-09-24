@@ -111,13 +111,14 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error {
 		conf.NoSourceComment = len(args) <= 1 && !hasDir
 	}
 
-	var i int
+	var printSeparator bool
 	var errs []error
 	for _, arg := range args {
 		if err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				if logErrors {
 					slog.Error("Failed to template file", "error", err)
+					printSeparator = true
 				}
 				errs = append(errs, err)
 				return nil
@@ -127,12 +128,12 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error {
 				return nil
 			}
 
-			if !conf.Inplace && i != 0 {
+			if printSeparator && !conf.Inplace {
+				printSeparator = false
 				if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
 					return err
 				}
 			}
-			i++
 
 			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), path); err != nil {
 				if logErrors {
@@ -140,6 +141,7 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error {
 				}
 				errs = append(errs, err)
 			}
+			printSeparator = true
 			return nil
 		}); err != nil {
 			return err
