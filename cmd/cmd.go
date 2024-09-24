@@ -217,7 +217,11 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 	}
 
 	if err := os.Rename(temp.Name(), path); err != nil {
-		slog.Debug("Failed to rename file. Attempting to copy contents.")
+		slog.Debug("Failed to rename file. Attempting to copy contents.",
+			"from", temp.Name(),
+			"to", path,
+			"error", err,
+		)
 
 		out, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, stat.Mode())
 		if err != nil {
