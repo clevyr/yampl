@@ -23,7 +23,6 @@ linters:
     - errcheck
     - errname
     - errorlint
-    - exportloopref
     - forbidigo
     - gci
     - ginkgolinter
