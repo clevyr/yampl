@@ -90,15 +90,18 @@ func run(cmd *cobra.Command, args []string) error {
 		}
 	}
 
-	withSrcComment := len(args) > 1
-	if !withSrcComment {
-		for _, arg := range args {
-			if stat, err := os.Stat(arg); err == nil {
-				if withSrcComment = stat.IsDir(); withSrcComment {
-					break
-				}
+	var hasDir bool
+	for _, arg := range args {
+		if stat, err := os.Lstat(arg); err == nil {
+			if stat.IsDir() {
+				hasDir = true
+				break
 			}
 		}
+	}
+
+	if !conf.NoSourceComment {
+		conf.NoSourceComment = len(args) <= 1 && !hasDir
 	}
 
 	var i int
@@ -122,7 +125,7 @@ func run(cmd *cobra.Command, args []string) error {
 			}
 			i++
 
-			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), arg, path, withSrcComment); err != nil {
+			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), path); err != nil {
 				slog.Error("Failed to template file", "error", err)
 				errs = append(errs, err)
 			}
@@ -142,7 +145,7 @@ func run(cmd *cobra.Command, args []string) error {
 	}
 }
 
-func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string, withSrcComment bool) error {
+func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 	f, err := os.Open(path)
 	if err != nil {
 		return err
@@ -163,71 +166,61 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, dir, path string, wit
 
 	_ = f.Close()
 
-	if conf.Inplace {
-		temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(path))
+	if !conf.Inplace {
+		if !conf.NoSourceComment {
+			source := "# Source: " + path + "\n"
+			if !strings.HasPrefix(s, "---") {
+				s = source + s
+			}
+			if strings.Contains(s, "---") {
+				s = strings.ReplaceAll(s, "---\n", "---\n"+source)
+			}
+		}
+
+		return colorize.WriteString(w, s)
+	}
+
+	temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(path))
+	if err != nil {
+		return err
+	}
+	defer func() {
+		_ = os.RemoveAll(temp.Name())
+	}()
+
+	if _, err := temp.WriteString(s); err != nil {
+		return err
+	}
+
+	if err := temp.Chmod(stat.Mode()); err != nil {
+		return err
+	}
+
+	if err := temp.Close(); err != nil {
+		return err
+	}
+
+	if err := os.Rename(temp.Name(), path); err != nil {
+		slog.Debug("Failed to rename file. Attempting to copy contents.")
+
+		in, err := os.Open(temp.Name())
 		if err != nil {
 			return err
 		}
 		defer func() {
-			_ = os.RemoveAll(temp.Name())
+			_ = in.Close()
 		}()
 
-		if _, err := temp.WriteString(s); err != nil {
+		out, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, stat.Mode())
+		if err != nil {
 			return err
 		}
 
-		if err := temp.Chmod(stat.Mode()); err != nil {
+		if _, err := io.Copy(out, in); err != nil {
 			return err
 		}
 
-		if err := temp.Close(); err != nil {
-			return err
-		}
-
-		if err := os.Rename(temp.Name(), path); err != nil {
-			slog.Debug("Failed to rename file. Attempting to copy contents.")
-
-			in, err := os.Open(temp.Name())
-			if err != nil {
-				return err
-			}
-			defer func() {
-				_ = in.Close()
-			}()
-
-			out, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, stat.Mode())
-			if err != nil {
-				return err
-			}
-
-			if _, err := io.Copy(out, in); err != nil {
-				return err
-			}
-
-			if err := out.Close(); err != nil {
-				return err
-			}
-		}
-	} else {
-		if !conf.NoSourceComment {
-			rel := path
-			if !withSrcComment {
-				if rel, err = filepath.Rel(dir, path); err == nil && rel != "." {
-					withSrcComment = true
-				}
-			}
-			if withSrcComment {
-				source := "# Source: " + rel + "\n"
-				if !strings.HasPrefix(s, "---") {
-					s = source + s
-				}
-				if strings.Contains(s, "---") {
-					s = strings.ReplaceAll(s, "---\n", "---\n"+source)
-				}
-			}
-		}
-
-		if err := colorize.WriteString(w, s); err != nil {
+		if err := out.Close(); err != nil {
 			return err
 		}
 	}

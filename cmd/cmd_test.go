@@ -134,6 +134,9 @@ func Test_templateReader(t *testing.T) {
 }
 
 func Test_openAndTemplateFile(t *testing.T) {
+	noSourceCommentConfig := config.New()
+	noSourceCommentConfig.NoSourceComment = true
+
 	inplaceConf := config.New()
 	inplaceConf.Inplace = true
 
@@ -162,8 +165,8 @@ func Test_openAndTemplateFile(t *testing.T) {
 		wantStdout bool
 		wantErr    require.ErrorAssertionFunc
 	}{
-		{"simple", args{config.New(), "a: a"}, "a: a\n", true, require.NoError},
-		{"template", args{config.New(), "a: a #yampl b"}, "a: b #yampl b\n", true, require.NoError},
+		{"simple", args{noSourceCommentConfig, "a: a"}, "a: a\n", true, require.NoError},
+		{"template", args{noSourceCommentConfig, "a: a #yampl b"}, "a: b #yampl b\n", true, require.NoError},
 		{"inplace", args{inplaceConf, "a: a #yampl b"}, "a: b #yampl b\n", false, require.NoError},
 	}
 	for _, tt := range tests {
@@ -171,7 +174,7 @@ func Test_openAndTemplateFile(t *testing.T) {
 			p := tempFile(t, tt.args.contents)
 
 			var stdoutBuf strings.Builder
-			tt.wantErr(t, openAndTemplateFile(tt.args.conf, &stdoutBuf, p, p, false))
+			tt.wantErr(t, openAndTemplateFile(tt.args.conf, &stdoutBuf, p))
 
 			fileContents, err := os.ReadFile(p)
 			require.NoError(t, err)
