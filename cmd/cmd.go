@@ -10,7 +10,7 @@ import (
 	"path/filepath"
 	"strings"
 
-	"github.com/clevyr/yampl/internal/colorize"
+	"gabe565.com/utils/coloryaml"
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
@@ -87,7 +87,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return err
 		}
 
-		if err := colorize.WriteString(cmd.OutOrStdout(), s); err != nil {
+		if _, err := coloryaml.WriteString(cmd.OutOrStdout(), s); err != nil {
 			return err
 		}
 
@@ -192,7 +192,8 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 			}
 		}
 
-		return colorize.WriteString(w, s)
+		_, err := coloryaml.WriteString(w, s)
+		return err
 	}
 
 	temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(path))
