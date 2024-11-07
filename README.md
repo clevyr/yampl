@@ -1,6 +1,6 @@
 # Yampl
 
-<img src="./assets/icon.svg" alt="Yampl Icon" width="170" align="right">
+<img src="assets/logo.svg" alt="Yampl Icon" width="170" align="right">
 
 [![GitHub release (latest by date)](https://img.shields.io/github/v/release/clevyr/yampl)](https://github.com/clevyr/yampl/releases)
 [![Build](https://github.com/clevyr/yampl/actions/workflows/build.yml/badge.svg)](https://github.com/clevyr/yampl/actions/workflows/build.yml)
