@@ -5,6 +5,7 @@ import (
 	"os"
 	"strings"
 
+	"gabe565.com/utils/cobrax"
 	"github.com/clevyr/yampl/cmd"
 	"github.com/spf13/cobra/doc"
 )
@@ -21,7 +22,7 @@ func main() {
 		log.Fatalf("failed to mkdir: %v", err)
 	}
 
-	rootCmd := cmd.New(cmd.WithVersion("beta"))
+	rootCmd := cmd.New(cobrax.WithVersion("beta"))
 	if i := strings.Index(rootCmd.Long, "\n\nFull reference at"); i != -1 {
 		rootCmd.Long = rootCmd.Long[:i]
 	}
