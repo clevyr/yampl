@@ -3,7 +3,7 @@ module github.com/clevyr/yampl
 go 1.23.2
 
 require (
-	gabe565.com/utils v0.0.0-20241111053222-0f59399cbb3c
+	gabe565.com/utils v0.0.0-20241116061915-abe2278ecd5c
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/dmarkham/enumer v1.5.10
 	github.com/lmittmann/tint v1.0.5
@@ -23,7 +23,7 @@ require (
 	github.com/cpuguy83/go-md2man/v2 v2.0.4 // indirect
 	github.com/davecgh/go-spew v1.1.1 // indirect
 	github.com/fatih/color v1.18.0 // indirect
-	github.com/goccy/go-yaml v1.13.7 // indirect
+	github.com/goccy/go-yaml v1.13.9 // indirect
 	github.com/google/uuid v1.6.0 // indirect
 	github.com/huandu/xstrings v1.5.0 // indirect
 	github.com/inconshreveable/mousetrap v1.1.0 // indirect

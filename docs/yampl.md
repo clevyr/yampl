@@ -14,7 +14,7 @@ yampl [files | dirs] [-v key=value...] [flags]
 ### Options
 
 ```
-      --completion string        Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.
+      --completion string        Generate the autocompletion script for the specified shell (one of bash, zsh, fish, powershell)
   -h, --help                     help for yampl
       --ignore-template-errors   Continue processing a file even if a template fails
       --ignore-unset-errors      Exit with an error if a template variable is not set (default true)

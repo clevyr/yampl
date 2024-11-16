@@ -5,6 +5,8 @@ import (
 	"errors"
 	"log/slog"
 
+	"gabe565.com/utils/cobrax"
+	"gabe565.com/utils/must"
 	"github.com/spf13/cobra"
 )
 
@@ -25,8 +27,6 @@ const (
 	LogLevelFlag  = "log-level"
 	LogFormatFlag = "log-format"
 
-	CompletionFlag = "completion"
-
 	// Deprecated: Replaced by VarFlag
 	ValueFlag = "value"
 	// Deprecated: Removed. Yampl will always recurse if a given path is a directory
@@ -36,6 +36,8 @@ const (
 )
 
 func (c *Config) RegisterFlags(cmd *cobra.Command) {
+	must.Must(cobrax.RegisterCompletionFlag(cmd))
+
 	cmd.Flags().Var(c.valuesStringToString, ValueFlag, "Define a template variable. Can be used more than once.")
 
 	cmd.Flags().BoolVarP(&c.Inplace, InplaceFlag, "i", c.Inplace, "Edit files in place")
@@ -51,8 +53,6 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 
 	cmd.Flags().StringVarP(&c.LogLevel, LogLevelFlag, "l", c.LogLevel, "Log level (trace, debug, info, warn, error, fatal, panic)")
 	cmd.Flags().StringVar(&c.LogFormat, LogFormatFlag, c.LogFormat, "Log format (auto, color, plain, json)")
-
-	cmd.Flags().StringVar(&c.Completion, CompletionFlag, c.Completion, "Output command-line completion code for the specified shell. Can be 'bash', 'zsh', 'fish', or 'powershell'.")
 
 	// Deprecated
 	cmd.Flags().VarP(c.valuesStringToString, VarFlag, "v", "Define a template variable. Can be used more than once.")

@@ -6,6 +6,7 @@ import (
 	"slices"
 	"strings"
 
+	"gabe565.com/utils/cobrax"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -21,7 +22,7 @@ func Load(cmd *cobra.Command) (*Config, error) {
 	}
 
 	IgnoredEnvs := []string{
-		CompletionFlag,
+		cobrax.FlagCompletion,
 	}
 
 	var errs []error

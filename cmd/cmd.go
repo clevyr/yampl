@@ -60,10 +60,6 @@ func run(cmd *cobra.Command, args []string) error {
 		return err
 	}
 
-	if conf.Completion != "" {
-		return completion(cmd, conf.Completion)
-	}
-
 	cmd.SilenceUsage = true
 
 	if len(args) == 0 {

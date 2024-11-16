@@ -44,14 +44,6 @@ func Test_run(t *testing.T) {
 		require.Error(t, run(cmd, []string{}))
 	})
 
-	t.Run("completion flag enabled", func(t *testing.T) {
-		cmd := New()
-		if err := cmd.Flags().Set(config.CompletionFlag, "zsh"); !assert.NoError(t, err) {
-			return
-		}
-		require.NoError(t, run(cmd, []string{}))
-	})
-
 	t.Run("has config", func(t *testing.T) {
 		cmd := New()
 		conf, ok := config.FromContext(cmd.Context())

@@ -6,13 +6,6 @@ import (
 	"github.com/spf13/cobra"
 )
 
-const (
-	Bash       = "bash"
-	Zsh        = "zsh"
-	Fish       = "fish"
-	Powershell = "powershell"
-)
-
 func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 	if err := errors.Join(
 		cmd.RegisterFlagCompletionFunc(InplaceFlag, BoolCompletion),
@@ -31,11 +24,6 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 		cmd.RegisterFlagCompletionFunc(LogFormatFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
 				return LogFormatStrings(), cobra.ShellCompDirectiveNoFileComp
-			},
-		),
-		cmd.RegisterFlagCompletionFunc(CompletionFlag,
-			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return []string{Bash, Zsh, Fish, Powershell}, cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 	); err != nil {

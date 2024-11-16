@@ -6,13 +6,8 @@ import (
 	"os"
 	"path/filepath"
 
+	"gabe565.com/utils/cobrax"
 	"github.com/clevyr/yampl/cmd"
-)
-
-const (
-	shellBash = "bash"
-	shellZsh  = "zsh"
-	shellFish = "fish"
 )
 
 func main() {
@@ -24,23 +19,22 @@ func main() {
 	var buf bytes.Buffer
 	rootCmd.SetOut(&buf)
 
-	for _, shell := range []string{shellBash, shellZsh, shellFish} {
-		rootCmd.SetArgs([]string{"--completion=" + shell})
-		if err := rootCmd.Execute(); err != nil {
+	for _, shell := range []cobrax.Shell{cobrax.Bash, cobrax.Zsh, cobrax.Fish} {
+		if err := cobrax.GenCompletion(rootCmd, shell); err != nil {
 			panic(err)
 		}
 
-		path := filepath.Join("completions", shell)
+		path := filepath.Join("completions", string(shell))
 		if err := os.MkdirAll(path, 0o777); err != nil {
 			panic(err)
 		}
 
 		switch shell {
-		case shellBash:
+		case cobrax.Bash:
 			path = filepath.Join(path, rootCmd.Name())
-		case shellZsh:
+		case cobrax.Zsh:
 			path = filepath.Join(path, "_"+rootCmd.Name())
-		case shellFish:
+		case cobrax.Fish:
 			path = filepath.Join(path, rootCmd.Name()+".fish")
 		}
 
