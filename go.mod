@@ -6,7 +6,7 @@ require (
 	gabe565.com/utils v0.0.0-20241116061915-abe2278ecd5c
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/dmarkham/enumer v1.5.10
-	github.com/lmittmann/tint v1.0.5
+	github.com/lmittmann/tint v1.0.7
 	github.com/mattn/go-isatty v0.0.20
 	github.com/muesli/termenv v0.15.2
 	github.com/spf13/cobra v1.8.2-0.20240824230244-78bfc837fe35
