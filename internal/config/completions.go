@@ -3,6 +3,7 @@ package config
 import (
 	"errors"
 
+	"gabe565.com/utils/slogx"
 	"github.com/spf13/cobra"
 )
 
@@ -18,12 +19,12 @@ func (c *Config) RegisterCompletions(cmd *cobra.Command) {
 		cmd.RegisterFlagCompletionFunc(StripFlag, BoolCompletion),
 		cmd.RegisterFlagCompletionFunc(LogLevelFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return LogLevelStrings(), cobra.ShellCompDirectiveNoFileComp
+				return slogx.LevelStrings(), cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 		cmd.RegisterFlagCompletionFunc(LogFormatFlag,
 			func(_ *cobra.Command, _ []string, _ string) ([]string, cobra.ShellCompDirective) {
-				return LogFormatStrings(), cobra.ShellCompDirectiveNoFileComp
+				return slogx.FormatStrings(), cobra.ShellCompDirectiveNoFileComp
 			},
 		),
 	); err != nil {

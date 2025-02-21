@@ -4,45 +4,20 @@ import (
 	"io"
 	"log/slog"
 	"os"
-	"strings"
 	"time"
 
+	"gabe565.com/utils/slogx"
 	"github.com/lmittmann/tint"
 	"github.com/mattn/go-isatty"
 )
 
-//go:generate go run github.com/dmarkham/enumer -type LogFormat -trimprefix Format -transform lower -text
-
-type LogFormat uint8
-
-const (
-	FormatAuto LogFormat = iota
-	FormatColor
-	FormatPlain
-	FormatJSON
-)
-
 func (c *Config) InitLog(w io.Writer) {
-	var level slog.Level
-	if err := level.UnmarshalText([]byte(c.LogLevel)); err != nil {
-		slog.Warn("Invalid log level. Defaulting to info.", "value", c.LogLevel)
-		level = slog.LevelInfo
-		c.LogLevel = strings.ToLower(level.String())
-	}
-
-	var format LogFormat
-	if err := format.UnmarshalText([]byte(c.LogFormat)); err != nil {
-		slog.Warn("Invalid log format. Defaulting to auto.", "value", c.LogFormat)
-		format = FormatAuto
-		c.LogFormat = format.String()
-	}
-
-	InitLog(w, level, format)
+	InitLog(w, c.LogLevel, c.LogFormat)
 }
 
-func InitLog(w io.Writer, level slog.Level, format LogFormat) {
+func InitLog(w io.Writer, level slogx.Level, format slogx.Format) {
 	switch format {
-	case FormatJSON:
+	case slogx.FormatJSON:
 		slog.SetDefault(slog.New(
 			slog.NewJSONHandler(w, &slog.HandlerOptions{
 				Level: level,
@@ -51,11 +26,11 @@ func InitLog(w io.Writer, level slog.Level, format LogFormat) {
 	default:
 		var color bool
 		switch format {
-		case FormatAuto:
+		case slogx.FormatAuto:
 			if f, ok := w.(*os.File); ok {
 				color = isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd())
 			}
-		case FormatColor:
+		case slogx.FormatColor:
 			color = true
 		}
 
@@ -66,14 +41,5 @@ func InitLog(w io.Writer, level slog.Level, format LogFormat) {
 				NoColor:    !color,
 			}),
 		))
-	}
-}
-
-func LogLevelStrings() []string {
-	return []string{
-		strings.ToLower(slog.LevelDebug.String()),
-		strings.ToLower(slog.LevelInfo.String()),
-		strings.ToLower(slog.LevelWarn.String()),
-		strings.ToLower(slog.LevelError.String()),
 	}
 }

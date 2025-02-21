@@ -4,7 +4,9 @@ import (
 	"bytes"
 	"errors"
 	"log/slog"
+	"strings"
 
+	"gabe565.com/utils/slogx"
 	"github.com/spf13/cobra"
 )
 
@@ -47,8 +49,8 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	cmd.Flags().BoolVar(&c.IgnoreUnsetErrors, IgnoreUnsetErrorsFlag, c.IgnoreUnsetErrors, "Exit with an error if a template variable is not set")
 	cmd.Flags().BoolVar(&c.IgnoreTemplateErrors, IgnoreTemplateErrorsFlag, c.IgnoreTemplateErrors, "Continue processing a file even if a template fails")
 
-	cmd.Flags().StringVarP(&c.LogLevel, LogLevelFlag, "l", c.LogLevel, "Log level (trace, debug, info, warn, error, fatal, panic)")
-	cmd.Flags().StringVar(&c.LogFormat, LogFormatFlag, c.LogFormat, "Log format (auto, color, plain, json)")
+	cmd.Flags().VarP(&c.LogLevel, LogLevelFlag, "l", "Log level (one of "+strings.Join(slogx.LevelStrings(), ", ")+")")
+	cmd.Flags().Var(&c.LogFormat, LogFormatFlag, "Log format (one of "+strings.Join(slogx.FormatStrings(), ", ")+")")
 
 	// Deprecated
 	cmd.Flags().VarP(c.valuesStringToString, VarFlag, "v", "Define a template variable. Can be used more than once.")

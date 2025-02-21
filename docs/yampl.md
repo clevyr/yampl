@@ -20,8 +20,8 @@ yampl [files | dirs] [-v key=value...] [flags]
   -I, --indent int               Override output indentation (default 2)
   -i, --inplace                  Edit files in place
       --left-delim string        Override template left delimiter (default "{{")
-      --log-format string        Log format (auto, color, plain, json) (default "auto")
-  -l, --log-level string         Log level (trace, debug, info, warn, error, fatal, panic) (default "info")
+      --log-format string        Log format (one of auto, color, plain, json) (default "auto")
+  -l, --log-level string         Log level (one of trace, debug, info, warn, error) (default "info")
       --no-source-comment        Disables source path comment when run against multiple files or a dir
   -p, --prefix string            Template comments must begin with this prefix. The beginning '#' is implied. (default "#yampl")
       --right-delim string       Override template right delimiter (default "}}")

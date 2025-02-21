@@ -1,9 +1,7 @@
 package config
 
 import (
-	"log/slog"
-	"strings"
-
+	"gabe565.com/utils/slogx"
 	"github.com/clevyr/yampl/internal/config/flag"
 )
 
@@ -22,8 +20,8 @@ type Config struct {
 	IgnoreUnsetErrors    bool
 	IgnoreTemplateErrors bool
 
-	LogLevel  string
-	LogFormat string
+	LogLevel  slogx.Level
+	LogFormat slogx.Format
 
 	Completion string
 }
@@ -40,7 +38,7 @@ func New() *Config {
 
 		IgnoreUnsetErrors: true,
 
-		LogLevel:  strings.ToLower(slog.LevelInfo.String()),
-		LogFormat: FormatAuto.String(),
+		LogLevel:  slogx.LevelInfo,
+		LogFormat: slogx.FormatAuto,
 	}
 }
