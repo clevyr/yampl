@@ -5,7 +5,7 @@ go 1.24.0
 require (
 	gabe565.com/utils v0.0.0-20241116061915-abe2278ecd5c
 	github.com/Masterminds/sprig/v3 v3.3.0
-	github.com/dmarkham/enumer v1.5.10
+	github.com/dmarkham/enumer v1.5.11
 	github.com/lmittmann/tint v1.0.7
 	github.com/mattn/go-isatty v0.0.20
 	github.com/muesli/termenv v0.15.2
@@ -39,8 +39,9 @@ require (
 	github.com/shopspring/decimal v1.4.0 // indirect
 	github.com/spf13/cast v1.7.0 // indirect
 	golang.org/x/crypto v0.28.0 // indirect
-	golang.org/x/mod v0.13.0 // indirect
-	golang.org/x/sys v0.26.0 // indirect
-	golang.org/x/tools v0.14.0 // indirect
+	golang.org/x/mod v0.23.0 // indirect
+	golang.org/x/sync v0.11.0 // indirect
+	golang.org/x/sys v0.30.0 // indirect
+	golang.org/x/tools v0.30.0 // indirect
 	gopkg.in/check.v1 v1.0.0-20180628173108-788fd7840127 // indirect
 )
