@@ -3,10 +3,8 @@ package config
 import (
 	"errors"
 	"os"
-	"slices"
 	"strings"
 
-	"gabe565.com/utils/cobrax"
 	"github.com/spf13/cobra"
 	"github.com/spf13/pflag"
 )
@@ -21,18 +19,12 @@ func Load(cmd *cobra.Command) (*Config, error) {
 		return nil, ErrCmdMissingConfig
 	}
 
-	IgnoredEnvs := []string{
-		cobrax.FlagCompletion,
-	}
-
 	var errs []error
 	cmd.Flags().VisitAll(func(f *pflag.Flag) {
 		if !f.Changed {
-			if !slices.Contains(IgnoredEnvs, f.Name) {
-				if val, ok := os.LookupEnv(EnvName(f.Name)); ok {
-					if err := f.Value.Set(val); err != nil {
-						errs = append(errs, err)
-					}
+			if val, ok := os.LookupEnv(EnvName(f.Name)); ok {
+				if err := f.Value.Set(val); err != nil {
+					errs = append(errs, err)
 				}
 			}
 		}

@@ -5,8 +5,6 @@ import (
 	"errors"
 	"log/slog"
 
-	"gabe565.com/utils/cobrax"
-	"gabe565.com/utils/must"
 	"github.com/spf13/cobra"
 )
 
@@ -36,8 +34,6 @@ const (
 )
 
 func (c *Config) RegisterFlags(cmd *cobra.Command) {
-	must.Must(cobrax.RegisterCompletionFlag(cmd))
-
 	cmd.Flags().Var(c.valuesStringToString, ValueFlag, "Define a template variable. Can be used more than once.")
 
 	cmd.Flags().BoolVarP(&c.Inplace, InplaceFlag, "i", c.Inplace, "Edit files in place")
