@@ -133,12 +133,8 @@ func Test_openAndTemplateFile(t *testing.T) {
 	inplaceConf.Inplace = true
 
 	tempFile := func(t *testing.T, contents string) string {
-		f, err := os.CreateTemp("", "")
+		f, err := os.CreateTemp(t.TempDir(), "")
 		require.NoError(t, err)
-		t.Cleanup(func() {
-			_ = f.Close()
-			_ = os.Remove(f.Name())
-		})
 
 		_, err = f.WriteString(contents)
 		require.NoError(t, err)

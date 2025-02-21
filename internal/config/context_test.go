@@ -9,14 +9,14 @@ import (
 )
 
 func TestFromContext(t *testing.T) {
-	ctx := context.WithValue(context.Background(), configCtx, New())
+	ctx := context.WithValue(t.Context(), configCtx, New())
 	conf, ok := FromContext(ctx)
 	assert.True(t, ok)
 	assert.NotNil(t, conf)
 }
 
 func TestWithContext(t *testing.T) {
-	ctx := WithContext(context.Background(), New())
+	ctx := WithContext(t.Context(), New())
 	require.NotNil(t, ctx)
 	conf, ok := ctx.Value(configCtx).(*Config)
 	assert.True(t, ok)
