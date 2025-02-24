@@ -1,6 +1,7 @@
 package cmd
 
 import (
+	"bytes"
 	"context"
 	"errors"
 	"io"
@@ -63,14 +64,9 @@ func run(cmd *cobra.Command, args []string) error {
 	cmd.SilenceUsage = true
 
 	if len(args) == 0 {
-		var size int64
 		if f, ok := cmd.InOrStdin().(*os.File); ok {
 			if isatty.IsTerminal(f.Fd()) || isatty.IsCygwinTerminal(f.Fd()) {
 				return cmd.Help()
-			}
-
-			if stat, err := f.Stat(); err == nil {
-				size = stat.Size()
 			}
 		}
 
@@ -78,7 +74,7 @@ func run(cmd *cobra.Command, args []string) error {
 			return ErrStdinInplace
 		}
 
-		s, err := templateReader(conf, "stdin", cmd.InOrStdin(), size)
+		s, err := templateReader(conf, "stdin", cmd.InOrStdin())
 		if err != nil {
 			return err
 		}
@@ -170,7 +166,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 		return err
 	}
 
-	s, err := templateReader(conf, path, f, stat.Size())
+	s, err := templateReader(conf, path, f)
 	if err != nil {
 		return err
 	}
@@ -237,14 +233,21 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 	return nil
 }
 
-func templateReader(conf *config.Config, path string, r io.Reader, size int64) (string, error) {
+const indicator = "#_yampl_newline\n"
+
+func templateReader(conf *config.Config, path string, r io.Reader) (string, error) {
 	v := visitor.NewTemplateComments(conf, path)
 
-	decoder := yaml.NewDecoder(r)
-	var buf strings.Builder
-	if size != 0 {
-		buf.Grow(int(size))
+	b, err := io.ReadAll(r)
+	if err != nil {
+		return "", err
 	}
+
+	b = bytes.ReplaceAll(b, []byte("\n\n"), []byte("\n"+indicator))
+
+	decoder := yaml.NewDecoder(bytes.NewReader(b))
+	var buf strings.Builder
+	buf.Grow(len(b))
 
 	for {
 		var n yaml.Node
@@ -276,5 +279,14 @@ func templateReader(conf *config.Config, path string, r io.Reader, size int64) (
 		}
 	}
 
-	return buf.String(), nil
+	var result strings.Builder
+	result.Grow(buf.Len())
+	for line := range strings.Lines(buf.String()) {
+		if strings.HasSuffix(line, indicator) {
+			result.WriteByte('\n')
+		} else {
+			result.WriteString(line)
+		}
+	}
+	return result.String(), nil
 }
