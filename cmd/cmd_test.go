@@ -111,14 +111,11 @@ func Test_templateReader(t *testing.T) {
 		{"unset value ignored", args{config.New(), strings.NewReader("a: a #yampl {{ .b }}")}, "a: a #yampl {{ .b }}\n", require.NoError},
 		{"unset value error", args{failUnsetConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", require.Error},
 		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", require.NoError},
+		{"line break preserved", args{config.New(), strings.NewReader("a: a #yampl b\n\nb: b #yampl a")}, "a: b #yampl b\n\nb: a #yampl a\n", require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
-			var size int64
-			if r, ok := tt.args.r.(*strings.Reader); ok {
-				size = r.Size()
-			}
-			got, err := templateReader(tt.args.conf, "", tt.args.r, size)
+			got, err := templateReader(tt.args.conf, "", tt.args.r)
 			tt.wantErr(t, err)
 			assert.Equal(t, tt.want, got)
 		})
@@ -188,7 +185,7 @@ func Fuzz_templateReader(f *testing.F) {
 		conf := config.New()
 		conf.Vars = config.Vars{"newVal": content}
 
-		got, err := templateReader(conf, "", strings.NewReader(template), int64(len(content)))
+		got, err := templateReader(conf, "", strings.NewReader(template))
 		require.NoError(t, err)
 
 		var decoded map[string]any
