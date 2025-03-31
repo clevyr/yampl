@@ -36,7 +36,7 @@ type TemplateComments struct {
 	path string
 }
 
-func (t TemplateComments) Run(n *yaml.Node) error {
+func (t TemplateComments) Run(n *yaml.Node) error { //nolint:gocognit
 	switch {
 	case len(n.Content) == 0:
 		// Node has no children. Template current node.
@@ -110,6 +110,7 @@ func (t TemplateComments) Template(name string, n *yaml.Node, tmplSrc string, tm
 
 	data := maps.Clone(t.conf.Vars)
 	if data != nil {
+		//nolint:staticcheck
 		if _, ok := data[config.CurrentValueKey]; !ok {
 			data[config.CurrentValueKey] = n.Value
 		}

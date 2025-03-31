@@ -4,9 +4,7 @@ import (
 	"strings"
 )
 
-// CurrentValueKey is the key for the current YAML node's value
-//
-// deprecated
+// Deprecated: Use `current` template function instead.
 const CurrentValueKey = "Value"
 
 type Vars map[string]any
@@ -34,20 +32,16 @@ func setNested(vars Vars, val any, keys ...string) {
 		if _, ok := vars[key]; !ok {
 			vars[key] = Vars{}
 		}
-		setNested(vars[key].(Vars), val, keys[1:]...)
+		setNested(vars[key].(Vars), val, keys[1:]...) //nolint:errcheck
 	}
 }
 
-// Value returns the current YAML node value
-//
-// Deprecated: Use `current` template function instead
+// Deprecated: Use `current` template function instead.
 func (vars Vars) Value() any {
 	return vars["Value"]
 }
 
-// Val returns the current YAML node value
-//
-// Deprecated: Use `current` template function instead
+// Deprecated: Use `current` template function instead.
 func (vars Vars) Val() any {
 	if v, ok := vars["Val"]; ok {
 		return v
@@ -55,9 +49,7 @@ func (vars Vars) Val() any {
 	return vars.Value()
 }
 
-// V returns the current YAML node value
-//
-// Deprecated: Use `current` template function instead
+// Deprecated: Use `current` template function instead.
 func (vars Vars) V() any {
 	if v, ok := vars["V"]; ok {
 		return v

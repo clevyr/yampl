@@ -16,7 +16,7 @@ type StringToString struct {
 	changed bool
 }
 
-// Set Format: a=1,b=2
+// Set Format: a=1,b=2.
 func (s *StringToString) Set(val string) error {
 	val = strings.TrimSpace(val)
 	count := strings.Count(val, "=")

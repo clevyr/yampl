@@ -90,7 +90,7 @@ func run(cmd *cobra.Command, args []string) error {
 	return walkPaths(cmd, conf, args)
 }
 
-func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error {
+func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error { //nolint:gocognit
 	var hasDir bool
 	for _, arg := range args {
 		if stat, err := os.Lstat(arg); err == nil {

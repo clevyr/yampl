@@ -6,7 +6,7 @@ import (
 	"gopkg.in/yaml.v3"
 )
 
-// Parse returns the template and tag from a yaml.Node LineComment
+// Parse returns the template and tag from a yaml.Node LineComment.
 func Parse(prefix string, n *yaml.Node) (string, Tag) {
 	comment := n.LineComment
 	if strings.HasPrefix(comment, prefix) {

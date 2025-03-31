@@ -119,7 +119,7 @@ func (f *FindArgs) FindArgs(n *yaml.Node, value string) error {
 }
 
 func listTmplFields(t *template.Template) []string {
-	return listNodeFields(t.Tree.Root, nil)
+	return listNodeFields(t.Root, nil)
 }
 
 func listNodeFields(node parse.Node, res []string) []string {
@@ -144,7 +144,7 @@ func listNodeFields(node parse.Node, res []string) []string {
 	return res
 }
 
-func (f FindArgs) Values() []string {
+func (f *FindArgs) Values() []string {
 	result := make([]string, 0, len(f.matches))
 outer:
 	for key, val := range f.matches {
