@@ -112,6 +112,7 @@ func Test_templateReader(t *testing.T) {
 		{"unset value error", args{failUnsetConf, strings.NewReader("a: a #yampl {{ .z }}")}, "", require.Error},
 		{"strip", args{stripConf, strings.NewReader("a: a #yampl b")}, "a: b\n", require.NoError},
 		{"line break preserved", args{config.New(), strings.NewReader("a: a #yampl b\n\nb: b #yampl a")}, "a: b #yampl b\n\nb: a #yampl a\n", require.NoError},
+		{"line break in multi-line string", args{config.New(), strings.NewReader("test: |-\n  a\n\n  b")}, "test: |-\n  a\n\n  b\n", require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {

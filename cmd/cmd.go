@@ -9,6 +9,7 @@ import (
 	"log/slog"
 	"os"
 	"path/filepath"
+	"regexp"
 	"strings"
 
 	"gabe565.com/utils/cobrax"
@@ -235,6 +236,8 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 
 const indicator = "#_yampl_newline\n"
 
+var searchRe = regexp.MustCompile(`\n\n(\s+)?`)
+
 func templateReader(conf *config.Config, path string, r io.Reader) (string, error) {
 	v := visitor.NewTemplateComments(conf, path)
 
@@ -243,7 +246,7 @@ func templateReader(conf *config.Config, path string, r io.Reader) (string, erro
 		return "", err
 	}
 
-	b = bytes.ReplaceAll(b, []byte("\n\n"), []byte("\n"+indicator))
+	b = searchRe.ReplaceAll(b, []byte("\n$1"+indicator+"$1"))
 
 	decoder := yaml.NewDecoder(bytes.NewReader(b))
 	var buf strings.Builder
