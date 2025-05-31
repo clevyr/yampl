@@ -20,7 +20,7 @@ RUN --mount=type=cache,target=/root/.cache \
   CGO_ENABLED=0 xx-go build -ldflags='-w -s'
 
 
-FROM alpine:3.21
+FROM alpine:3.22
 LABEL org.opencontainers.image.source="https://github.com/clevyr/yampl"
 WORKDIR /data
 
