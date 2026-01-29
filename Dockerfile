@@ -14,7 +14,7 @@ ARG TARGETOS
 ARG TARGETARCH
 RUN --mount=type=cache,target=/root/.cache \
   CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="$TARGETARCH" \
-  go build -ldflags='-w -s'
+  go build -ldflags='-w -s' -trimpath
 
 
 FROM alpine:3.23
