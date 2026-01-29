@@ -67,7 +67,9 @@ func (c *Config) RegisterFlags(cmd *cobra.Command) {
 	if err := errors.Join(
 		cmd.Flags().MarkDeprecated(ValueFlag, "use --"+VarFlag+" instead"),
 		cmd.Flags().MarkDeprecated(RecursiveFlag, cmd.Name()+" will always recurse if a given path is a directory"),
-		cmd.Flags().MarkDeprecated(FailFlag, "use --"+IgnoreUnsetErrorsFlag+" and --"+IgnoreTemplateErrorsFlag+" instead"),
+		cmd.Flags().MarkDeprecated(FailFlag,
+			"use --"+IgnoreUnsetErrorsFlag+" and --"+IgnoreTemplateErrorsFlag+" instead",
+		),
 	); err != nil {
 		panic(err)
 	}
