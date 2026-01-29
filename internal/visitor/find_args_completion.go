@@ -39,7 +39,7 @@ func valueCompletion(cmd *cobra.Command, args []string, _ string) ([]string, cob
 
 			return valueCompletionFile(path, v)
 		}); err != nil {
-			continue
+			return nil, cobra.ShellCompDirectiveError
 		}
 	}
 
