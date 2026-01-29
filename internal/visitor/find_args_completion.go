@@ -6,7 +6,6 @@ import (
 	"io/fs"
 	"os"
 	"path/filepath"
-	"strings"
 
 	"github.com/clevyr/yampl/internal/config"
 	"github.com/clevyr/yampl/internal/util"
@@ -24,10 +23,6 @@ func valueCompletion(cmd *cobra.Command, args []string, _ string) ([]string, cob
 	conf, err := config.Load(cmd)
 	if err != nil {
 		return nil, cobra.ShellCompDirectiveError
-	}
-
-	if !strings.HasPrefix(conf.Prefix, "#") {
-		conf.Prefix = "#" + conf.Prefix
 	}
 
 	v := NewFindArgs(conf)
