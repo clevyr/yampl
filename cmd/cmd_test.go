@@ -173,7 +173,7 @@ func Test_templateReader(t *testing.T) {
 	}
 }
 
-func Test_openAndTemplateFile(t *testing.T) {
+func Test_templateAndFlushFile(t *testing.T) {
 	noSourceCommentConfig := config.New()
 	noSourceCommentConfig.NoSourceComment = true
 
@@ -210,7 +210,15 @@ func Test_openAndTemplateFile(t *testing.T) {
 			p := tempFile(t, tt.args.contents)
 
 			var stdoutBuf strings.Builder
-			tt.wantErr(t, openAndTemplateFile(tt.args.conf, &stdoutBuf, p))
+
+			task, err := templateFile(tt.args.conf, p)
+			tt.wantErr(t, err)
+			if err != nil {
+				return
+			}
+
+			err = flushFile(tt.args.conf, &stdoutBuf, *task)
+			tt.wantErr(t, err)
 
 			fileContents, err := os.ReadFile(p)
 			require.NoError(t, err)

@@ -90,6 +90,12 @@ func run(cmd *cobra.Command, args []string) error {
 	return walkPaths(cmd, conf, args)
 }
 
+type fileTask struct {
+	path    string
+	mode    os.FileMode
+	content string
+}
+
 func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error { //nolint:gocognit
 	var hasDir bool
 	for _, arg := range args {
@@ -106,14 +112,13 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error { /
 		conf.NoSourceComment = len(args) <= 1 && !hasDir
 	}
 
-	var printSeparator bool
 	var errs []error
+	var tasks []fileTask
 	for _, arg := range args {
 		if err := filepath.WalkDir(arg, func(path string, d fs.DirEntry, err error) error {
 			if err != nil {
 				if logErrors {
 					slog.Error("Failed to template file", "error", err)
-					printSeparator = true
 				}
 				errs = append(errs, err)
 				return nil
@@ -123,40 +128,44 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error { /
 				return nil
 			}
 
-			if printSeparator && !conf.Inplace {
-				printSeparator = false
-				if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
-					return err
-				}
-			}
-
-			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), path); err != nil {
+			task, err := templateFile(conf, path)
+			if err != nil {
 				if logErrors {
 					slog.Error("Failed to template file", "path", path, "error", err)
 				}
 				errs = append(errs, err)
+				return nil
 			}
-			printSeparator = true
+			tasks = append(tasks, *task)
 			return nil
 		}); err != nil {
 			return err
 		}
 	}
 
-	switch len(errs) {
-	case 0:
-		return nil
-	case 1:
-		return errs[0]
-	default:
+	if len(errs) != 0 {
 		return errors.Join(errs...)
 	}
+
+	for i, task := range tasks {
+		if i != 0 && !conf.Inplace {
+			if _, err := io.WriteString(cmd.OutOrStdout(), "---\n"); err != nil {
+				return err
+			}
+		}
+
+		if err := flushFile(conf, cmd.OutOrStdout(), task); err != nil {
+			return err
+		}
+	}
+
+	return nil
 }
 
-func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
+func templateFile(conf *config.Config, path string) (*fileTask, error) {
 	f, err := os.Open(path)
 	if err != nil {
-		return err
+		return nil, err
 	}
 	defer func(f *os.File) {
 		_ = f.Close()
@@ -164,19 +173,26 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 
 	stat, err := f.Stat()
 	if err != nil {
-		return err
+		return nil, err
 	}
 
 	s, err := templateReader(conf, path, f)
 	if err != nil {
-		return err
+		return nil, err
 	}
 
-	_ = f.Close()
+	return &fileTask{
+		path:    path,
+		mode:    stat.Mode(),
+		content: s,
+	}, nil
+}
 
+func flushFile(conf *config.Config, w io.Writer, task fileTask) error {
+	s := task.content
 	if !conf.Inplace {
 		if !conf.NoSourceComment {
-			source := "# Source: " + path + "\n"
+			source := "# Source: " + task.path + "\n"
 			if !strings.HasPrefix(s, "---") {
 				s = source + s
 			}
@@ -189,7 +205,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 		return err
 	}
 
-	temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(path))
+	temp, err := os.CreateTemp("", "yampl_*_"+filepath.Base(task.path))
 	if err != nil {
 		return err
 	}
@@ -202,7 +218,7 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 		return err
 	}
 
-	if err := temp.Chmod(stat.Mode()); err != nil {
+	if err := temp.Chmod(task.mode); err != nil {
 		return err
 	}
 
@@ -210,14 +226,14 @@ func openAndTemplateFile(conf *config.Config, w io.Writer, path string) error {
 		return err
 	}
 
-	if err := os.Rename(temp.Name(), path); err != nil {
+	if err := os.Rename(temp.Name(), task.path); err != nil {
 		slog.Debug("Failed to rename file. Attempting to copy contents.",
 			"from", temp.Name(),
-			"to", path,
+			"to", task.path,
 			"error", err,
 		)
 
-		out, err := os.OpenFile(path, os.O_WRONLY|os.O_TRUNC, stat.Mode())
+		out, err := os.OpenFile(task.path, os.O_WRONLY|os.O_TRUNC, task.mode)
 		if err != nil {
 			return err
 		}
