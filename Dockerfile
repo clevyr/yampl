@@ -1,11 +1,7 @@
 #syntax=docker/dockerfile:1
 
-FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.6.1 AS xx
-
 FROM --platform=$BUILDPLATFORM golang:1.25.6-alpine AS builder
 WORKDIR /app
-
-COPY --from=xx / /
 
 RUN apk add --no-cache git
 
@@ -14,10 +10,11 @@ RUN go mod download
 
 COPY . .
 
-# Set Golang build envs based on Docker platform string
-ARG TARGETPLATFORM
+ARG TARGETOS
+ARG TARGETARCH
 RUN --mount=type=cache,target=/root/.cache \
-  CGO_ENABLED=0 xx-go build -ldflags='-w -s'
+  CGO_ENABLED=0 GOOS="$TARGETOS" GOARCH="$TARGETARCH" \
+  go build -ldflags='-w -s'
 
 
 FROM alpine:3.23
