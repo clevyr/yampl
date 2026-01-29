@@ -24,8 +24,8 @@ func FuncMap(opts ...Option) template.FuncMap {
 
 	// Remove prefix from "must" functions
 	for key, fn := range funcMap {
-		if strings.HasPrefix(key, "must") {
-			k := strings.TrimPrefix(key, "must")
+		if after, ok := strings.CutPrefix(key, "must"); ok {
+			k := after
 			k = util.LowerFirst(k)
 			funcMap[k] = fn
 		}

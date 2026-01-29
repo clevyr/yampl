@@ -63,9 +63,7 @@ func (s *StringToString) Set(val string) error {
 	}
 
 	if s.changed {
-		for k, v := range result {
-			s.value[k] = v
-		}
+		maps.Copy(s.value, result)
 	} else {
 		s.changed = true
 		s.value = result

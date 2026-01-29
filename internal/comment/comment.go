@@ -9,18 +9,18 @@ import (
 // Parse returns the template and tag from a yaml.Node LineComment.
 func Parse(prefix string, n *yaml.Node) (string, Tag) {
 	comment := n.LineComment
-	if strings.HasPrefix(comment, prefix) {
+	if after, ok := strings.CutPrefix(comment, prefix); ok {
 		// Comment has #yampl prefix
-		comment = strings.TrimPrefix(comment, prefix)
+		comment = after
 
 		if strings.HasPrefix(comment, " ") {
 			// Tag not provided
 			return comment[1:], DynamicTag
 		}
 
-		if strings.HasPrefix(comment, tagSep) {
+		if after, ok := strings.CutPrefix(comment, tagSep); ok {
 			// Match comment tag
-			comment = strings.TrimPrefix(comment, tagSep)
+			comment = after
 
 			for _, tag := range Tags() {
 				prefix := string(tag) + " "
