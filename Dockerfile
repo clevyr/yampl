@@ -2,7 +2,7 @@
 
 FROM --platform=$BUILDPLATFORM tonistiigi/xx:1.6.1 AS xx
 
-FROM --platform=$BUILDPLATFORM golang:1.24.1-alpine AS builder
+FROM --platform=$BUILDPLATFORM golang:1.25.6-alpine AS builder
 WORKDIR /app
 
 COPY --from=xx / /
