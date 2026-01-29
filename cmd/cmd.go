@@ -132,7 +132,7 @@ func walkPaths(cmd *cobra.Command, conf *config.Config, args []string) error { /
 
 			if err := openAndTemplateFile(conf, cmd.OutOrStdout(), path); err != nil {
 				if logErrors {
-					slog.Error("Failed to template file", "error", err)
+					slog.Error("Failed to template file", "path", path, "error", err)
 				}
 				errs = append(errs, err)
 			}
