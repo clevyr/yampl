@@ -1,21 +1,23 @@
 package processor
 
 import (
-	"bytes"
 	"errors"
+	"fmt"
 	"io"
 	"io/fs"
 	"log/slog"
 	"os"
 	"path/filepath"
-	"regexp"
 	"strings"
 
 	"gabe565.com/utils/coloryaml"
+	"gabe565.com/utils/termx"
 	"github.com/clevyr/yampl/internal/config"
+	"github.com/clevyr/yampl/internal/node"
+	"github.com/clevyr/yampl/internal/parser"
 	"github.com/clevyr/yampl/internal/util"
 	"github.com/clevyr/yampl/internal/visitor"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml/ast"
 )
 
 type FileTask struct {
@@ -210,62 +212,36 @@ func FlushFile(conf *config.Config, w io.Writer, task FileTask) error {
 	return nil
 }
 
-const indicator = "#_yampl_newline\n"
-
-var searchRe = regexp.MustCompile(`\n\n(\s+)?`)
-
 func templateReader(conf *config.Config, path string, r io.Reader) (string, error) {
-	v := visitor.NewTemplateComments(conf, path)
-
-	b, err := io.ReadAll(r)
+	file, err := parser.ParseReader(r)
 	if err != nil {
 		return "", err
 	}
 
-	b = searchRe.ReplaceAll(b, []byte("\n$1"+indicator+"$1"))
+	v := visitor.NewTemplateComments(conf, path)
+	for _, doc := range file.Docs {
+		if doc.Body == nil {
+			continue
+		}
 
-	decoder := yaml.NewDecoder(bytes.NewReader(b))
-	var buf strings.Builder
-	buf.Grow(len(b))
+		ast.Walk(&v, doc.Body)
 
-	for {
-		var n yaml.Node
-
-		if err := decoder.Decode(&n); err != nil {
-			if errors.Is(err, io.EOF) {
-				break
+		if err := v.Error(); err != nil {
+			var printable node.PrintableError
+			if errors.As(err, &printable) {
+				colored := termx.IsColor(os.Stderr)
+				return "", fmt.Errorf("%w\n%v", err, printable.AnnotateSource(file.String(), colored))
 			}
 			return "", err
 		}
-
-		if buf.Len() > 0 {
-			buf.WriteString("---\n")
-		}
-
-		if err := v.Run(&n); err != nil {
-			return "", err
-		}
-
-		encoder := yaml.NewEncoder(&buf)
-		encoder.SetIndent(conf.Indent)
-		if err := encoder.Encode(&n); err != nil {
-			_ = encoder.Close()
-			return "", err
-		}
-
-		if err := encoder.Close(); err != nil {
-			return "", err
-		}
 	}
 
-	var result strings.Builder
-	result.Grow(buf.Len())
-	for line := range strings.Lines(buf.String()) {
-		if strings.HasSuffix(line, indicator) {
-			result.WriteByte('\n')
-		} else {
-			result.WriteString(line)
-		}
+	s := strings.TrimSuffix(file.String(), "\n")
+	if s == "" {
+		return s, nil
 	}
-	return result.String(), nil
+	if !strings.HasSuffix(s, "\n") {
+		s += "\n"
+	}
+	return s, nil
 }

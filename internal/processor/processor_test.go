@@ -24,6 +24,9 @@ func Test_templateReader(t *testing.T) {
 	stripConf := config.New()
 	stripConf.Strip = true
 
+	indent4Conf := config.New()
+	indent4Conf.Indent = 4
+
 	type args struct {
 		conf *config.Config
 		r    io.Reader
@@ -100,6 +103,96 @@ func Test_templateReader(t *testing.T) {
 			"line break in multi-line string",
 			args{config.New(), strings.NewReader("test: |-\n  a\n\n  b")},
 			"test: |-\n  a\n\n  b\n",
+			require.NoError,
+		},
+		{
+			"anchored value",
+			args{config.New(), strings.NewReader("img: &img a #yampl b\nother: *img")},
+			"img: &img b #yampl b\nother: *img\n",
+			require.NoError,
+		},
+		{
+			"sequence item",
+			args{config.New(), strings.NewReader("list:\n  - a #yampl b\n  - c")},
+			"list:\n  - b #yampl b\n  - c\n",
+			require.NoError,
+		},
+		{
+			"anchored sequence item",
+			args{config.New(), strings.NewReader("list:\n  - &x a #yampl b\nother: *x")},
+			"list:\n  - &x b #yampl b\nother: *x\n",
+			require.NoError,
+		},
+		{
+			"strip sequence item",
+			args{stripConf, strings.NewReader("list:\n  - a #yampl b")},
+			"list:\n  - b\n",
+			require.NoError,
+		},
+		{
+			"flow map value comment",
+			args{config.New(), strings.NewReader("a: {b: c} #yampl x")},
+			"a: x #yampl x\n",
+			require.NoError,
+		},
+		{
+			"original indentation preserved",
+			args{config.New(), strings.NewReader("a:\n    b: c #yampl d")},
+			"a:\n    b: d #yampl d\n",
+			require.NoError,
+		},
+		{
+			"scalar to block seq",
+			args{config.New(), strings.NewReader("a: b #yampl:seq [c]")},
+			"a: #yampl:seq [c]\n  - c\n",
+			require.NoError,
+		},
+		{
+			"scalar to block map",
+			args{config.New(), strings.NewReader("a: b #yampl:map {c: d}")},
+			"a: #yampl:map {c: d}\n  c: d\n",
+			require.NoError,
+		},
+		{
+			"nested seq is indented",
+			args{config.New(), strings.NewReader("a: b #yampl:map {c: [d]}")},
+			"a: #yampl:map {c: [d]}\n  c:\n    - d\n",
+			require.NoError,
+		},
+		{
+			"block seq indent under long key",
+			args{config.New(), strings.NewReader("test: b #yampl:seq [a]")},
+			"test: #yampl:seq [a]\n  - a\n",
+			require.NoError,
+		},
+		{
+			"block seq indent under long key comment",
+			args{config.New(), strings.NewReader("test: #yampl:seq [a]")},
+			"test: #yampl:seq [a]\n  - a\n",
+			require.NoError,
+		},
+		{
+			"block map indent under nested long key",
+			args{config.New(), strings.NewReader("spec:\n  containers: x #yampl:seq [a]")},
+			"spec:\n  containers: #yampl:seq [a]\n    - a\n",
+			require.NoError,
+		},
+		{
+			"indent flag sets converted block indent",
+			args{indent4Conf, strings.NewReader("spec:\n    containers: x #yampl:map {c: [d]}")},
+			"spec:\n    containers: #yampl:map {c: [d]}\n        c:\n            - d\n",
+			require.NoError,
+		},
+		{
+			"indent flag does not reformat existing content",
+			args{indent4Conf, strings.NewReader("a:\n  b: c #yampl d")},
+			"a:\n  b: d #yampl d\n",
+			require.NoError,
+		},
+		{
+			"multiline with indicator first line uses literal",
+			args{config.New(), strings.NewReader(`a: x #yampl - test{{ "\n" }}- "2"`)},
+			"a: |- #yampl - test{{ \"\\n\" }}- \"2\"\n  - test\n  - \"2\"\n",
 			require.NoError,
 		},
 	}

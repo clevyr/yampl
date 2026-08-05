@@ -9,7 +9,8 @@ import (
 	"github.com/clevyr/yampl/internal/comment"
 	"github.com/clevyr/yampl/internal/config"
 	yamplTemplate "github.com/clevyr/yampl/internal/template"
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml/ast"
+	"github.com/goccy/go-yaml/token"
 )
 
 func NewFindArgs(conf *config.Config) *FindArgs {
@@ -56,66 +57,58 @@ func (v MatchSlice) String() string {
 
 type FindArgs struct {
 	conf    *config.Config
-	path    string
 	matches map[string]MatchSlice
 }
 
-func (f *FindArgs) Run(n *yaml.Node) error {
-	switch {
-	case len(n.Content) == 0:
-		// Node has no children. Search current node.
-		_ = f.FindArgs(n, n.Value)
-	case n.Kind == yaml.MappingNode:
-		for i := 0; i < len(n.Content); i += 2 {
-			// Attempt to fetch template from comments on the key.
-			key, val := n.Content[i], n.Content[i+1]
-
-			tmplSrc, _ := comment.Parse(f.conf.Prefix, key)
-			if tmplSrc == "" {
-				// Key did not have comment, traversing children.
-				if err := f.Run(val); err != nil {
-					return err
-				}
-			} else {
-				// Template is on key's comment instead of value.
-				// This typically happens if the value is left empty with an implied null.
-				_ = f.FindArgs(key, val.Value)
-			}
-		}
-	default:
-		for _, node := range n.Content {
-			if err := f.Run(node); err != nil {
-				return err
-			}
+//nolint:ireturn
+func (f *FindArgs) Visit(n ast.Node) ast.Visitor {
+	tmplSrc, _ := comment.Parse(f.conf.Prefix, n)
+	if tmplSrc == "" {
+		// Comments on empty flow collections attach to the closing
+		// bracket's next token instead of the node itself
+		if val, ok := n.(*ast.MappingNode); ok && val.End != nil && val.End.NextType() == token.CommentType {
+			tmplSrc, _ = comment.ParseGroup(f.conf.Prefix, ast.CommentGroup([]*token.Token{val.End.Next}))
 		}
 	}
-	return nil
+
+	if tmplSrc != "" {
+		f.FindArgs(n, tmplSrc)
+	}
+	return f
 }
 
-func (f *FindArgs) FindArgs(n *yaml.Node, value string) error {
-	if tmplSrc, _ := comment.Parse(f.conf.Prefix, n); tmplSrc != "" {
-		tmpl, err := template.New("").
-			Funcs(yamplTemplate.FuncMap(
-				yamplTemplate.WithCurrent(n.Value),
-			)).
-			Delims(f.conf.LeftDelim, f.conf.RightDelim).
-			Option("missingkey=zero").
-			Parse(tmplSrc)
-		if err != nil {
-			return NewNodeError(err, f.path, n)
-		}
+func (f *FindArgs) FindArgs(n ast.Node, tmplSrc string) {
+	value := nodeValue(n)
 
-		for _, field := range listTmplFields(tmpl) {
-			match := Match{
-				Template: tmplSrc,
-				Line:     n.Line,
-				Column:   n.Column,
-				Value:    value,
-			}
-			f.matches[field] = append(f.matches[field], match)
-		}
+	tmpl, err := template.New("").
+		Funcs(yamplTemplate.FuncMap(
+			yamplTemplate.WithCurrent(value),
+		)).
+		Delims(f.conf.LeftDelim, f.conf.RightDelim).
+		Option("missingkey=zero").
+		Parse(tmplSrc)
+	if err != nil {
+		return
 	}
-	return nil
+
+	for _, field := range listTmplFields(tmpl) {
+		match := Match{
+			Template: tmplSrc,
+			Value:    value,
+		}
+		if pos := n.GetToken().Position; pos != nil {
+			match.Line = pos.Line
+			match.Column = pos.Column
+		}
+		f.matches[field] = append(f.matches[field], match)
+	}
+}
+
+func nodeValue(n ast.Node) string {
+	if scalar, ok := n.(ast.ScalarNode); ok {
+		return fmt.Sprintf("%v", scalar.GetValue())
+	}
+	return ""
 }
 
 func listTmplFields(t *template.Template) []string {

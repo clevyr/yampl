@@ -3,57 +3,43 @@ package comment
 import (
 	"strings"
 
-	"gopkg.in/yaml.v3"
+	"github.com/goccy/go-yaml/ast"
 )
 
-// Parse returns the template and tag from a yaml.Node LineComment.
-func Parse(prefix string, n *yaml.Node) (string, Tag) {
-	comment := n.LineComment
-	if after, ok := strings.CutPrefix(comment, prefix); ok {
-		// Comment has #yampl prefix
-		comment = after
+// Parse returns the template and tag from an ast.Node comment.
+func Parse(prefix string, n ast.Node) (string, Tag) {
+	return ParseGroup(prefix, n.GetComment())
+}
 
-		if strings.HasPrefix(comment, " ") {
-			// Tag not provided
-			return comment[1:], DynamicTag
-		}
+// ParseGroup returns the template and tag from a comment group.
+func ParseGroup(prefix string, comments *ast.CommentGroupNode) (string, Tag) {
+	if comments == nil {
+		return "", NoTag
+	}
 
-		if after, ok := strings.CutPrefix(comment, tagSep); ok {
-			// Match comment tag
-			comment = after
+	for _, comment := range comments.Comments {
+		s := comment.String()
+		if strings.HasPrefix(s, prefix) {
+			// Comment has #yampl prefix
+			s = strings.TrimPrefix(s, prefix)
 
-			for _, tag := range Tags() {
-				prefix := string(tag) + " "
-				if strings.HasPrefix(comment, prefix) {
-					return comment[len(prefix):], tag
+			if strings.HasPrefix(s, " ") {
+				// Tag not provided
+				return s[1:], NoTag
+			}
+
+			if strings.HasPrefix(s, tagSep) {
+				// Match comment tag
+				s = strings.TrimPrefix(s, tagSep)
+
+				for _, tag := range Tags() {
+					prefix := string(tag) + " "
+					if strings.HasPrefix(s, prefix) {
+						return s[len(prefix):], tag
+					}
 				}
 			}
 		}
 	}
-	return "", DynamicTag
-}
-
-// Move moves a comment between yaml.Node entries after a style change.
-// When a yaml.MappingNode or yaml.SequenceNode has an inline comment,
-// the decoder will set LineComment differently according to the node's style.
-//
-// When value(s) are on a single line (flow style), LineComment will be set on the value.
-// When value(s) are on multiple lines (block style), LineComment will be set on the key.
-//
-// If templating changes the node's style, the comment needs to move or else
-// encoding errors will occur.
-func Move(key, val *yaml.Node) {
-	if val.Kind != yaml.SequenceNode && val.Kind != yaml.MappingNode {
-		return
-	}
-
-	if len(val.Content) > 0 && val.LineComment != "" && key.LineComment == "" {
-		// Flow to block style: move comment from value to key.
-		key.LineComment = val.LineComment
-		val.LineComment = ""
-	} else if len(val.Content) == 0 && key.LineComment != "" && val.LineComment == "" {
-		// Block to flow style: move comment from key to value.
-		val.LineComment = key.LineComment
-		key.LineComment = ""
-	}
+	return "", NoTag
 }

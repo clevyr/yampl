@@ -1,16 +1,15 @@
 package visitor
 
 import (
-	"errors"
-	"io"
 	"io/fs"
 	"os"
 	"path/filepath"
 
 	"github.com/clevyr/yampl/internal/config"
+	"github.com/clevyr/yampl/internal/parser"
 	"github.com/clevyr/yampl/internal/util"
+	"github.com/goccy/go-yaml/ast"
 	"github.com/spf13/cobra"
-	"gopkg.in/yaml.v3"
 )
 
 func RegisterCompletion(cmd *cobra.Command) {
@@ -42,27 +41,26 @@ func valueCompletion(cmd *cobra.Command, args []string, _ string) ([]string, cob
 }
 
 func valueCompletionFile(path string, v *FindArgs) error {
-	v.path = path
-
 	f, err := os.Open(path)
 	if err != nil {
 		return err
 	}
+	defer func() {
+		_ = f.Close()
+	}()
 
-	decoder := yaml.NewDecoder(f)
-
-	for {
-		var n yaml.Node
-
-		if err := decoder.Decode(&n); err != nil {
-			if errors.Is(err, io.EOF) {
-				return nil
-			}
-			return err
-		}
-
-		if err := v.Run(&n); err != nil {
-			return err
-		}
+	file, err := parser.ParseReader(f)
+	if err != nil {
+		return err
 	}
+
+	for _, doc := range file.Docs {
+		if doc.Body == nil {
+			continue
+		}
+
+		ast.Walk(v, doc.Body)
+	}
+
+	return nil
 }

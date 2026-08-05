@@ -17,7 +17,7 @@ yampl [files | dirs] [-v key=value...] [flags]
   -h, --help                     help for yampl
       --ignore-template-errors   Continue processing a file even if a template fails
       --ignore-unset-errors      Exit with an error if a template variable is not set (default true)
-  -I, --indent int               Override output indentation (default 2)
+  -I, --indent int               Indentation for values converted to block style. Existing content keeps its formatting. (default 2)
   -i, --inplace                  Edit files in place
       --left-delim string        Override template left delimiter (default "{{")
       --log-format string        Log format (one of auto, color, plain, json) (default "auto")

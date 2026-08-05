@@ -19,6 +19,7 @@ func Test_toYaml(t *testing.T) {
 	}{
 		{"map", args{map[string]any{"a": "b"}}, "a: b", require.NoError},
 		{"slice", args{[]string{"a", "b"}}, "- a\n- b", require.NoError},
+		{"nested", args{map[string]any{"a": map[string]any{"b": []string{"c"}}}}, "a:\n  b:\n    - c", require.NoError},
 	}
 	for _, tt := range tests {
 		t.Run(tt.name, func(t *testing.T) {
