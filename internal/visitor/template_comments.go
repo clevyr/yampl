@@ -6,7 +6,6 @@ import (
 	"fmt"
 	"log/slog"
 	"maps"
-	"regexp"
 	"strconv"
 	"strings"
 	"text/template"
@@ -175,11 +174,7 @@ func (t *TemplateComments) Template(
 
 	data := maps.Clone(t.conf.Vars)
 	if data != nil {
-		//nolint:staticcheck
-		if _, ok := data[config.CurrentValueKey]; !ok {
-			data[config.CurrentValueKey] = oldVal
-		}
-		t.checkDeprecated(tmplSrc)
+		data.InjectCurrent(oldVal) //nolint:staticcheck // Supports the deprecated .Value var
 	}
 
 	var buf strings.Builder
@@ -319,18 +314,6 @@ func (t *TemplateComments) Template(
 		return n, nil
 	}
 	return nil, nil //nolint:nilnil // nil node means the value was unchanged
-}
-
-func (t *TemplateComments) checkDeprecated(tmplSrc string) {
-	if t.conf.Vars != nil {
-		re := regexp.MustCompile(`(\.V(al(ue)?)?)(?:[ |)]|` + regexp.QuoteMeta(t.conf.RightDelim) + `)`)
-		for _, match := range re.FindAllStringSubmatch(tmplSrc, -1) {
-			key := match[1]
-			if _, ok := t.conf.Vars[key[1:]]; !ok {
-				slog.Warn(key + " is deprecated, use `current` instead")
-			}
-		}
-	}
 }
 
 func (t *TemplateComments) nodeLogger(n ast.Node, tmplSrc string) *slog.Logger {

@@ -49,6 +49,62 @@ func TestVars_SetNested(t *testing.T) {
 	}
 }
 
+func Test_setNested(t *testing.T) {
+	type args struct {
+		input Vars
+		value any
+		keys  []string
+	}
+	tests := []struct {
+		name string
+		args args
+		want Vars
+	}{
+		{"simple", args{make(Vars), "a", []string{"a"}}, Vars{"a": "a"}},
+		{"nested", args{make(Vars), "a", []string{"a", "b"}}, Vars{"a": Vars{"b": "a"}}},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			setNested(tt.args.input, tt.args.value, tt.args.keys...)
+			assert.Equal(t, tt.want, tt.args.input)
+		})
+	}
+}
+
+func TestVars_InjectCurrent(t *testing.T) {
+	t.Run("injects when unset", func(t *testing.T) {
+		vars := make(Vars)
+		vars.InjectCurrent("a")
+		assert.Equal(t, "a", vars.Value())
+		assert.Equal(t, "a", vars.Val())
+		assert.Equal(t, "a", vars.V())
+	})
+
+	t.Run("keeps user-defined Value", func(t *testing.T) {
+		vars := Vars{"Value": "user"}
+		vars.InjectCurrent("a")
+		assert.Equal(t, "user", vars.Value())
+	})
+}
+
+func TestVars_Value(t *testing.T) {
+	tests := []struct {
+		name string
+		vars Vars
+		want any
+	}{
+		{"user-defined", Vars{"Value": "a"}, "a"},
+		{"injected", Vars{"Value": injectedValue("a")}, "a"},
+		{"unset", Vars{}, nil},
+	}
+	for _, tt := range tests {
+		t.Run(tt.name, func(t *testing.T) {
+			got := tt.vars.Value()
+			assert.Equal(t, tt.want, got)
+		})
+	}
+}
+
 func TestVars_V(t *testing.T) {
 	tests := []struct {
 		name string
@@ -79,28 +135,6 @@ func TestVars_Val(t *testing.T) {
 		t.Run(tt.name, func(t *testing.T) {
 			got := tt.vars.Val()
 			assert.Equal(t, tt.want, got)
-		})
-	}
-}
-
-func Test_setNested(t *testing.T) {
-	type args struct {
-		input Vars
-		value any
-		keys  []string
-	}
-	tests := []struct {
-		name string
-		args args
-		want Vars
-	}{
-		{"simple", args{make(Vars), "a", []string{"a"}}, Vars{"a": "a"}},
-		{"nested", args{make(Vars), "a", []string{"a", "b"}}, Vars{"a": Vars{"b": "a"}}},
-	}
-	for _, tt := range tests {
-		t.Run(tt.name, func(t *testing.T) {
-			setNested(tt.args.input, tt.args.value, tt.args.keys...)
-			assert.Equal(t, tt.want, tt.args.input)
 		})
 	}
 }
