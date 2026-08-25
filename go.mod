@@ -6,7 +6,7 @@ require (
 	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/goccy/go-yaml v1.19.2
-	github.com/lmittmann/tint v1.1.2
+	github.com/lmittmann/tint v1.2.0
 	github.com/mattn/go-isatty v0.0.20
 	github.com/muesli/termenv v0.16.0
 	github.com/spf13/cobra v1.10.2
