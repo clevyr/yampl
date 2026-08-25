@@ -3,6 +3,7 @@ package visitor
 import (
 	"context"
 	"encoding/base64"
+	"errors"
 	"fmt"
 	"log/slog"
 	"maps"
@@ -37,7 +38,12 @@ func NewTemplateComments(conf *config.Config, path string) TemplateComments {
 func (t *TemplateComments) Visit(n ast.Node) ast.Visitor {
 	if t.err == nil {
 		if err := t.Run(n); err != nil {
-			t.err = node.NewPrintableError(err, n)
+			var printable node.PrintableError
+			if errors.As(err, &printable) {
+				t.err = printable
+			} else {
+				t.err = node.NewPrintableError(err, n)
+			}
 			return nil
 		}
 	}
@@ -66,7 +72,7 @@ func (t *TemplateComments) Run(n ast.Node) error { //nolint:gocognit,gocyclo,cyc
 		}
 
 		// Comment after value
-		tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, value)
+		tmplSrc, tmplTag, tmplTk := comment.Parse(t.conf.Prefix, value)
 		if t.conf.Strip {
 			if err := value.SetComment(nil); err != nil {
 				return err
@@ -75,7 +81,7 @@ func (t *TemplateComments) Run(n ast.Node) error { //nolint:gocognit,gocyclo,cyc
 
 		if tmplSrc == "" { //nolint:nestif
 			// Edge case where comment is set on key
-			if tmplSrc, tmplTag = comment.Parse(t.conf.Prefix, n.Key); tmplSrc != "" {
+			if tmplSrc, tmplTag, tmplTk = comment.Parse(t.conf.Prefix, n.Key); tmplSrc != "" {
 				if !t.conf.Strip {
 					// Move comment from key to value
 					if err := value.SetComment(n.Key.GetComment()); err != nil {
@@ -97,7 +103,7 @@ func (t *TemplateComments) Run(n ast.Node) error { //nolint:gocognit,gocyclo,cyc
 						}
 					}
 					val.End.Next = nil
-					tmplSrc, tmplTag = comment.Parse(t.conf.Prefix, val)
+					tmplSrc, tmplTag, tmplTk = comment.Parse(t.conf.Prefix, val)
 				}
 			}
 		}
@@ -105,7 +111,7 @@ func (t *TemplateComments) Run(n ast.Node) error { //nolint:gocognit,gocyclo,cyc
 		if tmplSrc != "" {
 			newNode, err := t.Template(n.Key, value, tmplSrc, tmplTag)
 			if err != nil {
-				return t.handleTemplateError(n, tmplSrc, err)
+				return t.handleTemplateError(n, tmplSrc, tmplTk, err)
 			}
 
 			if newNode != nil {
@@ -123,7 +129,7 @@ func (t *TemplateComments) Run(n ast.Node) error { //nolint:gocognit,gocyclo,cyc
 				value = anchor.Value
 			}
 
-			tmplSrc, tmplTag := comment.Parse(t.conf.Prefix, value)
+			tmplSrc, tmplTag, tmplTk := comment.Parse(t.conf.Prefix, value)
 			if tmplSrc == "" {
 				continue
 			}
@@ -136,7 +142,7 @@ func (t *TemplateComments) Run(n ast.Node) error { //nolint:gocognit,gocyclo,cyc
 
 			newNode, err := t.Template(nil, value, tmplSrc, tmplTag)
 			if err != nil {
-				return t.handleTemplateError(value, tmplSrc, err)
+				return t.handleTemplateError(value, tmplSrc, tmplTk, err)
 			}
 
 			if newNode != nil {
@@ -327,18 +333,23 @@ func (t *TemplateComments) nodeLogger(n ast.Node, tmplSrc string) *slog.Logger {
 	return log
 }
 
-func (t *TemplateComments) handleTemplateError(n ast.Node, tmplSrc string, err error) error {
+func (t *TemplateComments) handleTemplateError(
+	n ast.Node,
+	tmplSrc string,
+	tmplTk *token.Token,
+	err error,
+) error {
 	level := slog.LevelWarn
 	switch {
 	case err != nil && strings.Contains(err.Error(), "map has no entry for key"):
 		if t.conf.IgnoreUnsetErrors {
 			level = slog.LevelDebug
 		} else {
-			return err
+			return node.NewPrintableTemplateError(err, n, tmplSrc, tmplTk)
 		}
 	case t.conf.IgnoreTemplateErrors:
 	default:
-		return err
+		return node.NewPrintableTemplateError(err, n, tmplSrc, tmplTk)
 	}
 
 	t.nodeLogger(n, tmplSrc).Log(context.Background(), level,

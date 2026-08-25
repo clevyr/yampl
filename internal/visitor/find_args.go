@@ -62,12 +62,12 @@ type FindArgs struct {
 
 //nolint:ireturn
 func (f *FindArgs) Visit(n ast.Node) ast.Visitor {
-	tmplSrc, _ := comment.Parse(f.conf.Prefix, n)
+	tmplSrc, _, _ := comment.Parse(f.conf.Prefix, n)
 	if tmplSrc == "" {
 		// Comments on empty flow collections attach to the closing
 		// bracket's next token instead of the node itself
 		if val, ok := n.(*ast.MappingNode); ok && val.End != nil && val.End.NextType() == token.CommentType {
-			tmplSrc, _ = comment.ParseGroup(f.conf.Prefix, ast.CommentGroup([]*token.Token{val.End.Next}))
+			tmplSrc, _, _ = comment.ParseGroup(f.conf.Prefix, ast.CommentGroup([]*token.Token{val.End.Next}))
 		}
 	}
 
