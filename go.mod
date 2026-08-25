@@ -3,7 +3,7 @@ module github.com/clevyr/yampl
 go 1.27.0
 
 require (
-	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
+	gabe565.com/utils v0.0.0-20260511235214-4059440fa83b
 	github.com/Masterminds/sprig/v3 v3.3.0
 	github.com/goccy/go-yaml v1.19.2
 	github.com/lmittmann/tint v1.2.0
