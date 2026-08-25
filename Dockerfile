@@ -17,7 +17,7 @@ RUN --mount=type=cache,target=/root/.cache \
   go build -ldflags='-w -s' -trimpath
 
 
-FROM alpine:3.23
+FROM alpine:3.24
 LABEL org.opencontainers.image.source="https://github.com/clevyr/yampl"
 WORKDIR /data
 
