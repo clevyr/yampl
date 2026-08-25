@@ -1,6 +1,6 @@
 module github.com/clevyr/yampl
 
-go 1.25.6
+go 1.27.0
 
 require (
 	gabe565.com/utils v0.0.0-20251001054419-00a1424779a7
