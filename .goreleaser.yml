@@ -54,20 +54,26 @@ changelog:
       regexp: "(fix|perf)"
     - title: Others
       order: 999
-brews:
+homebrew_casks:
   - homepage: https://github.com/clevyr/yampl
     description: Yaml templating via line-comments
-    license: Apache-2.0
     repository:
       owner: clevyr
       name: homebrew-tap
-    directory: Formula
-    install: |
-      bin.install "{{ .ProjectName }}"
-      man1.install Dir["manpages/*"]
-      bash_completion.install Dir["completions/bash/*"]
-      zsh_completion.install Dir["completions/zsh/*"]
-      fish_completion.install Dir["completions/fish/*"]
+    binaries:
+      - yampl
+    manpages:
+      - manpages/*
+    completions:
+      bash: completions/bash/yampl
+      zsh: completions/zsh/_yampl
+      fish: completions/fish/yampl.fish
+    hooks:
+      post:
+        install: |
+          if OS.mac? && system_command("/usr/bin/xattr", args: ["-h"]).exit_status == 0
+            system_command "/usr/bin/xattr", args: ["-dr", "com.apple.quarantine", "#{staged_path}/yampl"]
+          end
 dockers_v2:
   - dockerfile: goreleaser.Dockerfile
     images:
